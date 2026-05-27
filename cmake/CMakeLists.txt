@@ -1,0 +1,8 @@
+if (DEFINED ENV{BAREMETAL_ARM_TOOLCHAIN_PATH})
+    include(${CMAKE_CURRENT_LIST_DIR}/toolchain_config.cmake)
+else ()
+        message(FATAL_ERROR "Environment variable BAREMETAL_ARM_TOOLCHAIN_PATH with the path to the gnu-arm-none-eabi toolchain must be defined!")
+endif ()
+include(${CMAKE_CURRENT_LIST_DIR}/compiler_settings.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/no_in_source_build.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/doxygen.cmake)

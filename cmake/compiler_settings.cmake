@@ -1,0 +1,2 @@
+add_compile_options(-mcpu=cortex-m0plus -mthumb -O3 -Wall -fno-exceptions -fno-rtti)
+add_link_options(-mcpu=cortex-m0plus -mthumb -specs=nano.specs -T ${CMAKE_SOURCE_DIR}/src/rp2040/startup/rp2040_ls.ld -Wl,-Map=rp2040.map)
