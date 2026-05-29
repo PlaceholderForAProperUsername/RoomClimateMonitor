@@ -7,9 +7,8 @@ project(
         RoomClimateMonitor
         VERSION 1.0
         DESCRIPTION "A RP2040 project to monitor indoor climate parameters"
-        LANGUAGES ASM C CXX
+        LANGUAGES ASM CXX
 )
 
-set(CMAKE_C_STANDARD 23)
 set(CMAKE_CXX_STANDARD 23)
 add_subdirectory(src)

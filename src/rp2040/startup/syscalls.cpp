@@ -20,10 +20,10 @@ extern  "C" {
     };
 
     // unused stubs for nanolib
-    void _exit(int status) {while (1) {}}
-    int _close(int file_descriptor) {return -1;}
-    int _lseek(int file, int ptr, int dir) {return -1;}
-    int _read(int file, char *ptr, int len) {return -1;}
-    int _write(int file, char *ptr, int len) {return -1;}
+    void _exit([[maybe_unused]] int status) {while (1) {}}
+    int _close([[maybe_unused]] int file_descriptor) {return -1;}
+    int _lseek([[maybe_unused]] int file, [[maybe_unused]] int ptr, [[maybe_unused]] int dir) {return -1;}
+    int _read([[maybe_unused]] int file, [[maybe_unused]] char *ptr, [[maybe_unused]] int len) {return -1;}
+    int _write([[maybe_unused]] int file, [[maybe_unused]] char *ptr, [[maybe_unused]] int len) {return -1;}
 
-}
+}   // extern "C"

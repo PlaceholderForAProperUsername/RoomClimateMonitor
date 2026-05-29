@@ -24,6 +24,9 @@ SECTIONS
         *(.rodata*)
         *(.init*)
         *(.fini*)
+        *(.eh_frame*)
+        *(.ARM.extab*)
+        *(.ARM.exidx*)
         . = ALIGN(4);
         _text_end = .;
     } > FLASH

@@ -6,4 +6,4 @@ add_subdirectory(peripherals)
 add_subdirectory(startup)
 add_subdirectory(system)
 
-target_link_libraries(${TARGET} INTERFACE RP2040_Startup)
+target_link_libraries(${TARGET} INTERFACE RP2040_Startup RP2040_System)
