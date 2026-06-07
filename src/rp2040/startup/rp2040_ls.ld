@@ -24,11 +24,21 @@ SECTIONS
         *(.rodata*)
         *(.init*)
         *(.fini*)
-        *(.eh_frame*)
-        *(.ARM.extab*)
-        *(.ARM.exidx*)
         . = ALIGN(4);
         _text_end = .;
+    } > FLASH
+
+    .eh_frame : {
+        . = ALIGN(4);
+        *(.eh_frame*)
+        . = ALIGN(4);
+    } > FLASH
+
+    .ARM : {
+        . = ALIGN(4);
+        *(.ARM.extab)
+        *(.ARM.exidx)
+        . = ALIGN(4);
     } > FLASH
 
     __stored_data__ = .;
