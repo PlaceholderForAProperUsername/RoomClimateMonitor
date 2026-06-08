@@ -1,10 +1,9 @@
 /**
  * @file rp2040_startup.S
- * @brief
+ * @brief The startup file for the rp2040.
  * @author Thorsten Hoffmeister
  * @version 1.0
- * @date 27.05.26
- * @toolchain arm-none-eabi-gcc
+ * @date 27.05.2026
  *
  *
  * @copyright (C) 2026  Thorsten Hoffmeister
