@@ -216,26 +216,42 @@ namespace rp2040::system::xosc {
         using stable_bits = dormant_reg::Bits<DormantBitField, utils::reg_access::read_write_access>; /**< The DormantBitField type. */
     } // dormant
 
+    /**
+     * @brief The startup register controls the startup delay.
+     *
+     * The startup delay is specified by the delay bits multiplied by 256 in cycles. An additional 4x-multiplier can be
+     * enabled with the x4 bit.
+     */
     namespace startup {
-        constexpr std::uintptr_t addr = xosc_base + startup_offset;
-        using startup_reg = utils::reg_access::Reg<addr, utils::reg_access::read_write_access, std::uint32_t>;
+        constexpr std::uintptr_t addr = xosc_base + startup_offset; /**< @brief The address of the startup register. */
+        using startup_reg = utils::reg_access::Reg<addr, utils::reg_access::read_write_access, std::uint32_t>; /**< @brief The startup register type. */
 
-        constexpr std::uint32_t default_delay_val = 47U;
+        constexpr std::uint32_t default_delay_val = 47U; /**< @brief The default value for the startup delay according to the rp2040 datasheet. */
 
-        constexpr std::uint32_t delay_mask = 0x3FFFU;
-        constexpr std::uint32_t delay_pos = 0U;
+        constexpr std::uint32_t delay_mask = 0x3FFFU; /**< @brief The mask for the delay bits. */
+        constexpr std::uint32_t delay_pos = 0U; /**< @brief The position of the delay bits. */
 
-        template <auto value>
-        using DelayBitField = utils::reg_access::BitFieldValues<value, startup_reg, delay_mask, delay_pos>;
+        /**
+         * @brief The BitField for the delay bits.
+         *
+         * @tparam delay_value The value for the startup delay multiplied by 256 in cycles.
+         */
+        template <auto delay_value>
+        using DelayBitField = utils::reg_access::BitFieldValues<delay_value, startup_reg, delay_mask, delay_pos>;
 
-        template <auto value>
-        using delay_bits = startup_reg::Bits<DelayBitField<value>>;
+        /**
+         * @brief The DelayBitField type.
+         *
+         * @tparam delay_value The value for the startup delay multiplied by 256 in cycles.
+         */
+        template <auto delay_value>
+        using delay_bits = startup_reg::Bits<DelayBitField<delay_value>>;
 
-        constexpr std::uint32_t x4_pos = 20U;
+        constexpr std::uint32_t x4_pos = 20U; /**< @brief The position of the x4 bit. */
 
-        using x4_type = utils::reg_access::BitFieldEnableDisable<startup_reg, x4_pos>;
+        using x4_type = utils::reg_access::BitFieldEnableDisable<startup_reg, x4_pos>; /**< @brief The BitField of the x4 bit. */
 
-        using x4_bits = startup_reg::Bits<x4_type>;
+        using x4_bits = startup_reg::Bits<x4_type>; /**< @brief The X4BitField type.*/
     } // startup
 
     /** @}*/ // rp2040_xosc
