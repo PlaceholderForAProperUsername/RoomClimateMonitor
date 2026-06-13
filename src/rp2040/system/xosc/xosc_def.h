@@ -190,6 +190,32 @@ namespace rp2040::system::xosc {
         using freq_range_bits  = status_reg::Bits<FreqRangeBitField, utils::reg_access::read_access>; /**< @brief The FreqRangeBitField type. */
     } //status
 
+    /**
+     * @brief The dormant register to pause and wake up the xosc. The pll should be stopped and an irq should be set up
+     * before selecting dormant mode.
+     */
+    namespace dormant {
+        constexpr std::uint32_t addr = xosc_base + dormant_offset; /**< @brief The address of the dormant register. */
+        using dormant_reg = utils::reg_access::Reg<addr, utils::reg_access::read_write_access, std::uint32_t>; /**< @brief The dormant register type. */
+
+        struct DormantBitField {
+            using reg = dormant_reg; /**< @brief The register of which the BitField is part of. */
+            using T = reg::RegType; /**< @brief The data type of the register. */
+
+            static constexpr T position = 0U; /**< @brief The position at which the BitField start in the register. */
+            static constexpr T mask = (0xFFFFFFFFU << position); /**< @brief The mask of the controlled bits. */
+
+            /**
+             * @brief The values of the dormant bits.
+             */
+            enum class value : T {
+                dormant = 0x636f6d61U, /**< @brief Pauses the xosc. */
+                wake = 0x77616b65U, /**< @brief Wakes up the xosc. */
+            };
+        };
+        using stable_bits = dormant_reg::Bits<DormantBitField, utils::reg_access::read_write_access>; /**< The DormantBitField type. */
+    } // dormant
+
     namespace startup {
         constexpr std::uintptr_t addr = xosc_base + startup_offset;
         using startup_reg = utils::reg_access::Reg<addr, utils::reg_access::read_write_access, std::uint32_t>;
