@@ -28,7 +28,7 @@
 #include <bitset>
 #include <cstdint>
 
-#include "../../../xosc_def.h"
+#include "xosc_def.h"
 
 namespace rp2040::system {
     /**
