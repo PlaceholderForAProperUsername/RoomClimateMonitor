@@ -1,0 +1,1 @@
+@defgroup utils Collection of utility functionality

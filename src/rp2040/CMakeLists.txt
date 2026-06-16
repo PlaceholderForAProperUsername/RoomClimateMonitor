@@ -2,7 +2,7 @@ set(TARGET "RP2040")
 
 add_library(${TARGET} INTERFACE)
 
-add_subdirectory(peripherals)
+add_subdirectory(hardware)
 add_subdirectory(startup)
 add_subdirectory(system)
 
