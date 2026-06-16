@@ -36,7 +36,7 @@ namespace rp2040::system {
 
     template<std::uintptr_t xosc_addr>
     void XOSC_Type<xosc_addr>::init() {
-        if (this->m_flags.test(Flags::isEnabled)) {
+        if (this->m_flags.test(static_cast<std::uint32_t>(Flags::IsEnabled))) {
             return;
         }
         ctrl_r::freq_range_bits::set(ctrl_r::FreqRangeBitField::value::range_1_15_mhz);
@@ -48,38 +48,38 @@ namespace rp2040::system {
         /* Wait until the crystal oscillator is running and stable */
         while (!status_r::enabled_bits::getBits()) {}
 
-        this->m_flags.set(Flags::isEnabled);
+        this->m_flags.set(static_cast<std::uint32_t>(Flags::IsEnabled));
     }
 
     template<std::uintptr_t xosc_addr>
     void XOSC_Type<xosc_addr>::deinit() {
-        if (!this->m_flags.test(Flags::isEnabled)) {
+        if (!this->m_flags.test(static_cast<std::uint32_t>(Flags::IsEnabled))) {
             return;
         }
 
         ctrl_r::enable_bits::set(ctrl_r::EnableBitField::value::disable);
 
-        this->m_flags.reset(Flags::isEnabled);
+        this->m_flags.reset(static_cast<std::uint32_t>(Flags::IsEnabled));
     }
 
     template<std::uintptr_t xosc_addr>
     void XOSC_Type<xosc_addr>::pause() {
-        if (this->m_flags.test(Flags::isPaused)) {
+        if (this->m_flags.test(static_cast<std::uint32_t>(Flags::IsPaused))) {
             return;
         }
         dormant_r::dormant_bits::set(dormant_r::dormant_bits::value::pause);
 
-        this->m_flags.set(Flags::isPaused);
+        this->m_flags.set(static_cast<std::uint32_t>(Flags::IsPaused));
     }
 
     template<std::uintptr_t xosc_addr>
     void XOSC_Type<xosc_addr>::wake() {
-        if (!this->m_flags.test(Flags::isPaused)) {
+        if (!this->m_flags.test(static_cast<std::uint32_t>(Flags::IsPaused))) {
             return;
         }
         dormant_r::dormant_bits::set(dormant_r::dormant_bits::value::pause);
 
-        this->m_flags.reset(Flags::isPaused);
+        this->m_flags.reset(static_cast<std::uint32_t>(Flags::IsPaused));
     }
 
 

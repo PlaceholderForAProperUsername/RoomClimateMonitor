@@ -110,13 +110,13 @@ namespace rp2040::system {
          *
          * The value correspond to the bit position in @ref m_flags
          */
-        struct Flags {
-            constexpr static std::uint32_t isEnabled = 0; /**< @brief Flag to indicate if the XOSC is enabled. @see init @see deinit */
-            constexpr static std::uint32_t isPaused = 1; /**< @brief Flag to indicate if the XOSC is paused. @see pause @see wake */
-            constexpr static std::uint32_t numberOfFlags = 2; /**< @brief Helper entry to get the number of flags. Must be the last entry. */
+        enum class Flags : std::uint32_t {
+            IsEnabled = 0, /**< @brief Flag to indicate if the XOSC is enabled. @see init @see deinit */
+            IsPaused, /**< @brief Flag to indicate if the XOSC is paused. @see pause @see wake */
+            NumberOfFlags /**< @brief Helper entry to get the number of flags. */
         };
 
-        std::bitset<Flags::numberOfFlags> m_flags; /**< @brief The status flags of the XOSC. @see Flags */
+        std::bitset<static_cast<std::size_t>(Flags::NumberOfFlags)> m_flags; /**< @brief The status flags of the XOSC. @see Flags */
     };
 
     using XOSC = XOSC_Type<xosc_base>; /**< @brief Alias for the XOSC. */
