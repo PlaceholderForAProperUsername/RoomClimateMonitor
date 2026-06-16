@@ -30,11 +30,7 @@
 #include <type_traits>
 
 /**
- * @defgroup utils Provides several utility modules.
- */
-
-/**
- * @defgroup reg_access Provides utilities to use registers.
+ * @defgroup reg_access Reg_Access: Provides utilities to use registers.
  * @ingroup utils
  */
 
@@ -94,8 +90,8 @@ namespace utils::reg_access {
      */
     template <std::uintptr_t Address, typename RegAccess = read_write_access, typename T = std::uint32_t>
     struct Reg {
-        using ThisReg = Reg<Address, RegAccess, T>;
-        using RegType = T;
+        using ThisReg = Reg<Address, RegAccess, T>; /**< @brief Alias for the register. */
+        using RegType = T; /**< @brief Alias for the underlying type of the register. */
 
         /**
          * @brief Represents specific bits of the enclosing register and provides functions to configure the bits of the register.
@@ -219,15 +215,20 @@ namespace utils::reg_access {
      *
      * @tparam Reg The register to which the BitField belongs. @see Reg
      * @tparam Pos The position of the bit within the register.
+     *
+     * @ingroup reg_access
      */
     template <typename Reg, std::uint32_t Pos>
     struct BitFieldEnableDisable {
-        using reg = Reg;
-        using T = reg::RegType;
+        using reg = Reg; /**< @brief Alias for the register the bitfield belongs to. */
+        using T = reg::RegType; /**< @brief Alias for the underlying data type of the register. */
 
-        static constexpr T position = Pos;
-        static constexpr T mask = (0x1UL << position);
+        static constexpr T position = Pos; /**< @brief The position of the bitfield in the register. */
+        static constexpr T mask = (0x1UL << position); /**< @brief The mask of the bitfield used in bit operations. */
 
+        /**
+         * @brief The possible values for this bitfield.
+         */
         enum class value : T {
             disable = 0,
             enable = 1
@@ -241,19 +242,27 @@ namespace utils::reg_access {
      * @tparam Reg The register to which the BitField belongs. @see Reg
      * @tparam Mask The unshifted mask of the bits. As an example, for 3 bits the Mask will be 0x07 regardless of position.
      * @tparam Pos The position of the bit within the register.
+     *
+     * @ingroup reg_access
      */
     template <auto Value, typename Reg, std::uint32_t Mask, std::uint32_t Pos>
     struct BitFieldValues {
-        using reg = Reg;
-        using T = reg::RegType;
+        using reg = Reg; /**< @brief Alias for the register the bitfield belongs to. */
+        using T = reg::RegType; /**< @brief Alias for the underlying data type of the register. */
 
         static_assert(std::is_same_v<T, decltype(Value)>);
 
-        static constexpr T position = Pos;
-        static constexpr T mask = (Mask << position);
+        static constexpr T position = Pos; /**< @brief The position of the bitfield in the register. */
+        static constexpr T mask = (Mask << position); /**< @brief The mask of the bitfield used in bit operations. */
 
         static_assert(Value <= Mask);
 
+        /**
+         * @brief The possible value for this bitfield.
+         *
+         * Implementation note: Even though this bitfield doesn't necessarily need an enum, it is used to have a unified
+         * interface for the bitfield type.
+         */
         enum class value : T {
             val = Value
         };
