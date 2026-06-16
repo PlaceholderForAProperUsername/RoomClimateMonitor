@@ -47,6 +47,15 @@ namespace rp2040::system {
         NumberOfSubsystems
     };
 
+    template <std::uintptr_t resets_addr>
+    struct Reset_RegMapType {
+        static_assert(resets_addr == resets_base, "The resets address must be a valid address");
+
+        static constexpr std::uint32_t reset_offset = 0x00U; /**< @brief The offset for the reset register. */
+        static constexpr std::uint32_t wdsel_offset = 0x04U; /**< @brief The offset for the watchdog select (wdsel) register. */
+        static constexpr std::uint32_t reset_done_offset = 0x08U; /**< @brief The offset for the reset done register. */
+
+    };
 
     /** @}*/ // rp2040_reset
 
