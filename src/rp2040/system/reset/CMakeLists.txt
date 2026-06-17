@@ -1,4 +1,4 @@
-set(TARGET "RP2040_System_Reset")
+set(TARGET "RP2040_System_Resets")
 
 add_library(${TARGET} INTERFACE)
 
