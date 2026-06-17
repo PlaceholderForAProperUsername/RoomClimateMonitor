@@ -143,6 +143,48 @@ namespace rp2040::system {
             using wdsel_bits = wdsel_reg::Bits<WDSelBitField<subsystem>>;
         };
 
+        /**
+         * @brief The reset_done register.
+         *
+         * If a bit is set for a subsystem, the reset for that subsystem is deasserted, meaning the registers are ready to
+         * be accessed.
+         */
+        struct reset_done {
+            static constexpr std::uint32_t addr = resets_base + reset_done_offset; /**< @brief The address of the reset_done register. */
+            using reset_done_reg = utils::reg_access::Reg<addr, utils::reg_access::read_access, std::uint32_t>; /**< @brief The reset_done register. */
+
+            /**
+             * @brief The bits of the reset_done register.
+             *
+             * @tparam subsystem The subsystem whose status is to be checked.
+             */
+            template <ResetBits subsystem>
+            struct ResetDoneBitField {
+                using reg = reset_done_reg;
+                using T = reg::RegType;
+
+                static_assert(static_cast<T>(subsystem) < static_cast<T>(ResetBits::NumberOfSubsystems), "Invalid subsystem!");
+
+                static constexpr T position = static_cast<T>(subsystem); /**< @brief The position of the bits in the register */
+                static constexpr T mask = (0x01U << position); /**< @brief The mask of the affected bits. */
+
+                /**
+                 * @brief The meaning of the bits.
+                 */
+                enum class value : T {
+                    disabled = 0U, /**< @brief The subsystem is still in reset and thus disabled. */
+                    enabled = 1U /**< @brief The subsystem is out of reset and thus enabled. */
+                };
+            };
+
+            /**
+             * @brief The reset_done Bits type.
+             *
+             * @tparam subsystem The subsystem whose status is to be checked.
+             */
+            template <ResetBits subsystem>
+            using reset_done_bits = reset_done_reg::Bits<ResetDoneBitField<subsystem>>;
+        };
     };
 
     /** @}*/ // rp2040_reset
