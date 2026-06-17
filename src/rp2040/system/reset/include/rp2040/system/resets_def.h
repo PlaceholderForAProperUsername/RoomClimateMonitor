@@ -95,16 +95,57 @@ namespace rp2040::system {
             /**
              * @brief The ResetsBitField type.
              *
-             * @tparam subsystem The subsystem to be controlled
+             * @tparam subsystem The subsystem to be controlled.
              */
             template <ResetBits subsystem>
             using reset_bits = reset_reg::Bits<ResetsBitField<subsystem>>;
         };
 
+        /**
+         * @brief The watchdog select register.
+         *
+         * If a bit is set and the watchdog fires, the subsystem will reset.
+         */
+        struct wdsel {
+            static constexpr std::uint32_t addr = resets_base + wdsel_offset; /**< @brief The address of the wdsel register. */
+            using wdsel_reg = utils::reg_access::Reg<addr, utils::reg_access::read_write_access, std::uint32_t>; /**< @brief The wdsel register. */
+
+            /**
+             * @brief The bits of the watchdog select register.
+             *
+             * @tparam subsystem The subsystem to be selected.
+             */
+            template <ResetBits subsystem>
+            struct WDSelBitField {
+                using reg = wdsel_reg; /**< @brief The register to which the bitfield belongs. */
+                using T = reg::RegType; /**< @brief The type of the register. */
+
+                static_assert(static_cast<T>(subsystem) < static_cast<T>(ResetBits::NumberOfSubsystems), "Invalid subsystem!");
+
+                static constexpr T position = static_cast<T>(subsystem); /**< @brief The position of the bits in the register */
+                static constexpr T mask = (0x01U << position); /**< @brief The mask of the affected bits. */
+
+                /**
+                 * @brief The valid values for the bits.
+                 */
+                enum class value : T {
+                    disable = 0U, /**< @brief The subsystem will be unaffected when the watchdog fires */
+                    enable = 1U, /**< @brief The subsystem will be put in reset when the watchdog fires */
+                };
+            };
+
+            /**
+             * @brief The watchdog select BitField type.
+             *
+             * @tparam subsystem The subsystem to be selected.
+             */
+            template <ResetBits subsystem>
+            using wdsel_bits = wdsel_reg::Bits<WDSelBitField<subsystem>>;
+        };
+
     };
 
     /** @}*/ // rp2040_reset
-
 }
 
 
