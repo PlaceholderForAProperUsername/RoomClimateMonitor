@@ -26,7 +26,6 @@
 #ifndef RP2040_SYSTEM_RESETS_T_H
 #define RP2040_SYSTEM_RESETS_T_H
 
-#include "resets.h"
 #include "include/rp2040/system/resets.h"
 
 namespace rp2040::system {
@@ -41,6 +40,19 @@ namespace rp2040::system {
         return instance;
     }
 
+    template <std::uintptr_t resets_addr>
+    template <SubsystemBits subsystem>
+    void Resets_Type<resets_addr>::enable() {
+        static_assert(static_cast<resets_reg::RegType>(subsystem) < static_cast<resets_reg::RegType>(SubsystemBits::NumberOfSubsystems), "Invalid subsystem");
+
+        using reset_bits = reset_r::template reset_bits<subsystem>;
+
+        reset_bits::set(reset_bits::value::enable);
+
+        using reset_done_bits = reset_r::template reset_done_bits<subsystem>;
+
+        while (reset_done_bits::getValue() != reset_done_bits::value::enabled) {}
+    }
 
     /** @} */
 } // rp2040::system

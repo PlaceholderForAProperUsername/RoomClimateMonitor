@@ -20,7 +20,7 @@ namespace rp2040::system {
     /**
      * @brief The subsystems controllable by the reset controller.
      */
-    enum class ResetBits: std::uint32_t {
+    enum class SubsystemBits: std::uint32_t {
         ADC = 0U,
         BUSCTRL = 1U,
         DMA = 2U,
@@ -73,12 +73,12 @@ namespace rp2040::system {
              *
              * @tparam subsystem The subsystem to be controlled.
              */
-            template <ResetBits subsystem>
+            template <SubsystemBits subsystem>
             struct ResetsBitField {
                 using reg = reset_reg; /**< @brief The register to which the bitfield belongs. */
                 using T = reg::RegType; /**< @brief The type of the register. */
 
-                static_assert(static_cast<T>(subsystem) < static_cast<T>(ResetBits::NumberOfSubsystems), "Invalid subsystem!");
+                static_assert(static_cast<T>(subsystem) < static_cast<T>(SubsystemBits::NumberOfSubsystems), "Invalid subsystem!");
 
                 static constexpr T position = static_cast<T>(subsystem); /**< @brief The position of the bits in the register */
                 static constexpr T mask = (0x01U << position); /**< @brief The mask of the affected bits. */
@@ -97,7 +97,7 @@ namespace rp2040::system {
              *
              * @tparam subsystem The subsystem to be controlled.
              */
-            template <ResetBits subsystem>
+            template <SubsystemBits subsystem>
             using reset_bits = reset_reg::Bits<ResetsBitField<subsystem>>;
         };
 
@@ -115,12 +115,12 @@ namespace rp2040::system {
              *
              * @tparam subsystem The subsystem to be selected.
              */
-            template <ResetBits subsystem>
+            template <SubsystemBits subsystem>
             struct WDSelBitField {
                 using reg = wdsel_reg; /**< @brief The register to which the bitfield belongs. */
                 using T = reg::RegType; /**< @brief The type of the register. */
 
-                static_assert(static_cast<T>(subsystem) < static_cast<T>(ResetBits::NumberOfSubsystems), "Invalid subsystem!");
+                static_assert(static_cast<T>(subsystem) < static_cast<T>(SubsystemBits::NumberOfSubsystems), "Invalid subsystem!");
 
                 static constexpr T position = static_cast<T>(subsystem); /**< @brief The position of the bits in the register */
                 static constexpr T mask = (0x01U << position); /**< @brief The mask of the affected bits. */
@@ -139,7 +139,7 @@ namespace rp2040::system {
              *
              * @tparam subsystem The subsystem to be selected.
              */
-            template <ResetBits subsystem>
+            template <SubsystemBits subsystem>
             using wdsel_bits = wdsel_reg::Bits<WDSelBitField<subsystem>>;
         };
 
@@ -158,12 +158,12 @@ namespace rp2040::system {
              *
              * @tparam subsystem The subsystem whose status is to be checked.
              */
-            template <ResetBits subsystem>
+            template <SubsystemBits subsystem>
             struct ResetDoneBitField {
                 using reg = reset_done_reg;
                 using T = reg::RegType;
 
-                static_assert(static_cast<T>(subsystem) < static_cast<T>(ResetBits::NumberOfSubsystems), "Invalid subsystem!");
+                static_assert(static_cast<T>(subsystem) < static_cast<T>(SubsystemBits::NumberOfSubsystems), "Invalid subsystem!");
 
                 static constexpr T position = static_cast<T>(subsystem); /**< @brief The position of the bits in the register */
                 static constexpr T mask = (0x01U << position); /**< @brief The mask of the affected bits. */
@@ -182,7 +182,7 @@ namespace rp2040::system {
              *
              * @tparam subsystem The subsystem whose status is to be checked.
              */
-            template <ResetBits subsystem>
+            template <SubsystemBits subsystem>
             using reset_done_bits = reset_done_reg::Bits<ResetDoneBitField<subsystem>>;
         };
     };

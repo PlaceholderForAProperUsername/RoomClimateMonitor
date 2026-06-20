@@ -57,10 +57,19 @@ namespace rp2040::system {
          */
         static Resets_Type& getInstance();
 
+        /**
+         * @brief Enables a subsystem.
+         *
+         * @tparam subsystem The subsystem to be enabled.
+         */
+        template <SubsystemBits subsystem>
+        void enable();
+
     private:
         Resets_Type() = default;
     };
 
+    using resets = Resets_Type<resets_base>;
 
     /** @} */ // rp2040_resets
 } // rp2040::system
