@@ -25,6 +25,8 @@
 #ifndef RP2040_SYSTEM_RESETS_H
 #define RP2040_SYSTEM_RESETS_H
 
+#include <cstdint>
+
 #include "resets_def.h"
 
 namespace rp2040::system {
@@ -33,6 +35,11 @@ namespace rp2040::system {
     * @{
     */
 
+    /**
+     * @brief The resets controller to enable and disable subsystems.
+     *
+     * @tparam resets_addr The address of the resets controller.
+     */
     template<std::uintptr_t resets_addr>
     class Resets_Type {
         static_assert(resets_addr == resets_base, "The resets address must be a valid address");
@@ -42,6 +49,16 @@ namespace rp2040::system {
         using wdsel_r = resets_reg::wdsel_r; /**< @brief The watchdog select regiser. */
         using reset_done_r = resets_reg::reset_done_r; /**< @brief The reset done register. */
 
+    public:
+        /**
+         * @brief Gets the Resets object.
+         *
+         * @return Resets_Type& The resets instance.
+         */
+        static Resets_Type& getInstance();
+
+    private:
+        Resets_Type() = default;
     };
 
 
