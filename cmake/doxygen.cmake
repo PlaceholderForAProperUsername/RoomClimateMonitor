@@ -12,6 +12,8 @@ set(DOXYGEN_DOT_UML_DETAILS YES)
 set(DOXYGEN_DOT_WRAP_THRESHOLD 100)
 set(DOXYGEN_CALL_GRAPH YES)
 set(DOXYGEN_QUIET YES)
+set(DOXYGEN_EXTENSION_MAPPING tpp=C++)
+set(DOXYGEN_FILE_PATTERNS *.tpp *.cpp *.h *.S)
 
 doxygen_add_docs(
         RoomClimateMonitor_Docs
