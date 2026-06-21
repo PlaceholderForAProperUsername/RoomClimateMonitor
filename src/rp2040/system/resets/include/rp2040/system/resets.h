@@ -45,9 +45,9 @@ namespace rp2040::system {
         static_assert(resets_addr == resets_base, "The resets address must be a valid address");
 
         using resets_reg = Resets_RegMapType<resets_addr>; /**< @brief The registers of the reset controller */
-        using reset_r = resets_reg::reset_r; /**< @brief The reset register. */
-        using wdsel_r = resets_reg::wdsel_r; /**< @brief The watchdog select regiser. */
-        using reset_done_r = resets_reg::reset_done_r; /**< @brief The reset done register. */
+        using reset_r = resets_reg::reset; /**< @brief The reset register. */
+        using wdsel_r = resets_reg::wdsel; /**< @brief The watchdog select regiser. */
+        using reset_done_r = resets_reg::reset_done; /**< @brief The reset done register. */
 
     public:
         /**
@@ -65,11 +65,38 @@ namespace rp2040::system {
         template <SubsystemBits subsystem>
         void enable();
 
+        /**
+         * @brief Disables a subsystem.
+         *
+         * @tparam subsystem The subsystem to be disabled.
+         */
+        template <SubsystemBits subsystem>
+        void disable();
+
+        /**
+         * @brief Resets a subsystem by first disabling the subsystem and then enabling it. @see enable @see disable
+         *
+         * @tparam subsystem The subsystem to be reset.
+         */
+        template <SubsystemBits subsystem>
+        void reset();
+
+        /**
+         * @brief Checks if a subsystem is enabled and running.
+         *
+         * @tparam subsystem The subsystem to be checked.
+         * @return bool
+         * @retval true The subsystem is enabled and running.
+         * @retval false The subsystem is not running.
+         */
+        template <SubsystemBits subsystem>
+        bool isEnabled();
+
     private:
         Resets_Type() = default;
     };
 
-    using resets = Resets_Type<resets_base>;
+    using Resets = Resets_Type<resets_base>; /**< @brief The resets controller */
 
     /** @} */ // rp2040_resets
 } // rp2040::system
