@@ -49,6 +49,11 @@ namespace rp2040::system {
         NumberOfSubsystems
     };
 
+    /**
+     * @brief The registers of the resets controller.
+     *
+     * @tparam resets_addr The address of the resets controller.
+     */
     template <std::uintptr_t resets_addr>
     struct Resets_RegMapType {
         static_assert(resets_addr == resets_base, "The resets address must be a valid address");
@@ -74,7 +79,7 @@ namespace rp2040::system {
              * @tparam subsystem The subsystem to be controlled.
              */
             template <SubsystemBits subsystem>
-            struct ResetsBitField {
+            struct ResetBitField {
                 using reg = reset_reg; /**< @brief The register to which the bitfield belongs. */
                 using T = reg::RegType; /**< @brief The type of the register. */
 
@@ -98,7 +103,7 @@ namespace rp2040::system {
              * @tparam subsystem The subsystem to be controlled.
              */
             template <SubsystemBits subsystem>
-            using reset_bits = reset_reg::Bits<ResetsBitField<subsystem>>;
+            using reset_bits = reset_reg::Bits<ResetBitField<subsystem>>;
         };
 
         /**
@@ -160,8 +165,8 @@ namespace rp2040::system {
              */
             template <SubsystemBits subsystem>
             struct ResetDoneBitField {
-                using reg = reset_done_reg;
-                using T = reg::RegType;
+                using reg = reset_done_reg; /**< @brief The register to which the bitfield belongs. */
+                using T = reg::RegType; /**< @brief The type of the register. */
 
                 static_assert(static_cast<T>(subsystem) < static_cast<T>(SubsystemBits::NumberOfSubsystems), "Invalid subsystem!");
 
