@@ -1,1 +1,2 @@
 add_subdirectory(reg_access)
+add_subdirectory(status)
