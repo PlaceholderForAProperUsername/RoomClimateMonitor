@@ -1,8 +1,8 @@
 /**
-*  @file resets.h
+ * @file resets.h
  * @brief The resets controller to enable or disable subsystems.
  * @author Thorsten Hoffmeister
- * @version 0.1
+ * @version 1.0
  * @date 19.06.2026
  *
  *

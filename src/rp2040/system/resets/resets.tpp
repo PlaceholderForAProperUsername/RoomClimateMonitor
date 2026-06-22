@@ -2,7 +2,7 @@
  * @file resets.tpp
  * @brief Implementation of the resets controller.
  * @author Thorsten Hoffmeister
- * @version 0.1
+ * @version 1.0
  * @date 21.06.2026
  *
  *
