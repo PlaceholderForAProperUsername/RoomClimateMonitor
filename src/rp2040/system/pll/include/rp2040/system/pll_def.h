@@ -52,7 +52,35 @@ namespace rp2040::system {
         static constexpr std::uint32_t fbdiv_int_offset = 0x08U; /**< @brief The offset of the feedback divisor register. */
         static constexpr std::uint32_t prim_offset = 0x0CU; /**< @brief The offset of the primary output register to control the post dividers. */
 
-        
+        /**
+         * @brief The control and status register.
+         */
+        struct cs {
+            static constexpr std::uintptr_t addr = pll_addr + cs_offset; /**< @brief The address of the cs register. */
+            using cs_reg = utils::reg_access::Reg<addr, utils::reg_access::reg_mixed_access, std::uint32_t>; /**< @brief The cs register */
+
+            /**
+             * @brief The lock bits of the cs register as a bitfield.
+             */
+            struct LockBitField {
+                using reg = cs_reg; /**< @brief The register to which the bitfield belongs. */
+                using T = reg::RegType; /**< @brief The type of the register. */
+
+                static constexpr T position = 31U; /**< @brief The position of the bits in the register. */
+                static constexpr T mask = (0x01U << position); /**< @brief The mask of the bits. */
+
+                /**
+                 * @brief Values to check if the pll is stable.
+                 */
+                enum class value : T {
+                    unstable = 0x0U, /**< @brief The output frequency is unstable. */
+                    locked = 0x01U, /**< @brief The output frequency is stable. */
+                };
+            };
+            using lock_bits = cs_reg::template Bits<LockBitField, utils::reg_access::read_access>; /**< @brief The lock bit of the cs register. */
+
+
+        };
     };
 
     /** @}*/ // rp2040_pll
