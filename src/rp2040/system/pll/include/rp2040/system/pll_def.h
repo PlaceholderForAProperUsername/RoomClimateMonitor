@@ -89,8 +89,40 @@ namespace rp2040::system {
              */
             using bypass_bits = cs_reg::template Bits<utils::reg_access::BitFieldEnableDisable<cs_reg, 0x08U>>;
 
+            /**
+             * @brief The bits to set the divisor of the reference clock.
+             *
+             * The behavior is undefined for a value of 0.
+             *
+             * @tparam Value The value to be set to the refdiv bits.
+             */
+            template <std::uint32_t Value>
+            struct RefDivBitField {
+                using reg = cs_reg; /**< @brief The register to which the bitfield belongs. */
+                using T = reg::RegType; /**< @brief The type of the register. */
+
+                static constexpr T position = 0U; /**< @brief The position of the bits in the register. */
+                static constexpr T mask = (0x3FU << position); /**< @brief The mask of the bits. */
+
+                static_assert((1 <= Value) && (Value <= mask), "Invalid ref divider.");
+
+                /**
+                 * @brief The value to be set to the refdiv bits.
+                 *
+                 * Note: This enum is necessary to have a unified interface for the bitfields.
+                 */
+                enum class value : T {
+                    val = Value,
+                };
             };
 
+            /**
+             * @brief The refdiv bits of the cs register.
+             *
+             * @tparam Value The value to be set to the refdiv bits.
+             */
+            template <std::uint32_t Value>
+            using refdiv_bits = cs_reg::template Bits<RefDivBitField<Value>>;
         };
     };
 
