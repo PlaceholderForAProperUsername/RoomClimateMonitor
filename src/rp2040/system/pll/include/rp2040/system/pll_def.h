@@ -90,7 +90,7 @@ namespace rp2040::system {
             using bypass_bits = cs_reg::template Bits<utils::reg_access::BitFieldEnableDisable<cs_reg, 0x08U>>;
 
             /**
-             * @brief The bits to set the divisor of the reference clock.
+             * @brief The bits to set the divisor of the reference clock as a bitfield.
              *
              * The behavior is undefined for a value of 0.
              *
@@ -104,7 +104,7 @@ namespace rp2040::system {
                 static constexpr T position = 0U; /**< @brief The position of the bits in the register. */
                 static constexpr T mask = (0x3FU << position); /**< @brief The mask of the bits. */
 
-                static_assert((1 <= Value) && (Value <= mask), "Invalid ref divider.");
+                static_assert((1 <= Value) && (Value <= 0x3FU), "Invalid ref divider.");
 
                 /**
                  * @brief The value to be set to the refdiv bits.
@@ -124,6 +124,36 @@ namespace rp2040::system {
             template <std::uint32_t Value>
             using refdiv_bits = cs_reg::template Bits<RefDivBitField<Value>>;
         };
+
+
+        struct pwr {
+            static constexpr std::uintptr_t addr = pll_addr + pwr_offset; /**< @brief The address of the pwr register. */
+            using pwr_reg = utils::reg_access::Reg<addr, utils::reg_access::read_write_access, std::uint32_t>; /**< @brief The pwr register */
+
+
+            /**
+             * @brief The bits to power down the vco.
+             *
+             * If this bit is set to enabled, the vco is powered down. Disabling this bit end the power down mode.
+             */
+            using vcopd_bits = pwr_reg::template Bits<utils::reg_access::BitFieldEnableDisable<pwr_reg, 0x05U>>;
+
+            /**
+             * @brief The bits to power down the post dividers.
+             *
+             * If this bit is set to enabled, the post dividers are powered down. Disabling this bit powers the post
+             * dividers.
+             */
+            using postdivpd_bits = pwr_reg::template Bits<utils::reg_access::BitFieldEnableDisable<pwr_reg, 0x03U>>;
+
+            /**
+             * @brief The bit to power down the PLL.
+             *
+             * If this bit is set to enabled, the pll is powered down. Disabling this bit enables power to the PLL.
+             */
+            using pd_bits = pwr_reg::template Bits<utils::reg_access::BitFieldEnableDisable<pwr_reg, 0x00U>>;
+        };
+
     };
 
     /** @}*/ // rp2040_pll
