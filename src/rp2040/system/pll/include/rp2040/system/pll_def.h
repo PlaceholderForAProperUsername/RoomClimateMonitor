@@ -61,6 +61,8 @@ namespace rp2040::system {
 
             /**
              * @brief The lock bits of the cs register as a bitfield.
+             *
+             * The lock bit indicates if the pll is locked, meaning the output frequency is stable or not.
              */
             struct LockBitField {
                 using reg = cs_reg; /**< @brief The register to which the bitfield belongs. */
@@ -79,6 +81,15 @@ namespace rp2040::system {
             };
             using lock_bits = cs_reg::template Bits<LockBitField, utils::reg_access::read_access>; /**< @brief The lock bit of the cs register. */
 
+            /**
+             * @brief The bypass bits of the cs register.
+             *
+             * If the bypass is enabled, the reference clock will be passed directly to the output instead of the divided
+             * voltage controlled oscillator (VCO):
+             */
+            using bypass_bits = cs_reg::template Bits<utils::reg_access::BitFieldEnableDisable<cs_reg, 0x08U>>;
+
+            };
 
         };
     };
