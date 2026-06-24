@@ -180,6 +180,9 @@ namespace rp2040::system {
 
                 static_assert((16 <= Value) && (Value <= 320), "Invalid feedback divider value. Allowed values 16 <= value <= 320");
 
+                /**
+                 * @brief The value to which the fbdiv_int register is to be set.
+                 */
                 enum class value : T {
                     val = Value,
                 };
@@ -194,6 +197,56 @@ namespace rp2040::system {
             using fbdiv_int_bits = fbdiv_int_reg::template Bits<FBDivBitField<Value>>;
         };
 
+        /**
+         * @brief The prim register to set the post dividers.
+         */
+        struct prim {
+            static constexpr std::uintptr_t addr = pll_addr + prim_offset; /**< @brief The address of the prim register. */
+            using prim_reg = utils::reg_access::Reg<addr, utils::reg_access::read_write_access, std::uint32_t>; /**< @brief The prim register. */
+
+
+            /**
+             * @brief The post divider bits as a bitfield.
+             *
+             * @tparam Value The value to which the postdiv bits are to be set.
+             * @tparam pos The position of the postdiv bits in the register.
+             */
+            template <std::uint32_t Value, std::uint32_t pos>
+            struct PostDivBitField {
+                using reg = prim_reg; /**< @brief The register to which the bitfield belongs. */
+                using T = reg::RegType; /**< @brief The type of the register. */
+
+                static_assert((pos == 12U) || (pos == 16U), "Invalid value for pos parameter. Value must be either 12 or 16!");
+
+                static constexpr T position = pos; /**< @brief The position of the bits in the register. */
+                static constexpr T mask = (0x07U << position); /**< @brief The mask of the bits. */
+
+                static_assert((1U <= Value) && (Value <= 7U), "Invalid post divider value. Value must be between 1 and 7!");
+
+                /**
+                 * @brief The value to which the postdiv bits are to be set.
+                 */
+                enum class value : T {
+                    val = Value,
+                };
+            };
+
+            /**
+             * @brief The postdiv1 bits.
+             *
+             * @tparam Value The value to which post divider 1 is to be set.
+             */
+            template <std::uint32_t Value>
+            using postdiv1_bits = prim_reg::template Bits<PostDivBitField<Value, 16U>>;
+
+            /**
+             * @brief The postdiv2 bits.
+             *
+             * @tparam Value The value to which post divider 2 is to be set.
+             */
+            template <std::uint32_t Value>
+            using postdiv2_bits = prim_reg::template Bits<PostDivBitField<Value, 12U>>;
+        };
     };
 
     /** @}*/ // rp2040_pll
