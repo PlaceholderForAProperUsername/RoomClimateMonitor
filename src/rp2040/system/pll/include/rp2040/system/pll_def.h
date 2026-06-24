@@ -126,6 +126,9 @@ namespace rp2040::system {
         };
 
 
+        /**
+         * @brief The pwr register controls the power to parts of the pll.
+         */
         struct pwr {
             static constexpr std::uintptr_t addr = pll_addr + pwr_offset; /**< @brief The address of the pwr register. */
             using pwr_reg = utils::reg_access::Reg<addr, utils::reg_access::read_write_access, std::uint32_t>; /**< @brief The pwr register */
@@ -152,6 +155,43 @@ namespace rp2040::system {
              * If this bit is set to enabled, the pll is powered down. Disabling this bit enables power to the PLL.
              */
             using pd_bits = pwr_reg::template Bits<utils::reg_access::BitFieldEnableDisable<pwr_reg, 0x00U>>;
+        };
+
+        /**
+         * @brief The fbdiv_int register stores the feedback divider as an integer.
+         */
+        struct fbdiv_int {
+            static constexpr std::uintptr_t addr = pll_addr + fbdiv_int_offset; /**< @brief The address of the fbdiv_int register. */
+            using fbdiv_int_reg = utils::reg_access::Reg<addr, utils::reg_access::read_write_access, std::uint32_t>; /**< @brief The fbdiv_int register. */
+
+
+            /**
+             * @brief The feedback divisor bits as a bitfield.
+             *
+             * @tparam Value The value to which the feedback divisor is to be set.
+             */
+            template <std::uint32_t Value>
+            struct FBDivBitField {
+                using reg = fbdiv_int_reg; /**< @brief The register to which the bitfield belongs. */
+                using T = reg::RegType; /**< @brief The type of the register. */
+
+                static constexpr T position = 0U; /**< @brief The position of the bits in the register. */
+                static constexpr T mask = (0xFFFU << position); /**< @brief The mask of the bits. */
+
+                static_assert((16 <= Value) && (Value <= 320), "Invalid feedback divider value. Allowed values 16 <= value <= 320");
+
+                enum class value : T {
+                    val = Value,
+                };
+            };
+
+            /**
+             * @brief The feedback divisor bits.
+             *
+             * @tparam Value The value to which the feedback divisor is to be set.
+             */
+            template <std::uint32_t Value>
+            using fbdiv_int_bits = fbdiv_int_reg::template Bits<FBDivBitField<Value>>;
         };
 
     };
