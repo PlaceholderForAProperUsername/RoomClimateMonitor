@@ -35,6 +35,19 @@ namespace rp2040::system {
      */
 
     /**
+     * @brief Holds the configuration parameter for the PLL.
+     *
+     * The default parameter are for PLL_SYS to achieve a system frequency of 125MHz with the XOSC (12MHz) set as the
+     * reference clock.
+     */
+    struct PLL_ConfigType {
+        std::uint8_t refdiv = 1;
+        std::uint8_t postdiv1 = 6;
+        std::uint8_t postdiv2 = 2;
+        std::uint16_t fbdiv = 125;
+    };
+
+    /**
      * @brief The pll object.
      *
      * @tparam pll_addr The address of the pll.
