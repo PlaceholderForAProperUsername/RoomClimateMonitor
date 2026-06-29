@@ -25,6 +25,7 @@
 #ifndef RP2040_SYSTEM_PLL_H
 #define RP2040_SYSTEM_PLL_H
 
+#include <bitset>
 #include "pll_def.h"
 
 namespace rp2040::system {
@@ -41,14 +42,29 @@ namespace rp2040::system {
     template <std::uintptr_t pll_addr>
     class PLL_Type {
         static_assert((pll_addr == pll_sys_base) || (pll_addr == pll_usb_base), "Invalid pll address.");
+
+        using pll_regs = PLL_RegMapType<pll_addr>;
+        using cs_r = pll_regs::cs;
+        using pwr_r = pll_regs::pwr;
+        using fbdiv_int_r = pll_regs::fbdiv_int;
+        using prim_r = pll_regs::prim;
+
     public:
         static PLL_Type<pll_addr>& getInstance();
 
     private:
         PLL_Type() = default;
+
+        enum class Flags : std::uint32_t {
+            isInitialized = 0U,
+            NumberOfFlags
+        };
+
+        std::bitset<static_cast<std::uint32_t>(Flags::NumberOfFlags)> m_flags;
     };
 
     using PLL_Sys = PLL_Type<pll_sys_base>;
+    using PLL_USB = PLL_Type<pll_usb_base>;
     /** @} */ // rp2040_pll
 } // rp2040::system
 
