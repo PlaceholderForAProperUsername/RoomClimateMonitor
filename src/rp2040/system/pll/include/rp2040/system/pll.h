@@ -43,14 +43,31 @@ namespace rp2040::system {
     class PLL_Type {
         static_assert((pll_addr == pll_sys_base) || (pll_addr == pll_usb_base), "Invalid pll address.");
 
-        using pll_regs = PLL_RegMapType<pll_addr>;
-        using cs_r = pll_regs::cs;
-        using pwr_r = pll_regs::pwr;
-        using fbdiv_int_r = pll_regs::fbdiv_int;
-        using prim_r = pll_regs::prim;
+        using pll_regs = PLL_RegMapType<pll_addr>; /**< @brief The register map of the pll. */
+        using cs_r = pll_regs::cs; /**< @brief The control and status register. */
+        using pwr_r = pll_regs::pwr; /**< @brief The power modes register. */
+        using fbdiv_int_r = pll_regs::fbdiv_int; /**< @brief The feedback divisor register. */
+        using prim_r = pll_regs::prim;  /**< @brief The register to control the post dividers. */
 
     public:
+        /**
+         * @brief Getter function to get the Instance of the singleton.
+         *
+         * @return PLL_Type<pll_addr>& The instance of the singleton.
+         */
         static PLL_Type<pll_addr>& getInstance();
+
+        /**
+         * @brief Enables the PLL, if the PLL is not already enabled.
+         *
+         * This function puts the PLL only in an enabled state, allowing the PLL to be configured and started. This
+         * function does not start the PLL.
+         *
+         * @pre None
+         *
+         * @post The PLL is enabled and can be configured.
+         */
+        void init();
 
     private:
         PLL_Type() = default;
