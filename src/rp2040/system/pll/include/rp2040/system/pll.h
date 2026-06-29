@@ -69,6 +69,15 @@ namespace rp2040::system {
          */
         void init();
 
+        /**
+         * @brief Disables the PLL, if the PLL is not already disabled.
+         *
+         * @pre None
+         *
+         * @post The PLL is disabled and its registers are locked.
+         */
+        void deinit();
+
     private:
         PLL_Type() = default;
 

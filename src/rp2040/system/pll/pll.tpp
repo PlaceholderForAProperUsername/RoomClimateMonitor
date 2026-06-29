@@ -30,6 +30,19 @@ namespace rp2040::system {
         m_flags.set(static_cast<std::uint32_t>(Flags::isInitialized));
     }
 
+    template <std::uintptr_t pll_addr>
+    void PLL_Type<pll_addr>::deinit() {
+        if (!this->m_flags.test(static_cast<std::uint32_t>(Flags::isInitialized))) {
+            return;
+        }
+        if constexpr (pll_addr == pll_sys_base) {
+            Resets::getInstance().disable<SubsystemBits::PLL_SYS>();
+        } else if constexpr (pll_addr == pll_usb_base) {
+            Resets::getInstance().disable<SubsystemBits::PLL_USB>();
+        }
+        m_flags.reset(static_cast<std::uint32_t>(Flags::isInitialized));
+    }
+
     /** @} */ // rp2040_pll
 } // rp2040::system
 
