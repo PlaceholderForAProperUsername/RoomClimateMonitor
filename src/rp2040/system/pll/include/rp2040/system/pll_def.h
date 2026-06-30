@@ -38,14 +38,19 @@ namespace rp2040::system::pll {
     constexpr std::uintptr_t pll_sys_base = 0x40028000U; /**< @brief The address of the system pll. */
     constexpr std::uintptr_t pll_usb_base = 0x4002c000U; /**< @brief The address of the usb pll. */
 
-    constexpr std::uint32_t refClockMinFreq_Hz = 5'000'000U;
-    constexpr std::uint32_t refClockMaxFreq_Hz = 800'000'000U;
-    constexpr std::uint32_t fbdivMinVal = 16U;
-    constexpr std::uint32_t fbdivMaxVal = 320U;
-    constexpr std::uint32_t VCO_minFreq_Hz = 750'000'000U;
-    constexpr std::uint32_t VCO_maxFreq_Hz = 1'600'000'000U;
-    constexpr std::uint8_t postdivMinVal = 1U;
-    constexpr std::uint8_t postdivMaxVal = 7U;
+
+    namespace limits {
+        constexpr std::uint32_t refClockMinFreq_Hz = 5'000'000U; /**< @brief Minimum value for frequency of the reference clock. */
+        constexpr std::uint32_t refClockMaxFreq_Hz = 800'000'000U; /**< @brief Maximum value for frequency of the reference clock. */
+        constexpr std::uint32_t fbdivMinVal = 16U; /**< @brief The minimum value for the feedback divisor. */
+        constexpr std::uint32_t fbdivMaxVal = 320U; /**< @brief The maximum value for the feedback divisor. */
+        constexpr std::uint32_t VCO_minFreq_Hz = 750'000'000U; /**< @brief The minimum value for the frequency of the Voltage Controlled Oscillator (VCO). */
+        constexpr std::uint32_t VCO_maxFreq_Hz = 1'600'000'000U;  /**< @brief The maximum value for the frequency of the Voltage Controlled Oscillator (VCO). */
+        constexpr std::uint8_t postdivMinVal = 1U; /**< @brief The minimum value for the post divider. */
+        constexpr std::uint8_t postdivMaxVal = 7U; /**< @brief The maximum value for the post divider. */
+        constexpr std::uint32_t PLL_SysMaxFreq_Hz = 133'000'000U; /**< @brief The maximum value for the RP2040's system PLL. */
+        constexpr std::uint32_t PLL_USB_MaxFreq_Hz = 48'000'000U; /**< @brief The maximum value for the RP2040's USB PLL. */
+    }
 
     /**
      * @brief The register map of the pll
@@ -187,7 +192,7 @@ namespace rp2040::system::pll {
                 static constexpr T position = 0U; /**< @brief The position of the bits in the register. */
                 static constexpr T mask = (0xFFFU << position); /**< @brief The mask of the bits. */
 
-                static_assert((fbdivMinVal <= Value) && (Value <= fbdivMaxVal), "Invalid feedback divider value. Allowed values 16 <= value <= 320");
+                static_assert((limits::fbdivMinVal <= Value) && (Value <= limits::fbdivMaxVal), "Invalid feedback divider value. Allowed values 16 <= value <= 320");
 
                 /**
                  * @brief The value to which the fbdiv_int register is to be set.
@@ -230,7 +235,7 @@ namespace rp2040::system::pll {
                 static constexpr T position = pos; /**< @brief The position of the bits in the register. */
                 static constexpr T mask = (0x07U << position); /**< @brief The mask of the bits. */
 
-                static_assert((postdivMinVal <= Value) && (Value <= postdivMaxVal), "Invalid post divider value. Value must be between 1 and 7!");
+                static_assert((limits::postdivMinVal <= Value) && (Value <= limits::postdivMaxVal), "Invalid post divider value. Value must be between 1 and 7!");
 
                 /**
                  * @brief The value to which the postdiv bits are to be set.

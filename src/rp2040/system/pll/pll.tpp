@@ -50,21 +50,21 @@ namespace rp2040::system::pll {
             return std::unexpected(utils::status::Status::ERROR_INIT);
         }
 
-        static_assert((refClockMinFreq_Hz <= refFreq_Hz) && (refFreq_Hz <= refClockMaxFreq_Hz) , "Invalid reference clock frequency");
-        static_assert((fbdivMinVal <= config.fbdiv) && (config.fbdiv <= fbdivMaxVal), "Invalid fbd divider");
-        static_assert((postdivMinVal <= config.postdiv1) && (config.postdiv1 <= postdivMaxVal), "Invalid postdiv1 divider");
-        static_assert((postdivMinVal <= config.postdiv2) && (config.postdiv2 <= postdivMaxVal), "Invalid postdiv2 divider");
+        static_assert((limits::refClockMinFreq_Hz <= refFreq_Hz) && (refFreq_Hz <= limits::refClockMaxFreq_Hz) , "Invalid reference clock frequency");
+        static_assert((limits::fbdivMinVal <= config.fbdiv) && (config.fbdiv <= limits::fbdivMaxVal), "Invalid fbd divider");
+        static_assert((limits::postdivMinVal <= config.postdiv1) && (config.postdiv1 <= limits::postdivMaxVal), "Invalid postdiv1 divider");
+        static_assert((limits::postdivMinVal <= config.postdiv2) && (config.postdiv2 <= limits::postdivMaxVal), "Invalid postdiv2 divider");
 
         constexpr std::uint32_t vco = config.fbdiv * refFreq_Hz;
 
-        static_assert((VCO_minFreq_Hz <= vco) && (vco <= VCO_maxFreq_Hz), "Invalid VCO frequency");
+        static_assert((limits::VCO_minFreq_Hz <= vco) && (vco <= limits::VCO_maxFreq_Hz), "Invalid VCO frequency");
 
         constexpr std::uint32_t achievedFreq = vco / (config.postdiv1 * config.postdiv2);
 
         if constexpr (pll_addr == pll_sys_base) {
-            static_assert(achievedFreq <= 133'000'000, "System pll frequency must be lower than or equal to 133 MHz");
+            static_assert(achievedFreq <= limits::PLL_SysMaxFreq_Hz, "System pll frequency must be lower than or equal to 133 MHz");
         } else if constexpr (pll_addr == pll_usb_base) {
-            static_assert(achievedFreq <= 48'000'000, "USB pll frequency must be lower than or equal to 48 MHz");
+            static_assert(achievedFreq <= limits::PLL_USB_MaxFreq_Hz, "USB pll frequency must be lower than or equal to 48 MHz");
         }
 
         cs_r::template refdiv_bits<config.refdiv>::set(cs_r::template RefDivBitField<config.refdiv>::value::val);

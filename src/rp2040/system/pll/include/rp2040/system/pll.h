@@ -45,13 +45,21 @@ namespace rp2040::system::pll {
      * reference clock.
      */
      struct PLL_ConfigType {
-         std::uint8_t refdiv;
-         std::uint8_t postdiv1;
-         std::uint8_t postdiv2;
-         std::uint16_t fbdiv;
+         std::uint8_t refdiv; /**< @brief The reference clock divider value. */
+         std::uint8_t postdiv1; /**< @brief The post divider 1 value. */
+         std::uint8_t postdiv2; /**< @brief The post divider 2 value. */
+         std::uint16_t fbdiv; /**< @brief The feedback divider value. */
 
+         /**
+          * @brief Constructor of the PLL_ConfigType object to make this object usable at compile time.
+          *
+          * @param refdiv The value of the reference clock divisor.
+          * @param postdiv1 The post divider 1 value.
+          * @param postdiv2 The post divider 2 value.
+          * @param fbdiv The feedback divider value.
+          */
          constexpr explicit PLL_ConfigType(std::uint8_t refdiv = 1U, std::uint8_t postdiv1 = 6U,
-             std::uint8_t postdiv2 = 2U, std::uint16_t fbdiv = 125U) :
+                                           std::uint8_t postdiv2 = 2U, std::uint16_t fbdiv = 125U) :
          refdiv(refdiv), postdiv1(postdiv1), postdiv2(postdiv2), fbdiv(fbdiv) {}
 
     };
@@ -123,8 +131,8 @@ namespace rp2040::system::pll {
         std::bitset<static_cast<std::uint32_t>(Flags::NumberOfFlags)> m_flags;
     };
 
-    using PLL_Sys = PLL_Type<pll_sys_base>;
-    using PLL_USB = PLL_Type<pll_usb_base>;
+    using PLL_Sys = PLL_Type<pll_sys_base>; /**< @brief The System PLL. */
+    using PLL_USB = PLL_Type<pll_usb_base>; /**< @brief The USB PLL. */
     /** @} */ // rp2040_pll
 } // rp2040::system
 
