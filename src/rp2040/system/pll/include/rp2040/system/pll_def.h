@@ -96,7 +96,7 @@ namespace rp2040::system::pll {
              * If the bypass is enabled, the reference clock will be passed directly to the output instead of the divided
              * voltage controlled oscillator (VCO):
              */
-            using bypass_bits = cs_reg::template Bits<utils::reg_access::BitFieldEnableDisable<cs_reg, 0x08U>>;
+            using bypass_bits = cs_reg::template Bits<utils::reg_access::BitFieldEnableDisable<cs_reg, 0x08U>, utils::reg_access::read_write_access>;
 
             /**
              * @brief The bits to set the divisor of the reference clock as a bitfield.
@@ -131,7 +131,7 @@ namespace rp2040::system::pll {
              * @tparam Value The value to be set to the refdiv bits.
              */
             template <std::uint32_t Value>
-            using refdiv_bits = cs_reg::template Bits<RefDivBitField<Value>>;
+            using refdiv_bits = cs_reg::template Bits<RefDivBitField<Value>, utils::reg_access::read_write_access>;
         };
 
 
