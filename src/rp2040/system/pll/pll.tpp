@@ -5,7 +5,7 @@
 #include "include/rp2040/system/pll.h"
 #include "rp2040/system/resets.h"
 
-namespace rp2040::system {
+namespace rp2040::system::pll {
     /**
      * @addtogroup rp2040_pll
      * @{
@@ -27,7 +27,7 @@ namespace rp2040::system {
         } else if constexpr (pll_addr == pll_usb_base) {
             Resets::getInstance().enable<SubsystemBits::PLL_USB>();
         }
-        m_flags.set(static_cast<std::uint32_t>(Flags::isInitialized));
+        this->m_flags.set(static_cast<std::uint32_t>(Flags::isInitialized));
     }
 
     template <std::uintptr_t pll_addr>
@@ -40,7 +40,43 @@ namespace rp2040::system {
         } else if constexpr (pll_addr == pll_usb_base) {
             Resets::getInstance().disable<SubsystemBits::PLL_USB>();
         }
-        m_flags.reset(static_cast<std::uint32_t>(Flags::isInitialized));
+        this->m_flags.reset(static_cast<std::uint32_t>(Flags::isInitialized));
+    }
+
+    template <std::uintptr_t pll_addr>
+    template <PLL_ConfigType config, std::uint32_t refFreq_Hz>
+    std::expected<std::uint32_t, utils::status::Status> PLL_Type<pll_addr>::setFrequency() {
+        if (!this->m_flags.test(static_cast<std::uint32_t>(Flags::isInitialized))) {
+            return std::unexpected(utils::status::Status::ERROR_INIT);
+        }
+
+        static_assert((refClockMinFreq_Hz <= refFreq_Hz) && (refFreq_Hz <= refClockMaxFreq_Hz) , "Invalid reference clock frequency");
+        static_assert((fbdivMinVal <= config.fbdiv) && (config.fbdiv <= fbdivMaxVal), "Invalid fbd divider");
+        static_assert((postdivMinVal <= config.postdiv1) && (config.postdiv1 <= postdivMaxVal), "Invalid postdiv1 divider");
+        static_assert((postdivMinVal <= config.postdiv2) && (config.postdiv2 <= postdivMaxVal), "Invalid postdiv2 divider");
+
+        constexpr std::uint32_t vco = config.fbdiv * refFreq_Hz;
+
+        static_assert((VCO_minFreq_Hz <= vco) && (vco <= VCO_maxFreq_Hz), "Invalid VCO frequency");
+
+        constexpr std::uint32_t achievedFreq = vco / (config.postdiv1 * config.postdiv2);
+
+        if constexpr (pll_addr == pll_sys_base) {
+            static_assert(achievedFreq <= 133'000'000, "System pll frequency must be lower than or equal to 133 MHz");
+        } else if constexpr (pll_addr == pll_usb_base) {
+            static_assert(achievedFreq <= 48'000'000, "USB pll frequency must be lower than or equal to 48 MHz");
+        }
+
+        cs_r::template refdiv_bits<config.refdiv>::set(cs_r::template RefDivBitField<config.refdiv>::value::val);
+        fbdiv_int_r::template fbdiv_int_bits<config.fbdiv>::set(fbdiv_int_r::template FBDivBitField<config.fbdiv>::value::val);
+        pwr_r::pd_bits::clear();
+        pwr_r::vcopd_bits::clear();
+        while (!cs_r::lock_bits::getValue()) {}
+        prim_r::template postdiv1_bits<config.postdiv1>::set(prim_r::template PostDiv1BitField<config.postdiv1>::value::val);
+        prim_r::template postdiv2_bits<config.postdiv2>::set(prim_r::template PostDiv2BitField<config.postdiv2>::value::val);
+        pwr_r::postdivpd_bits::clear();
+
+        return achievedFreq;
     }
 
     /** @} */ // rp2040_pll

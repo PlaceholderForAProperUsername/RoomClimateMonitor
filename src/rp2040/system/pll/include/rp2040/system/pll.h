@@ -26,9 +26,13 @@
 #define RP2040_SYSTEM_PLL_H
 
 #include <bitset>
+#include <expected>
+
+#include "utils/status.h"
 #include "pll_def.h"
 
-namespace rp2040::system {
+
+namespace rp2040::system::pll {
     /**
      * @addtogroup rp2040_pll
      * @{
@@ -40,11 +44,16 @@ namespace rp2040::system {
      * The default parameter are for PLL_SYS to achieve a system frequency of 125MHz with the XOSC (12MHz) set as the
      * reference clock.
      */
-    struct PLL_ConfigType {
-        std::uint8_t refdiv = 1;
-        std::uint8_t postdiv1 = 6;
-        std::uint8_t postdiv2 = 2;
-        std::uint16_t fbdiv = 125;
+     struct PLL_ConfigType {
+         std::uint8_t refdiv;
+         std::uint8_t postdiv1;
+         std::uint8_t postdiv2;
+         std::uint16_t fbdiv;
+
+         constexpr explicit PLL_ConfigType(std::uint8_t refdiv = 1U, std::uint8_t postdiv1 = 6U,
+             std::uint8_t postdiv2 = 2U, std::uint16_t fbdiv = 125U) :
+         refdiv(refdiv), postdiv1(postdiv1), postdiv2(postdiv2), fbdiv(fbdiv) {}
+
     };
 
     /**
@@ -90,6 +99,18 @@ namespace rp2040::system {
          * @post The PLL is disabled and its registers are locked.
          */
         void deinit();
+
+        /**
+         * @brief Sets the frequency of the PLL.
+         *
+         * @tparam config The Parameter to configure the PLL. @see PLL_ConfigType
+         * @tparam refFreq_Hz The frequency of the reference clock. The default is the frequency of the XOSC @see XOSC_Type
+         * @return The achieved frequency in Hz or an error code.
+         * @retval ERROR_INIT The PLL is not initialized. @see init
+         */
+        template <PLL_ConfigType config, std::uint32_t refFreq_Hz = 12'000'000U>
+        std::expected<std::uint32_t, utils::status::Status> setFrequency();
+
 
     private:
         PLL_Type() = default;
