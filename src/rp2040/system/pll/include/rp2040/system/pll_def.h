@@ -241,12 +241,28 @@ namespace rp2040::system::pll {
             };
 
             /**
+             * @brief BitField for the post divider 1.
+             *
+             * @tparam Value The value to which the post divider 1 is to be set.
+             */
+            template <std::uint32_t Value>
+            using PostDiv1BitField = PostDivBitField<Value, 16U>;
+
+            /**
              * @brief The postdiv1 bits.
              *
              * @tparam Value The value to which post divider 1 is to be set.
              */
             template <std::uint32_t Value>
-            using postdiv1_bits = prim_reg::template Bits<PostDivBitField<Value, 16U>>;
+            using postdiv1_bits = prim_reg::template Bits<PostDiv1BitField<Value>>;
+
+            /**
+             * @brief BitField for the post divider 2.
+             *
+             * @tparam Value The value to which the post divider 2 is to be set.
+             */
+            template <std::uint32_t Value>
+            using PostDiv2BitField = PostDivBitField<Value, 12U>;
 
             /**
              * @brief The postdiv2 bits.
@@ -254,7 +270,7 @@ namespace rp2040::system::pll {
              * @tparam Value The value to which post divider 2 is to be set.
              */
             template <std::uint32_t Value>
-            using postdiv2_bits = prim_reg::template Bits<PostDivBitField<Value, 12U>>;
+            using postdiv2_bits = prim_reg::template Bits<PostDiv2BitField<Value>>;
         };
     };
 
