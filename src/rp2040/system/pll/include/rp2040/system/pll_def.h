@@ -96,12 +96,17 @@ namespace rp2040::system::pll {
             using lock_bits = cs_reg::template Bits<LockBitField, utils::reg_access::read_access>; /**< @brief The lock bit of the cs register. */
 
             /**
+             * @brief The bypass bits of the cs register as a bitfield.
+             */
+            using BypassBitField = utils::reg_access::BitFieldEnableDisable<cs_reg, 0x08U>;
+
+            /**
              * @brief The bypass bits of the cs register.
              *
              * If the bypass is enabled, the reference clock will be passed directly to the output instead of the divided
              * voltage controlled oscillator (VCO):
              */
-            using bypass_bits = cs_reg::template Bits<utils::reg_access::BitFieldEnableDisable<cs_reg, 0x08U>, utils::reg_access::read_write_access>;
+            using bypass_bits = cs_reg::template Bits<BypassBitField, utils::reg_access::read_write_access>;
 
             /**
              * @brief The bits to set the divisor of the reference clock as a bitfield.
@@ -149,11 +154,29 @@ namespace rp2040::system::pll {
 
 
             /**
+             * @brief The VCO power down bits as a Bitfield.
+             *
+             * Values:
+             * - enable: The power down mode is enabled.
+             * - disable: The power down mode is disabled.
+             */
+            using VCOPDBitField = utils::reg_access::BitFieldEnableDisable<pwr_reg, 0x05U>;
+
+            /**
              * @brief The bits to power down the vco.
              *
              * If this bit is set to enabled, the vco is powered down. Disabling this bit end the power down mode.
              */
-            using vcopd_bits = pwr_reg::template Bits<utils::reg_access::BitFieldEnableDisable<pwr_reg, 0x05U>>;
+            using vcopd_bits = pwr_reg::template Bits<VCOPDBitField>;
+
+            /**+
+             * @brief The post divider power down bits as a Bitfield.
+             *
+             * Values:
+             * - enable: The power down mode is enabled.
+             * - disable: The power down mode is disabled.
+             */
+            using PostDivPDBitField = utils::reg_access::BitFieldEnableDisable<pwr_reg, 0x03U>;
 
             /**
              * @brief The bits to power down the post dividers.
@@ -161,14 +184,23 @@ namespace rp2040::system::pll {
              * If this bit is set to enabled, the post dividers are powered down. Disabling this bit powers the post
              * dividers.
              */
-            using postdivpd_bits = pwr_reg::template Bits<utils::reg_access::BitFieldEnableDisable<pwr_reg, 0x03U>>;
+            using postdivpd_bits = pwr_reg::template Bits<PostDivPDBitField>;
+
+            /**
+             * @brief The pll power down bits as a bitfield.
+             *
+             * Values:
+             * - enable: The power down mode is enabled.
+             * - disable: The power down mode is disabled.
+             */
+            using PDBitField = utils::reg_access::BitFieldEnableDisable<pwr_reg, 0x00U>;
 
             /**
              * @brief The bit to power down the PLL.
              *
              * If this bit is set to enabled, the pll is powered down. Disabling this bit enables power to the PLL.
              */
-            using pd_bits = pwr_reg::template Bits<utils::reg_access::BitFieldEnableDisable<pwr_reg, 0x00U>>;
+            using pd_bits = pwr_reg::template Bits<PDBitField>;
         };
 
         /**
