@@ -28,7 +28,7 @@ namespace rp2040::system::pll {
             Resets::getInstance().enable<SubsystemBits::PLL_USB>();
         }
         this->m_flags.set(static_cast<std::uint32_t>(Flags::isInitialized));
-        this->m_frequency = 0;
+        this->m_frequency_hz = 0;
     }
 
     template <std::uintptr_t pll_addr>
@@ -42,12 +42,12 @@ namespace rp2040::system::pll {
             Resets::getInstance().disable<SubsystemBits::PLL_USB>();
         }
         this->m_flags.reset(static_cast<std::uint32_t>(Flags::isInitialized));
-        this->m_frequency = 0;
+        this->m_frequency_hz = 0;
     }
 
     template <std::uintptr_t pll_addr>
     template <PLL_ConfigType config, std::uint32_t refFreq_Hz>
-    std::expected<std::uint32_t, utils::status::Status> PLL_Type<pll_addr>::setFrequency() {
+    std::expected<unsigned int, utils::status::Status> PLL_Type<pll_addr>::setFrequency() {
         if (!this->m_flags.test(static_cast<std::uint32_t>(Flags::isInitialized))) {
             return std::unexpected(utils::status::Status::ERROR_INIT);
         }
@@ -61,7 +61,7 @@ namespace rp2040::system::pll {
 
         static_assert((limits::VCO_minFreq_Hz <= vco) && (vco <= limits::VCO_maxFreq_Hz), "Invalid VCO frequency");
 
-        constexpr std::uint32_t achievedFreq = vco / (config.postdiv1 * config.postdiv2);
+        constexpr unsigned int achievedFreq = vco / (config.postdiv1 * config.postdiv2);
 
         if constexpr (pll_addr == pll_sys_base) {
             static_assert(achievedFreq <= limits::PLL_SysMaxFreq_Hz, "System pll frequency must be lower than or equal to 133 MHz");
@@ -70,8 +70,8 @@ namespace rp2040::system::pll {
         }
 
         // If the PLL is already running with the correct frequency, there is no need to configure it again.
-        if (achievedFreq == this->m_frequency) {
-            return this->m_frequency;
+        if (achievedFreq == this->m_frequency_hz) {
+            return this->m_frequency_hz;
         }
 
         // If the PLL is already running with a different frequency, reset the PLL
@@ -94,9 +94,22 @@ namespace rp2040::system::pll {
         prim_r::template postdiv2_bits<config.postdiv2>::set(prim_r::template PostDiv2BitField<config.postdiv2>::value::val);
         pwr_r::postdivpd_bits::clear();
 
-        this->m_frequency = achievedFreq;
+        this->m_frequency_hz = achievedFreq;
 
         return achievedFreq;
+    }
+
+    template <std::uintptr_t pll_addr>
+    std::expected<unsigned int, utils::status::Status> PLL_Type<pll_addr>::getFrequency() {
+        if (!this->m_flags.test(static_cast<std::uint32_t>(Flags::isInitialized))) {
+            return std::unexpected(utils::status::Status::ERROR_INIT);
+        }
+
+        if (this->m_frequency_hz == 0) {
+            return std::unexpected(utils::status::Status::ERROR_RESOURCE);
+        }
+
+        return this->m_frequency_hz;
     }
 
     /** @} */ // rp2040_pll
