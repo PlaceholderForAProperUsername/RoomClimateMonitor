@@ -1,0 +1,8 @@
+//
+//  on 03.07.26.
+//
+
+#ifndef RP2040_SYSTEM_CLOCKS_DEF_H
+#define RP2040_SYSTEM_CLOCKS_DEF_H
+
+#endif // RP2040_SYSTEM_CLOCKS_DEF_H
