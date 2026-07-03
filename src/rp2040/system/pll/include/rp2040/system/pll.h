@@ -115,13 +115,17 @@ namespace rp2040::system::pll {
          * @tparam refFreq_Hz The frequency of the reference clock. The default is the frequency of the XOSC @see XOSC_Type
          * @return The achieved frequency in Hz or an error code.
          * @retval ERROR_INIT The PLL is not initialized. @see init
+         *
+         * @pre The PLL must be initialized. @see init
+         *
+         * @post The PLL runs at the configured frequency.
          */
         template <PLL_ConfigType config, std::uint32_t refFreq_Hz = 12'000'000U>
         std::expected<std::uint32_t, utils::status::Status> setFrequency();
 
 
     private:
-        PLL_Type() = default;
+        PLL_Type() : m_flags(0), m_frequency(0) {}
 
         enum class Flags : std::uint32_t {
             isInitialized = 0U,
@@ -129,6 +133,8 @@ namespace rp2040::system::pll {
         };
 
         std::bitset<static_cast<std::uint32_t>(Flags::NumberOfFlags)> m_flags;
+
+        unsigned int m_frequency;
     };
 
     using PLL_Sys = PLL_Type<pll_sys_base>; /**< @brief The System PLL. */
