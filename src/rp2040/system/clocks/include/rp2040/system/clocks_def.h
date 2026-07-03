@@ -84,7 +84,7 @@ namespace rp2040::system::clocks {
                 using reg = ctrl_reg; /**< @brief The register to which the bitfield belongs. */
                 using T = reg::RegType; /**< @brief The type of the register. */
 
-                static constexpr T position = 0x05U; /**< @brief The position of the bits in the register. */
+                static constexpr T position = 0x00U; /**< @brief The position of the bits in the register. */
                 static constexpr T mask = (0x03U << position); /**< @brief The mask of the bits. */
 
                 /**
@@ -98,7 +98,45 @@ namespace rp2040::system::clocks {
             };
 
             using src_bits = ctrl_reg::Bits<SrcBitField>; /**< @brief The src bits. */
+        };
 
+        /**
+         * @brief The div register of the reference clock.
+         */
+        struct div {
+            static constexpr std::uintptr_t addr = clocks_base + ref_base_offset + div_offset; /**< @brief The addr of the div register of the reference clock. */
+            using div_reg = utils::reg_access::Reg<addr, utils::reg_access::read_write_access, std::uint32_t>; /**< @brief The div register. */
+
+            /**
+             * @brief The integer component of the clock divisor.
+             *
+             * @tparam Value The value to which the integer part is to be set.
+             */
+            template <std::uint8_t Value>
+            struct IntBitField {
+                using reg = div_reg; /**< @brief The register to which the bitfield belongs. */
+                using T = reg::RegType; /**< @brief The type of the register. */
+
+                static constexpr T position = 0x08U; /**< @brief The position of the bits in the register. */
+                static constexpr T mask = (0x03U << position); /**< @brief The mask of the bits. */
+
+                static_assert(Value <= 0x03U, "Invalid value for the int bits.");
+
+                /**
+                 * @brief The value to which the integer component is to be set.
+                 */
+                enum class value : T {
+                    val = Value,
+                };
+            };
+
+            /**
+             * @brief The int bits of the reference clock.
+             *
+             * @tparam Value The value to which the integer component is to be set.
+             */
+            template <std::uint8_t Value>
+            using int_bits = div_reg::Bits<IntBitField<Value>>;
         };
     };
 
