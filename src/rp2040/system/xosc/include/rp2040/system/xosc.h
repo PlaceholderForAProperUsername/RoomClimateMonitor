@@ -27,8 +27,10 @@
 
 #include <bitset>
 #include <cstdint>
+#include <expected>
 
 #include "xosc_def.h"
+#include "utils/status.h"
 
 namespace rp2040::system {
     /**
@@ -101,6 +103,16 @@ namespace rp2040::system {
          */
         void wake();
 
+        /**
+         * @brief Gets the frequency of the XOSC.
+         *
+         * @return The frequency at which the XOSC runs or an error code.
+         * @retval unsigned int The frequency of the XOSC in Hz.
+         * @retval ERROR_INIT The frequency is not initialized. @see init
+         * @retval ERROR_RESOURCE The XOSC is paused and thus unavailable. @see wake
+         */
+        std::expected<unsigned int, utils::status::Status> getFrequency();
+
     private:
         XOSC_Type() : m_flags(0) {};
 
@@ -117,6 +129,8 @@ namespace rp2040::system {
         };
 
         std::bitset<static_cast<std::size_t>(Flags::NumberOfFlags)> m_flags; /**< @brief The status flags of the XOSC. @see Flags */
+
+        static constexpr unsigned int m_frequency_hz = 12'000'000U; /**< @brief The frequency of the RP2040's XOSC. */
     };
 
     using XOSC = XOSC_Type<xosc_base>; /**< @brief Alias for the XOSC. */
