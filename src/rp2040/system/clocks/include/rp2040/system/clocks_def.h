@@ -138,6 +138,39 @@ namespace rp2040::system::clocks {
             template <std::uint8_t Value>
             using int_bits = div_reg::Bits<IntBitField<Value>>;
         };
+
+        /**
+         * @brief The selected register contains information about the selected clock.
+         */
+        struct selected {
+            static constexpr std::uintptr_t addr = clocks_base + ref_base_offset + selected_offset; /**< @brief The addr of the selected register of the reference clock. */
+            using selected_reg = utils::reg_access::Reg<addr, utils::reg_access::read_access, std::uint32_t>; /**< @brief The selected register. */
+
+            /**
+             * @brief The selected bits contain information about the selected clock in the src bits of the ctrl register.
+             */
+            struct SelectedBitField {
+                using reg = selected_reg; /**< @brief The register to which the bitfield belongs. */
+                using T = reg::RegType; /**< @brief The type of the register. */
+
+                static constexpr T position = 0x00U; /**< @brief The position of the bits in the register. */
+                static constexpr T mask = (0xFFFFFFFFU << position); /**< @brief The mask of the bits. */
+
+                /**
+                 * @brief Each clock corresponds to a bit in the selected register.
+                 */
+                enum class value : T {
+                    ROSC = (1U << 0U), /**< @brief The ROSC bit. */
+                    AUX = (1U << 1U), /**< @brief The auxiliary source bit. */
+                    XOSC = (1U << 2U), /**< @brief The XOSC bit. */
+                };
+            };
+
+            /**
+             * @brief The selected bits of the selected register.
+             */
+            using selected_bits = selected_reg::Bits<SelectedBitField>;
+        };
     };
 
     /** @}*/ //rp2040_clocks
