@@ -40,6 +40,19 @@ namespace rp2040::system::clocks {
     constexpr std::uint32_t peri_offset = 0x48U; /**< @brief Offset for peripheral clock control registers. */
 
     /**
+     * @brief The possible clock sources for the reference clock.
+     */
+    enum class RefClockSrc : std::uint32_t {
+        ROSC = 0x00U, /**< @brief The ring oscillator. */
+        XOSC = 0x02U, /**< @brief The crystal oscillator */
+        AUX_SRC_START = 0x03, /**< @brief Helper entry. Not an actual source. */
+        PLL_USB = 0x03U, /**< @brief The usb pll. */
+        GPIN0 = 0x04U, /**< @brief External clock provided through GPIN0. */
+        GPIN1 = 0x05U, /**< @brief External clock provided through GPIN1. */
+        RefClockCount /**< @brief Helper entry for parameter checking. */
+    };
+
+    /**
      * @brief Registers for the reference clock control registers.
      */
     struct Ref_RegMapType {
@@ -57,7 +70,10 @@ namespace rp2040::system::clocks {
 
             /**
              * @brief The auxiliary clock source bits as a BitField.
+             *
+             * @tparam Value The value for the auxiliary source for the reference clock.
              */
+            template <std::uint32_t Value>
             struct AuxSrcBitField {
                 using reg = ctrl_reg; /**< @brief The register to which the bitfield belongs. */
                 using T = reg::RegType; /**< @brief The type of the register. */
@@ -65,21 +81,35 @@ namespace rp2040::system::clocks {
                 static constexpr T position = 0x05U; /**< @brief The position of the bits in the register. */
                 static constexpr T mask = (0x03U << position); /**< @brief The mask of the bits. */
 
+                static_assert(Value <= 0x02U, "Invalid value for the auxiliary src of the reference clock.");
+
                 /**
                  * @brief The values to which the auxiliary clock source can be set.
+                 *
+                 * Values:
+                 * - 0x00 PLL_USB
+                 * - 0x01 GPIN0
+                 * - 0x02 GPIN1
                  */
                 enum class value : T {
-                    PLL_USB = 0x00U, /**< @brief Set source to the USB PLL. */
-                    GPIN0 = 0x01U, /**< @brief Set the source to GPIN0. */
-                    GPIN1 = 0x02U, /**< @brief Set the source to GPIN1. */
+                    val = Value
                 };
             };
 
-            using aux_src_bits = ctrl_reg::Bits<AuxSrcBitField>; /**< @brief The auxiliary source bits. */
+            /**
+             * @brief The auxiliary source bits.
+             *
+             * @tparam Value The value for the auxiliary source for the reference clock.
+             */
+            template <std::uint32_t Value>
+            using aux_src_bits = ctrl_reg::Bits<AuxSrcBitField<Value>>;
 
             /**
             * @brief The clock source bits as a BitField.
+            *
+            * @tparam Value The value of the src for the reference clock.
             */
+            template <std::uint32_t Value>
             struct SrcBitField {
                 using reg = ctrl_reg; /**< @brief The register to which the bitfield belongs. */
                 using T = reg::RegType; /**< @brief The type of the register. */
@@ -87,17 +117,28 @@ namespace rp2040::system::clocks {
                 static constexpr T position = 0x00U; /**< @brief The position of the bits in the register. */
                 static constexpr T mask = (0x03U << position); /**< @brief The mask of the bits. */
 
+                static_assert(Value <= 0x02U, "Invalid value for the reference clock.");
+
                 /**
                  * @brief The values to which the reference clock source can be set.
+                 *
+                 * Values:
+                 * - 0x00 ROSC
+                 * - 0x01 AUXSRC
+                 * - 0x02 XOSC
                  */
                 enum class value : T {
-                    ROSC = 0x00U, /**< @brief Sets the reference clock source to the ROSC. */
-                    Aux = 0x01U, /**< @brief Sets the reference clock source to use an auxiliary source. */
-                    XOSC = 0x02U, /**< @brief Sets the reference clock source to the XOSC. */
+                    val = Value,
                 };
             };
 
-            using src_bits = ctrl_reg::Bits<SrcBitField>; /**< @brief The src bits. */
+            /**
+             * @brief The src bits.
+             *
+             * @tparam Value The value of the src for the reference clock.
+             */
+            template <std::uint32_t Value>
+            using src_bits = ctrl_reg::Bits<SrcBitField<Value>>;
         };
 
         /**
