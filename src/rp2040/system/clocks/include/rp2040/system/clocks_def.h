@@ -34,10 +34,14 @@ namespace rp2040::system::clocks {
      * @addtogroup rp2040_clocks
      * @{
      */
+
     constexpr std::uintptr_t clocks_base = 0x40008000U; /**< @brief Base address of clocks. */
 
-    constexpr std::uint32_t sys_offset = 0x3CU; /**< @brief Offset for system clock control registers. */
-    constexpr std::uint32_t peri_offset = 0x48U; /**< @brief Offset for peripheral clock control registers. */
+    constexpr std::uint32_t ref_base_offset = 0x30U; /**< @brief Offset for reference clock control registers. */
+    constexpr std::uint32_t sys_base_offset = 0x3CU; /**< @brief Offset for system clock control registers. */
+    constexpr std::uint32_t peri_base_offset = 0x48U; /**< @brief Offset for peripheral clock control registers. */
+
+    constexpr std::uintptr_t ref_base = clocks_base + ref_base_offset;
 
     /**
      * @brief The possible clock sources for the reference clock.
@@ -54,9 +58,13 @@ namespace rp2040::system::clocks {
 
     /**
      * @brief Registers for the reference clock control registers.
+     *
+     * @tparam ref_addr The base address of the reference clock registers.
      */
+    template <std::uintptr_t ref_addr>
     struct Ref_RegMapType {
-        static constexpr std::uint32_t ref_base_offset = 0x30U; /**< @brief Offset for reference clock control registers. */
+        static_assert(ref_addr == ref_base, "Invalid reference clock address.");
+
         static constexpr std::uint32_t ctrl_offset = 0x00U; /**< @brief Offset for the control register. */
         static constexpr std::uint32_t div_offset = 0x04U; /**< @brief Offset for the divisor register. */
         static constexpr std::uint32_t selected_offset = 0x08U; /**< @brief Offset for the selected register. */
@@ -65,7 +73,7 @@ namespace rp2040::system::clocks {
          * @brief Register to control the reference clock.
          */
         struct ctrl {
-            static constexpr std::uintptr_t addr = clocks_base + ref_base_offset + ctrl_offset; /**< @brief The address of the ctrl register of the reference clock control. */
+            static constexpr std::uintptr_t addr = ref_addr + ctrl_offset; /**< @brief The address of the ctrl register of the reference clock control. */
             using ctrl_reg = utils::reg_access::Reg<addr, utils::reg_access::read_write_access, std::uint32_t>; /**< @brief The control register of the reference clock. */
 
             /**
@@ -102,7 +110,7 @@ namespace rp2040::system::clocks {
              * @tparam Value The value for the auxiliary source for the reference clock.
              */
             template <std::uint32_t Value>
-            using aux_src_bits = ctrl_reg::Bits<AuxSrcBitField<Value>>;
+            using aux_src_bits = ctrl_reg::template Bits<AuxSrcBitField<Value>>;
 
             /**
             * @brief The clock source bits as a BitField.
@@ -138,14 +146,14 @@ namespace rp2040::system::clocks {
              * @tparam Value The value of the src for the reference clock.
              */
             template <std::uint32_t Value>
-            using src_bits = ctrl_reg::Bits<SrcBitField<Value>>;
+            using src_bits = ctrl_reg::template Bits<SrcBitField<Value>>;
         };
 
         /**
          * @brief The div register of the reference clock.
          */
         struct div {
-            static constexpr std::uintptr_t addr = clocks_base + ref_base_offset + div_offset; /**< @brief The addr of the div register of the reference clock. */
+            static constexpr std::uintptr_t addr = ref_addr + div_offset; /**< @brief The addr of the div register of the reference clock. */
             using div_reg = utils::reg_access::Reg<addr, utils::reg_access::read_write_access, std::uint32_t>; /**< @brief The div register. */
 
             /**
@@ -177,14 +185,14 @@ namespace rp2040::system::clocks {
              * @tparam Value The value to which the integer component is to be set.
              */
             template <std::uint8_t Value>
-            using int_bits = div_reg::Bits<IntBitField<Value>>;
+            using int_bits = div_reg::template Bits<IntBitField<Value>>;
         };
 
         /**
          * @brief The selected register contains information about the selected clock.
          */
         struct selected {
-            static constexpr std::uintptr_t addr = clocks_base + ref_base_offset + selected_offset; /**< @brief The addr of the selected register of the reference clock. */
+            static constexpr std::uintptr_t addr = ref_addr + selected_offset; /**< @brief The addr of the selected register of the reference clock. */
             using selected_reg = utils::reg_access::Reg<addr, utils::reg_access::read_access, std::uint32_t>; /**< @brief The selected register. */
 
             /**
@@ -210,7 +218,7 @@ namespace rp2040::system::clocks {
             /**
              * @brief The selected bits of the selected register.
              */
-            using selected_bits = selected_reg::Bits<SelectedBitField>;
+            using selected_bits = selected_reg::template Bits<SelectedBitField>;
         };
     };
 
