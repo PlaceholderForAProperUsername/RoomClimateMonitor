@@ -1,6 +1,26 @@
-//
-//  on 03.07.26.
-//
+/**
+ * @file clocks.h
+ * @brief The Clocks module to use the clocks of the RP2040.
+ * @author Thorsten Hoffmeister
+ * @version 0.1
+ * @date 03.07.2026
+ *
+ *
+ * @copyright (C) 2026  Thorsten Hoffmeister
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
 #ifndef RP2040_SYSTEM_CLOCKS_H
 #define RP2040_SYSTEM_CLOCKS_H
@@ -16,34 +36,31 @@ namespace rp2040::system::clocks {
      */
 
     /**
-     * @brief Controls the reference clock.
+     * @brief Provides general functionality common to the clocks of the RP2040.
      *
-     * @tparam ref_addr The base address of the reference clock control registers.
+     * @tparam ClockDefType A clock type.
      */
-    template <std::uintptr_t ref_addr>
-    class Ref_Type {
-        static_assert(ref_addr == ref_base, "Invalid reference clock address.");
+    template <typename ClockDefType>
+    requires IsClockType<ClockDefType>
+    class ClockBaseType {
+        static constexpr decltype(auto) addr = ClockDefType::base_addr;
 
-        using RegMap = Ref_RegMapType<ref_addr>; /**< @brief The register map of the reference clock registers. */
-        using ctrl_r = RegMap::ctrl; /**< @brief The control register. */
-        using div_r = RegMap::div; /**< @brief The div register. */
-        using selected_r = RegMap::selected; /**< @brief The selected clock register. */
+        static_assert((addr == ref_base) || (addr == sys_base) || (addr == peri_base), "Invalid clock address.");
 
     public:
         /**
-         * @brief Gets the instance of the reference clock object.
+         * @brief Getter function to get the singleton instance.
          *
-         * @return The singleton instance of the ref clock object.
+         * @return The singleton instance.
          */
-        Ref_Type& getInstance();
+        static ClockBaseType<ClockDefType>& getInstance();
 
     private:
-        Ref_Type() = default;
+        ClockBaseType() = default;
+
     };
-
-
-    using RefClock = Ref_Type<ref_base>;
-
+    
+    using RefClock = ClockBaseType<RefClock_DefType>; /**< @brief The reference clock. */
     /** @}*/ // rp2040_clocks
 } // rp2040::system::clocks
 

@@ -26,6 +26,7 @@
 #define RP2040_SYSTEM_CLOCKS_DEF_H
 
 #include <cstdint>
+#include <type_traits>
 
 #include "utils/reg_access.h"
 
@@ -35,45 +36,57 @@ namespace rp2040::system::clocks {
      * @{
      */
 
+    /**
+     * @brief Describes the minimum requirements for a ClockType.
+     *
+     * The minimum, which the different clocks have in common, is the possibility to set a source for the clock.
+     *
+     * @tparam ClockDefType The type to be checked.
+     */
+    template <typename ClockDefType>
+    concept IsClockType =
+        std::is_enum_v<typename ClockDefType::ClockSrc> &&
+        std::is_class_v<typename ClockDefType::ctrl> &&
+        std::is_same_v<decltype(ClockDefType::base_addr), const std::uintptr_t>;
+
+
     constexpr std::uintptr_t clocks_base = 0x40008000U; /**< @brief Base address of clocks. */
 
     constexpr std::uint32_t ref_base_offset = 0x30U; /**< @brief Offset for reference clock control registers. */
     constexpr std::uint32_t sys_base_offset = 0x3CU; /**< @brief Offset for system clock control registers. */
     constexpr std::uint32_t peri_base_offset = 0x48U; /**< @brief Offset for peripheral clock control registers. */
 
-    constexpr std::uintptr_t ref_base = clocks_base + ref_base_offset;
+    constexpr std::uintptr_t ref_base = clocks_base + ref_base_offset; /**< @brief The base address of the reference clock registers. */
+    constexpr std::uintptr_t sys_base = clocks_base + sys_base_offset; /**< @brief The base address of the system clock registers. */
+    constexpr std::uintptr_t peri_base = clocks_base + peri_base_offset; /**< @brief The base address of the peripheral clock registers. */
+
+    constexpr std::uint32_t ctrl_offset = 0x00U; /**< @brief Offset for the control register. */
+    constexpr std::uint32_t div_offset = 0x04U; /**< @brief Offset for the divisor register. */
+    constexpr std::uint32_t selected_offset = 0x08U; /**< @brief Offset for the selected register. */
 
     /**
-     * @brief The possible clock sources for the reference clock.
-     */
-    enum class RefClockSrc : std::uint32_t {
-        ROSC = 0x00U, /**< @brief The ring oscillator. */
-        XOSC = 0x02U, /**< @brief The crystal oscillator */
-        AUX_SRC_START = 0x03, /**< @brief Helper entry. Not an actual source. */
-        PLL_USB = 0x03U, /**< @brief The usb pll. */
-        GPIN0 = 0x04U, /**< @brief External clock provided through GPIN0. */
-        GPIN1 = 0x05U, /**< @brief External clock provided through GPIN1. */
-        RefClockCount /**< @brief Helper entry for parameter checking. */
-    };
-
-    /**
-     * @brief Registers for the reference clock control registers.
+     * @brief Defines the reference clock with its registers.
      *
-     * @tparam ref_addr The base address of the reference clock registers.
      */
-    template <std::uintptr_t ref_addr>
-    struct Ref_RegMapType {
-        static_assert(ref_addr == ref_base, "Invalid reference clock address.");
+    struct RefClock_DefType {
+        static constexpr std::uintptr_t base_addr = ref_base; /**< @brief The base address of the reference clock registers. */
 
-        static constexpr std::uint32_t ctrl_offset = 0x00U; /**< @brief Offset for the control register. */
-        static constexpr std::uint32_t div_offset = 0x04U; /**< @brief Offset for the divisor register. */
-        static constexpr std::uint32_t selected_offset = 0x08U; /**< @brief Offset for the selected register. */
+        /**
+         * @brief The clock sources for the reference clock.
+         */
+        enum class ClockSrc : std::uint32_t {
+            ROSC = 0x00U, /**< @brief The ring oscillator. */
+            XOSC = 0x02U, /**< @brief The crystal oscillator */
+            PLL_USB = 0x01U, /**< @brief The usb pll. */
+            GPIN0 = 0x21U, /**< @brief External clock provided through GPIN0. */
+            GPIN1 = 0x41U, /**< @brief External clock provided through GPIN1. */
+        };
 
         /**
          * @brief Register to control the reference clock.
          */
         struct ctrl {
-            static constexpr std::uintptr_t addr = ref_addr + ctrl_offset; /**< @brief The address of the ctrl register of the reference clock control. */
+            static constexpr std::uintptr_t addr = base_addr + ctrl_offset; /**< @brief The address of the ctrl register of the reference clock control. */
             using ctrl_reg = utils::reg_access::Reg<addr, utils::reg_access::read_write_access, std::uint32_t>; /**< @brief The control register of the reference clock. */
 
             /**
@@ -153,7 +166,7 @@ namespace rp2040::system::clocks {
          * @brief The div register of the reference clock.
          */
         struct div {
-            static constexpr std::uintptr_t addr = ref_addr + div_offset; /**< @brief The addr of the div register of the reference clock. */
+            static constexpr std::uintptr_t addr = base_addr + div_offset; /**< @brief The addr of the div register of the reference clock. */
             using div_reg = utils::reg_access::Reg<addr, utils::reg_access::read_write_access, std::uint32_t>; /**< @brief The div register. */
 
             /**
@@ -192,7 +205,7 @@ namespace rp2040::system::clocks {
          * @brief The selected register contains information about the selected clock.
          */
         struct selected {
-            static constexpr std::uintptr_t addr = ref_addr + selected_offset; /**< @brief The addr of the selected register of the reference clock. */
+            static constexpr std::uintptr_t addr = base_addr + selected_offset; /**< @brief The addr of the selected register of the reference clock. */
             using selected_reg = utils::reg_access::Reg<addr, utils::reg_access::read_access, std::uint32_t>; /**< @brief The selected register. */
 
             /**
@@ -218,7 +231,7 @@ namespace rp2040::system::clocks {
             /**
              * @brief The selected bits of the selected register.
              */
-            using selected_bits = selected_reg::template Bits<SelectedBitField>;
+            using selected_bits = selected_reg::Bits<SelectedBitField>;
         };
     };
 
