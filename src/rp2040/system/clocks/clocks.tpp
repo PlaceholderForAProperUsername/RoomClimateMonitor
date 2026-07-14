@@ -25,6 +25,7 @@
 #ifndef RP2040_SYSTEM_CLOCKS_T_H
 #define RP2040_SYSTEM_CLOCKS_T_H
 #include "rp2040/system/clocks.h"
+#include "rp2040/system/clocks_def.h"
 
 namespace rp2040::system::clocks {
 
@@ -35,6 +36,52 @@ namespace rp2040::system::clocks {
         return instance;
     }
 
+    template <typename ClockDefType>
+    requires IsClockType<ClockDefType>
+    template <typename ClockDefType::ClockSrc src>
+    void ClockBaseType<ClockDefType>::setClkSrc() {
+
+        constexpr std::uint32_t auxSrcVal = (static_cast<std::uint32_t>(src) & ctrlAuxSrcMask_max) >> ctrlAuxSrcPosition;
+
+        if constexpr (ClockHasGlitchlessSrcType<ClockDefType>) {
+            constexpr std::uint32_t srcVal = static_cast<std::uint32_t>(src) & ctrlSrcMask_max;
+            if constexpr (srcVal == ctrlSrcAuxSrcBit) {
+                // if already an auxiliary source is selected, a temporary clock must be selected to prevent glitching when setting the auxiliary source
+                if (selected_r::selected_bits::getValue() == selected_r::SelectedBitField::value::AUX) {
+                    constexpr std::uint32_t tmpClockSrc = 0x0U;
+                    ctrl_r::template src_bits<tmpClockSrc>::set(ctrl_r::template SrcBitField<tmpClockSrc>::value::val);
+
+                    // wait for the temporary clock to settle
+                    while (selected_r::selected_bits::getValue() == 0x00U) {}
+                }
+                ctrl_r::template aux_src_bits<auxSrcVal>::set(ctrl_r::template AuxSrcBitField<auxSrcVal>::value::val);
+                ctrl_r::template src_bits<srcVal>::set(ctrl_r::template SrcBitField<srcVal>::value::val);
+
+                while (selected_r::selected_bits::getValue() != selected_r::SelectedBitField::value::AUX) {}
+
+            } else {
+                // As the source is not an auxiliary source, the source can be set directly
+                ctrl_r::template src_bits<srcVal>::set(ctrl_r::template SrcBitField<srcVal>::value::val);
+            }
+        } else {
+            ctrl_r::enable_bits::clear();
+            /**
+             * @brief The expected worst case waiting time in cycles.
+             *
+             * 2 cycles of the clock sources need to pass for the generated clock to stop. As there is no implementation
+             * to get the actual waiting time in cycles, a worst case of a system clock running at 133 MHz and the ROSC
+             * running at 6 MHz as the clock source is assumed: 133 MHz / 6MHz = 22.1667 cycles of system clock for one
+             * cycle of the source clock. As 2 cycles of the source clock are needed, the value is 45.
+             */
+            constexpr int expectedWorstCaseCycles {45};
+            // Wait for the generated clock to stop
+            for (int i = {0}; i < expectedWorstCaseCycles; ++i) {}
+            ctrl_r::template aux_src_bits<auxSrcVal>::set(ctrl_r::template AuxSrcBitField<auxSrcVal>::value::val);
+            ctrl_r::enable_bits::set(ctrl_r::enable_bits::value::enable);
+            // wait for the generated clock to start
+            for (int i = {0}; i < expectedWorstCaseCycles; ++i) {}
+        }
+    }
 
 }
 

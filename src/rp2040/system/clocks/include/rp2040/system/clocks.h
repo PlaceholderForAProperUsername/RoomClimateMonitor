@@ -47,6 +47,22 @@ namespace rp2040::system::clocks {
 
         static_assert((addr == ref_base) || (addr == sys_base) || (addr == peri_base), "Invalid clock address.");
 
+        using ctrl_r = ClockDefType::ctrl;
+        using div_r = decltype([] {
+            if constexpr (requires {typename ClockDefType::div;}) {
+                return std::type_identity<typename ClockDefType::div>();
+            } else {
+                return std::type_identity<void>();
+            }
+        }())::type;
+        using selected_r = decltype([] {
+            if constexpr (requires {typename ClockDefType::selected;}) {
+                return std::type_identity<typename ClockDefType::selected>();
+            } else {
+                return std::type_identity<void>();
+            }
+        }())::type;
+
     public:
         /**
          * @brief Getter function to get the singleton instance.
@@ -54,6 +70,9 @@ namespace rp2040::system::clocks {
          * @return The singleton instance.
          */
         static ClockBaseType<ClockDefType>& getInstance();
+
+        template <typename ClockDefType::ClockSrc src>
+        void setClkSrc();
 
     private:
         ClockBaseType() = default;
