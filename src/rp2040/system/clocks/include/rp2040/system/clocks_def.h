@@ -37,9 +37,40 @@ namespace rp2040::system::clocks {
      */
 
     /**
+     * @brief Checks if the clock type can switch the clock glitchlessly for some clock sources.
+     *
+     * There are two principal types of clocks in the RP2040. One that has additional src bits, which can be selected
+     * glitchlessly, and the other type without the possibility to switch a clock source glitchlessly. Both types have
+     * auxiliary sources, which glitch when changed for both types. The way to change the auxiliary source differs
+     * between the two types. For the type with the option to glitchlessly change the clock source, another glitchless
+     * source is selected to prevent the auxiliary source from glitching and after that the clock source is switched to
+     * use the auxiliary source as a primary source. For the other type, there is an option to stop the clock. That is
+     * done when switching the auxiliary source, the only type of source for that type and after the switch, the clock is
+     * enabled again. This concept serve as to check if the clock has glitchless src bits.
+     *
+     * @tparam ClockDefType The clock type to be checked.
+     */
+    template <typename ClockDefType>
+    concept ClockHasGlitchlessSrcType = requires {typename ClockDefType::ctrl::template src_bits<0x0U>;};
+
+    /**
+     * @brief Checks if the clock type is of the type which only has the glitching aux src register.
+     *
+     * This type is characterized by having an enable bit in the ctrl register.
+     *
+     * @tparam ClockDefType The clock type to be checked.
+     */
+    template <typename ClockDefType>
+    concept ClockOnlyGlitchingAuxSrcType = requires {typename ClockDefType::ctrl::enable_bits;};
+
+    /**
      * @brief Describes the minimum requirements for a ClockType.
      *
-     * The minimum, which the different clocks have in common, is the possibility to set a source for the clock.
+     * The minimum requirements are:
+     * - An enum to select the clock source
+     * - A struct to represent the ctrl register
+     * - The base address of the clock register
+     * - Have either src bits or an enable bit
      *
      * @tparam ClockDefType The type to be checked.
      */
@@ -47,7 +78,8 @@ namespace rp2040::system::clocks {
     concept IsClockType =
         std::is_enum_v<typename ClockDefType::ClockSrc> &&
         std::is_class_v<typename ClockDefType::ctrl> &&
-        std::is_same_v<decltype(ClockDefType::base_addr), const std::uintptr_t>;
+        std::is_same_v<decltype(ClockDefType::base_addr), const std::uintptr_t> &&
+        (ClockHasGlitchlessSrcType<ClockDefType> || ClockOnlyGlitchingAuxSrcType<ClockDefType>);
 
 
     constexpr std::uintptr_t clocks_base = 0x40008000U; /**< @brief Base address of clocks. */
@@ -65,6 +97,30 @@ namespace rp2040::system::clocks {
     constexpr std::uint32_t selected_offset = 0x08U; /**< @brief Offset for the selected register. */
 
     /**
+     * @brief Maximum number of bits reserved for the src bits in the ctrl register.
+     *
+     * The actual src bits of the clocks may use fewer bits.
+     */
+    constexpr std::uint32_t ctrlSrcMask_max = 0x1FU;
+
+    /**
+     * @brief Maximum number of bits reserved for the auxsrc bits in the ctrl register.
+     *
+     * The actual auxsrc bits of the clocks may use fewer bits.
+     */
+    constexpr std::uint32_t ctrlAuxSrcMask_max = 0x3E0U;
+
+    /**
+     * @brief The auxiliary source bit of the ctrl register.
+     *
+     * This bit is the same for every clock with src bits.
+     */
+    constexpr std::uint32_t ctrlSrcAuxSrcBit = (1U<<0U);
+
+    constexpr std::uint32_t ctrlSrcPosition = 0x00U; /**< @brief The Position of the src bits in the ctrl register. */
+    constexpr std::uint32_t ctrlAuxSrcPosition = 0x05U; /**< @brief The Position of the auxsrc bits in the ctrl register. */
+
+    /**
      * @brief Defines the reference clock with its registers.
      *
      */
@@ -75,11 +131,11 @@ namespace rp2040::system::clocks {
          * @brief The clock sources for the reference clock.
          */
         enum class ClockSrc : std::uint32_t {
-            ROSC = 0x00U, /**< @brief The ring oscillator. */
-            XOSC = 0x02U, /**< @brief The crystal oscillator */
-            PLL_USB = 0x01U, /**< @brief The usb pll. */
-            GPIN0 = 0x21U, /**< @brief External clock provided through GPIN0. */
-            GPIN1 = 0x41U, /**< @brief External clock provided through GPIN1. */
+            ROSC = (0x00U << ctrlSrcPosition), /**< @brief The ring oscillator. */
+            XOSC = (0x02U << ctrlSrcPosition), /**< @brief The crystal oscillator */
+            PLL_USB = (0x00U << ctrlAuxSrcPosition) | ctrlSrcAuxSrcBit, /**< @brief The usb pll. */
+            GPIN0 = (0x01U << ctrlAuxSrcPosition) | ctrlSrcAuxSrcBit, /**< @brief External clock provided through GPIN0. */
+            GPIN1 = (0x02U << ctrlAuxSrcPosition) | ctrlSrcAuxSrcBit, /**< @brief External clock provided through GPIN1. */
         };
 
         /**
@@ -159,7 +215,7 @@ namespace rp2040::system::clocks {
              * @tparam Value The value of the src for the reference clock.
              */
             template <std::uint32_t Value>
-            using src_bits = ctrl_reg::template Bits<SrcBitField<Value>>;
+            using src_bits = ctrl_reg::Bits<SrcBitField<Value>>;
         };
 
         /**
