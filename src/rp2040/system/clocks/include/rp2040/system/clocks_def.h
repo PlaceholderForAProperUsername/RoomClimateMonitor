@@ -179,7 +179,7 @@ namespace rp2040::system::clocks {
              * @tparam Value The value for the auxiliary source for the reference clock.
              */
             template <std::uint32_t Value>
-            using aux_src_bits = ctrl_reg::template Bits<AuxSrcBitField<Value>>;
+            using aux_src_bits = ctrl_reg::Bits<AuxSrcBitField<Value>>;
 
             /**
             * @brief The clock source bits as a BitField.
@@ -254,7 +254,7 @@ namespace rp2040::system::clocks {
              * @tparam Value The value to which the integer component is to be set.
              */
             template <std::uint8_t Value>
-            using int_bits = div_reg::template Bits<IntBitField<Value>>;
+            using int_bits = div_reg::Bits<IntBitField<Value>>;
         };
 
         /**
@@ -288,6 +288,26 @@ namespace rp2040::system::clocks {
              * @brief The selected bits of the selected register.
              */
             using selected_bits = selected_reg::Bits<SelectedBitField>;
+        };
+    };
+
+    /**
+     * @brief The system clock.
+     */
+    struct SysClock_DefType {
+        static constexpr std::uintptr_t base_addr = sys_base; /**< @brief Base address of the system clock registers. */
+
+        /**
+         * @brief The clock sources for the system clock.
+         */
+        enum class ClockSrc : std::uint32_t {
+            REF = (0x00U << ctrlSrcPosition), /**< @brief The reference clock as a source for the system clock. @see RefClock_DefType */
+            PLL_SYS = (0x00U << ctrlAuxSrcPosition) | ctrlSrcAuxSrcBit, /**< @brief The system pll. */
+            PLL_USB = (0x01U << ctrlAuxSrcPosition) | ctrlSrcAuxSrcBit, /**< @brief The usb pll. */
+            ROSC = (0x02U << ctrlAuxSrcPosition) | ctrlSrcAuxSrcBit, /**< @brief The ring oscillator. */
+            XOSC = (0x03U << ctrlAuxSrcPosition) | ctrlSrcAuxSrcBit, /**< @brief The crystal oscillator. */
+            GPIN0 = (0x04U << ctrlAuxSrcPosition) | ctrlSrcAuxSrcBit, /**< @brief External clock through GPIN0. */
+            GPIN1 = (0x05U << ctrlAuxSrcPosition) | ctrlSrcAuxSrcBit, /**< @brief External clock through GPIN1. */
         };
     };
 
