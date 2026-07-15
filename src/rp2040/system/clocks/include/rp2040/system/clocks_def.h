@@ -301,13 +301,95 @@ namespace rp2040::system::clocks {
          * @brief The clock sources for the system clock.
          */
         enum class ClockSrc : std::uint32_t {
-            REF = (0x00U << ctrlSrcPosition), /**< @brief The reference clock as a source for the system clock. @see RefClock_DefType */
+            CLK_REF = (0x00U << ctrlSrcPosition), /**< @brief The reference clock as a source for the system clock. @see RefClock_DefType */
             PLL_SYS = (0x00U << ctrlAuxSrcPosition) | ctrlSrcAuxSrcBit, /**< @brief The system pll. */
             PLL_USB = (0x01U << ctrlAuxSrcPosition) | ctrlSrcAuxSrcBit, /**< @brief The usb pll. */
             ROSC = (0x02U << ctrlAuxSrcPosition) | ctrlSrcAuxSrcBit, /**< @brief The ring oscillator. */
             XOSC = (0x03U << ctrlAuxSrcPosition) | ctrlSrcAuxSrcBit, /**< @brief The crystal oscillator. */
             GPIN0 = (0x04U << ctrlAuxSrcPosition) | ctrlSrcAuxSrcBit, /**< @brief External clock through GPIN0. */
             GPIN1 = (0x05U << ctrlAuxSrcPosition) | ctrlSrcAuxSrcBit, /**< @brief External clock through GPIN1. */
+        };
+
+        /**
+         * @brief Register to control the system clock.
+         */
+        struct ctrl {
+            static constexpr std::uintptr_t addr = base_addr + ctrl_offset; /**< @brief The address of the ctrl register of the system clock control. */
+            using ctrl_reg = utils::reg_access::Reg<addr, utils::reg_access::read_write_access, std::uint32_t>; /**< @brief The control register of the system clock. */
+
+            /**
+             * @brief The auxiliary clock source bits as a BitField.
+             *
+             * @tparam Value The value for the auxiliary source for the system clock.
+             */
+            template <std::uint32_t Value>
+            struct AuxSrcBitField {
+                using reg = ctrl_reg; /**< @brief The register to which the bitfield belongs. */
+                using T = reg::RegType; /**< @brief The type of the register. */
+
+                static constexpr T position = 0x05U; /**< @brief The position of the bits in the register. */
+                static constexpr T mask = (0x07U << position); /**< @brief The mask of the bits. */
+
+                static_assert(Value <= 0x05U, "Invalid value for the auxiliary src of the system clock.");
+
+                /**
+                 * @brief The values to which the auxiliary clock source can be set.
+                 *
+                 * Values:
+                 * - 0x00 PLL_SYS
+                 * - 0x01 PLL_USB
+                 * - 0x02 ROSC
+                 * - 0x03 XOSC
+                 * - 0x04 GPIN0
+                 * - 0x05 GPIN1
+                 */
+                enum class value : T {
+                    val = Value
+                };
+            };
+
+            /**
+             * @brief The auxiliary source bits.
+             *
+             * @tparam Value The value for the auxiliary source for the system clock.
+             */
+            template <std::uint32_t Value>
+            using aux_src_bits = ctrl_reg::Bits<AuxSrcBitField<Value>>;
+
+            /**
+            * @brief The clock source bits as a BitField.
+            *
+            * @tparam Value The value of the src for the system clock.
+            */
+            template <std::uint32_t Value>
+            struct SrcBitField {
+                using reg = ctrl_reg; /**< @brief The register to which the bitfield belongs. */
+                using T = reg::RegType; /**< @brief The type of the register. */
+
+                static constexpr T position = 0x00U; /**< @brief The position of the bits in the register. */
+                static constexpr T mask = (0x03U << position); /**< @brief The mask of the bits. */
+
+                static_assert(Value <= 0x01U, "Invalid value for the system clock.");
+
+                /**
+                 * @brief The values to which the system clock source can be set.
+                 *
+                 * Values:
+                 * - 0x00 CLK_REF
+                 * - 0x01 AUXSRC
+                 */
+                enum class value : T {
+                    val = Value,
+                };
+            };
+
+            /**
+             * @brief The src bits.
+             *
+             * @tparam Value The value of the src for the reference clock.
+             */
+            template <std::uint32_t Value>
+            using src_bits = ctrl_reg::Bits<SrcBitField<Value>>;
         };
     };
 
