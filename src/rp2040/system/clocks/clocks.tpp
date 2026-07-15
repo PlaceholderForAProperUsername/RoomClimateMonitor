@@ -47,7 +47,7 @@ namespace rp2040::system::clocks {
             constexpr std::uint32_t srcVal = static_cast<std::uint32_t>(src) & ctrlSrcMask_max;
             if constexpr (srcVal == ctrlSrcAuxSrcBit) {
                 // if already an auxiliary source is selected, a temporary clock must be selected to prevent glitching when setting the auxiliary source
-                if (selected_r::selected_bits::getValue() == selected_r::SelectedBitField::value::AUX) {
+                if (selected_r::selected_bits::getValue() == static_cast<std::uint32_t>(selected_r::SelectedBitField::value::AUX)) {
                     constexpr std::uint32_t tmpClockSrc = 0x0U;
                     ctrl_r::template src_bits<tmpClockSrc>::set(ctrl_r::template SrcBitField<tmpClockSrc>::value::val);
 
@@ -57,7 +57,7 @@ namespace rp2040::system::clocks {
                 ctrl_r::template aux_src_bits<auxSrcVal>::set(ctrl_r::template AuxSrcBitField<auxSrcVal>::value::val);
                 ctrl_r::template src_bits<srcVal>::set(ctrl_r::template SrcBitField<srcVal>::value::val);
 
-                while (selected_r::selected_bits::getValue() != selected_r::SelectedBitField::value::AUX) {}
+                while (selected_r::selected_bits::getValue() != static_cast<std::uint32_t>(selected_r::SelectedBitField::value::AUX)) {}
 
             } else {
                 // As the source is not an auxiliary source, the source can be set directly
