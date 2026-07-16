@@ -80,6 +80,7 @@ namespace rp2040::system::clocks {
     };
     
     using RefClock = ClockBaseType<RefClock_DefType>; /**< @brief The reference clock. */
+    using SysClock = ClockBaseType<SysClock_DefType>; /**< @brief The system clock. */
     /** @}*/ // rp2040_clocks
 } // rp2040::system::clocks
 
