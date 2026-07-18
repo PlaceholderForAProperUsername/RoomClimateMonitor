@@ -36,6 +36,53 @@ namespace rp2040::system::clocks {
      */
 
     /**
+     * @brief Contains basic clock configuration parameters.
+     *
+     * @tparam ClockDefType The clock to be configured.
+     */
+    template <typename ClockDefType>
+    requires IsClockType<ClockDefType>
+    struct ClockConfType {
+        ClockDefType::ClockSrc src; /**< @brief The source of the clock. */
+        std::uint32_t frequency_hz; /**< @brief The frequency of the clock source. */
+
+        constexpr ClockConfType(ClockDefType::ClockSrc src, std::uint32_t frequency_hz) : src(src), frequency_hz(frequency_hz) {}
+    };
+
+    /**
+     * @brief Contains clock configuration parameters for clocks with a div register with additional fractional bits.
+     *
+     * @tparam ClockDefType The clock to be configured.
+     */
+    template <typename ClockDefType>
+    requires IsClockType<ClockDefType> && HasDivWithFracRegister<ClockDefType>
+    struct ClockConfType<ClockDefType> {
+        ClockDefType::ClockSrc src; /**< @brief The source of the clock. */
+        std::uint32_t frequency_hz; /**< @brief The frequency of the clock source. */
+        std::uint32_t div_int; /**< @brief The integer component of the clock divisor. */
+        std::uint32_t div_frac; /**< @brief The fractional component of the clock divider. */
+
+        constexpr ClockConfType(ClockDefType::ClockSrc src, std::uint32_t frequency_hz, std::uint32_t div_int = 0x01U, std::uint32_t div_frac = 0x00U) :
+        src(src), frequency_hz(frequency_hz), div_int(div_int), div_frac(div_frac) {}
+    };
+
+    /**
+     * @brief Contains clock configuration parameters for clocks with a div register.
+     *
+     * @tparam ClockDefType The clock to be configured.
+     */
+    template <typename ClockDefType>
+    requires IsClockType<ClockDefType> && HasDivRegister<ClockDefType>
+    struct ClockConfType<ClockDefType> {
+        ClockDefType::ClockSrc src; /**< @brief The source of the clock. */
+        std::uint32_t frequency_hz; /**< @brief The frequency of the clock source. */
+        std::uint32_t div_int; /**< @brief The integer component of the clock divisor. */
+
+        constexpr ClockConfType(ClockDefType::ClockSrc src, std::uint32_t frequency_hz, std::uint32_t div_int = 0x01U) :
+        src(src), frequency_hz(frequency_hz), div_int(div_int) {}
+    };
+
+    /**
      * @brief Provides general functionality common to the clocks of the RP2040.
      *
      * @tparam ClockDefType A clock type.
@@ -75,12 +122,17 @@ namespace rp2040::system::clocks {
         void setClkSrc();
 
     private:
-        ClockBaseType() = default;
+        ClockBaseType() : m_frequency_hz(0) {};
+
+        std::uint32_t m_frequency_hz;
 
     };
     
     using RefClock = ClockBaseType<RefClock_DefType>; /**< @brief The reference clock. */
     using SysClock = ClockBaseType<SysClock_DefType>; /**< @brief The system clock. */
+
+    using RefClockConfig = ClockConfType<RefClock_DefType>;
+    using SysClockConfig = ClockConfType<SysClock_DefType>;
     /** @}*/ // rp2040_clocks
 } // rp2040::system::clocks
 
