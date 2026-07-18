@@ -247,7 +247,7 @@ namespace rp2040::system::clocks {
              *
              * @tparam Value The value to which the integer part is to be set.
              */
-            template <std::uint8_t Value>
+            template <std::uint32_t Value>
             struct IntBitField {
                 using reg = div_reg; /**< @brief The register to which the bitfield belongs. */
                 using T = reg::RegType; /**< @brief The type of the register. */
@@ -270,7 +270,7 @@ namespace rp2040::system::clocks {
              *
              * @tparam Value The value to which the integer component is to be set.
              */
-            template <std::uint8_t Value>
+            template <std::uint32_t Value>
             using int_bits = div_reg::Bits<IntBitField<Value>>;
         };
 
@@ -407,6 +407,77 @@ namespace rp2040::system::clocks {
              */
             template <std::uint32_t Value>
             using src_bits = ctrl_reg::Bits<SrcBitField<Value>>;
+        };
+
+        /**
+         * @brief The register to set the clock divider.
+         */
+        struct div {
+            static constexpr std::uintptr_t addr = base_addr + div_offset;
+            using div_reg = utils::reg_access::Reg<addr, utils::reg_access::read_write_access, std::uint32_t>; /**< @brief The div register. */
+
+            /**
+             * @brief The integer component of the clock divisor.
+             *
+             * @tparam Value The value to which the integer part is to be set.
+             */
+            template <std::uint32_t Value>
+            struct IntBitField {
+                using reg = div_reg; /**< @brief The register to which the bitfield belongs. */
+                using T = reg::RegType; /**< @brief The type of the register. */
+
+                static constexpr T position = 0x08U; /**< @brief The position of the bits in the register. */
+                static constexpr T mask = (0xFFFFFFU << position); /**< @brief The mask of the bits. */
+
+                static_assert(Value <= 0xFFFFFFU, "Invalid value for the int bits.");
+
+                /**
+                 * @brief The value to which the integer component is to be set.
+                 */
+                enum class value : T {
+                    val = Value,
+                };
+            };
+
+            /**
+             * @brief The int bits of the system clock.
+             *
+             * @tparam Value The value to which the integer component is to be set.
+             */
+            template <std::uint32_t Value>
+            using int_bits = div_reg::Bits<IntBitField<Value>>;
+
+            /**
+             * @brief The fractional component of the clock divisor.
+             *
+             * @tparam Value The value to which the fractional part is to be set.
+             */
+            template <std::uint32_t Value>
+            struct FracBitField {
+                using reg = div_reg; /**< @brief The register to which the bitfield belongs. */
+                using T = reg::RegType; /**< @brief The type of the register. */
+
+                static constexpr T position = 0x00U; /**< @brief The position of the bits in the register. */
+                static constexpr T mask = (0xFFU << position); /**< @brief The mask of the bits. */
+
+                static_assert(Value <= 0xFFU, "Invalid value for the frac bits.");
+
+                /**
+                 * @brief The value to which the fractional component is to be set.
+                 */
+                enum class value : T {
+                    val = Value,
+                };
+            };
+
+            /**
+             * @brief The int bits of the system clock.
+             *
+             * @tparam Value The value to which the integer component is to be set.
+             */
+            template <std::uint32_t Value>
+            using frac_bits = div_reg::Bits<FracBitField<Value>>;
+
         };
 
 
