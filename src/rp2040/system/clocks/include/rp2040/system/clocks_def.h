@@ -90,6 +90,14 @@ namespace rp2040::system::clocks {
     template <typename ClockDefType>
     concept HasDivWithFracRegister = requires {typename ClockDefType::div::template frac_bits<0x0U>;};
 
+    /**
+     * @brief Checks if the clock has a div register.
+     *
+     * @tparam ClockDefType The type to be checked.
+     */
+    template <typename ClockDefType>
+    concept HasDivRegister = std::is_class_v<typename ClockDefType::div>;
+
 
     constexpr std::uintptr_t clocks_base = 0x40008000U; /**< @brief Base address of clocks. */
 
