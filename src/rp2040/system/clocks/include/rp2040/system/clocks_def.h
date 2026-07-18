@@ -82,6 +82,15 @@ namespace rp2040::system::clocks {
         (ClockHasGlitchlessSrcType<ClockDefType> || ClockOnlyGlitchingAuxSrcType<ClockDefType>);
 
 
+    /**
+     * @brief Checks if the clock has a div register with a fractional component.
+     *
+     * @tparam ClockDefType The type to be checked.
+     */
+    template <typename ClockDefType>
+    concept HasDivWithFracRegister = requires {typename ClockDefType::div::template frac_bits<0x0U>;};
+
+
     constexpr std::uintptr_t clocks_base = 0x40008000U; /**< @brief Base address of clocks. */
 
     constexpr std::uint32_t ref_base_offset = 0x30U; /**< @brief Offset for reference clock control registers. */
