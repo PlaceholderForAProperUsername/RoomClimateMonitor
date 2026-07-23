@@ -413,7 +413,7 @@ namespace rp2040::system::clocks {
          * @brief The register to set the clock divider.
          */
         struct div {
-            static constexpr std::uintptr_t addr = base_addr + div_offset;
+            static constexpr std::uintptr_t addr = base_addr + div_offset; /**< @brief The address of the div register of the system clock. */
             using div_reg = utils::reg_access::Reg<addr, utils::reg_access::read_write_access, std::uint32_t>; /**< @brief The div register. */
 
             /**

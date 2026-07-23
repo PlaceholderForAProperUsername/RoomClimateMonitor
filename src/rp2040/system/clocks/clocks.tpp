@@ -38,13 +38,31 @@ namespace rp2040::system::clocks {
 
     template <typename ClockDefType>
     requires IsClockType<ClockDefType>
-    template <typename ClockDefType::ClockSrc src>
-    void ClockBaseType<ClockDefType>::setClkSrc() {
+    template <ClockConfType<ClockDefType> conf>
+    void ClockBaseType<ClockDefType>::configureClock() {
 
-        constexpr std::uint32_t auxSrcVal = (static_cast<std::uint32_t>(src) & ctrlAuxSrcMask_max) >> ctrlAuxSrcPosition;
+        // If the divisor is increased, the divisor should be set before the source to reduce momentary overspeed.
+        // This is according to the RP2040's datasheet.
+        if constexpr (HasDivRegister<ClockDefType>) {
+            constexpr std::uint32_t divVal = []() -> std::uint32_t {
+                if constexpr (HasDivWithFracRegister<ClockDefType>) {
+                    return ((conf.div_int & 0xFFFFFFU) << 8) | conf.div_frac;
+                } else {
+                    return (conf.div_int & 0xFFFFFFU) << 8;
+                }
+            }();
+            if (div_r::div_reg::read() > (divVal)) {
+                div_r::template int_bits<conf.div_int>::set(div_r::template IntBitField<conf.div_int>::value::val);
+                if constexpr (HasDivWithFracRegister<ClockDefType>) {
+                    div_r::template frac_bits<conf.div_frac>::set(div_r::template FracBitField<conf.div_frac>::value::val);
+                }
+            }
+        }
+
+        constexpr std::uint32_t auxSrcVal = (static_cast<std::uint32_t>(conf.src) & ctrlAuxSrcMask_max) >> ctrlAuxSrcPosition;
 
         if constexpr (ClockHasGlitchlessSrcType<ClockDefType>) {
-            constexpr std::uint32_t srcVal = static_cast<std::uint32_t>(src) & ctrlSrcMask_max;
+            constexpr std::uint32_t srcVal = static_cast<std::uint32_t>(conf.src) & ctrlSrcMask_max;
             if constexpr (srcVal == ctrlSrcAuxSrcBit) {
                 // if already an auxiliary source is selected, a temporary clock must be selected to prevent glitching when setting the auxiliary source
                 if (selected_r::selected_bits::getValue() == static_cast<std::uint32_t>(selected_r::SelectedBitField::value::AUX)) {
@@ -65,6 +83,7 @@ namespace rp2040::system::clocks {
             }
         } else {
             ctrl_r::enable_bits::clear();
+
             /**
              * @brief The expected worst case waiting time in cycles.
              *
@@ -81,6 +100,15 @@ namespace rp2040::system::clocks {
             // wait for the generated clock to start
             for (int i = {0}; i < expectedWorstCaseCycles; ++i) {}
         }
+
+        if constexpr (HasDivRegister<ClockDefType>) {
+            div_r::template int_bits<conf.div_int>::set(div_r::template IntBitField<conf.div_int>::value::val);
+            if constexpr (HasDivWithFracRegister<ClockDefType>) {
+                div_r::template frac_bits<conf.div_frac>::set(div_r::template FracBitField<conf.div_frac>::value::val);
+            }
+        }
+
+        this->m_frequency_hz = conf.frequency_hz;
     }
 
 }
