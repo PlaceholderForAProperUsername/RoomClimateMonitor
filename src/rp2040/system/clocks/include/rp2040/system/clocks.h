@@ -146,6 +146,17 @@ namespace rp2040::system::clocks {
          */
         static ClockBaseType<ClockDefType>& getInstance();
 
+        /**
+         * @brief Configures the clock.
+         *
+         * @tparam conf The configuration of the clock.
+         *
+         * @pre The source must be configured and running.
+         * @pre When selecting an auxiliary source for a clock with glitchless src bits in the ctrl register, the clock
+         * with the value 0x00U must be enabled and running, because this function will temporarily switch to that source.
+         *
+         * @post The clock is now configured and running.
+         */
         template <ClockConfType<ClockDefType> conf>
         void configureClock();
 
