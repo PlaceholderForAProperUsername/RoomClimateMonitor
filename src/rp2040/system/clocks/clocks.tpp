@@ -96,7 +96,7 @@ namespace rp2040::system::clocks {
             // Wait for the generated clock to stop
             for (int i = {0}; i < expectedWorstCaseCycles; ++i) {}
             ctrl_r::template aux_src_bits<auxSrcVal>::set(ctrl_r::template AuxSrcBitField<auxSrcVal>::value::val);
-            ctrl_r::enable_bits::set(ctrl_r::enable_bits::value::enable);
+            ctrl_r::enable_bits::set(ctrl_r::EnableBitField::value::enable);
             // wait for the generated clock to start
             for (int i = {0}; i < expectedWorstCaseCycles; ++i) {}
         }

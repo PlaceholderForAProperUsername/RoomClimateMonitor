@@ -176,9 +176,11 @@ namespace rp2040::system::clocks {
     
     using RefClock = ClockBaseType<RefClock_DefType>; /**< @brief The reference clock. */
     using SysClock = ClockBaseType<SysClock_DefType>; /**< @brief The system clock. */
+    using PeriClock = ClockBaseType<PeriClock_DefType>; /**< @brief The peripheral clock. */
 
     using RefClockConfig = ClockConfType<RefClock_DefType>; /**< @brief The configuration for the reference clock. */
     using SysClockConfig = ClockConfType<SysClock_DefType>; /**< @brief The configuration for the system clock. */
+    using PeriClockConfig = ClockConfType<PeriClock_DefType>; /**< @brief the configuration for the peripheral clock. */
     /** @}*/ // rp2040_clocks
 } // rp2040::system::clocks
 

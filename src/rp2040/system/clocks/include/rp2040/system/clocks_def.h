@@ -514,6 +514,93 @@ namespace rp2040::system::clocks {
         };
     };
 
+    /**
+     * @brief The peripheral clock.
+     */
+    struct PeriClock_DefType {
+        static constexpr std::uintptr_t base_addr = peri_base; /**< @brief Base address of the peripheral clock registers. */
+
+        /**
+         * @brief The clock sources for the peripheral clock.
+         */
+        enum class ClockSrc : std::uint32_t {
+            CLK_SYS = (0x00U << ctrlAuxSrcPosition) | ctrlSrcAuxSrcBit, /**< @brief The system clock. @see SysClock */
+            PLL_SYS = (0x01U << ctrlAuxSrcPosition) | ctrlSrcAuxSrcBit, /**< @brief The system pll. */
+            PLL_USB = (0x02U << ctrlAuxSrcPosition) | ctrlSrcAuxSrcBit, /**< @brief The usb pll. */
+            ROSC = (0x03U << ctrlAuxSrcPosition) | ctrlSrcAuxSrcBit, /**< @brief The ring oscillator. */
+            XOSC = (0x04U << ctrlAuxSrcPosition) | ctrlSrcAuxSrcBit, /**< @brief The crystal oscillator. */
+            GPIN0 = (0x05U << ctrlAuxSrcPosition) | ctrlSrcAuxSrcBit, /**< @brief External clock through GPIN0. */
+            GPIN1 = (0x06U << ctrlAuxSrcPosition) | ctrlSrcAuxSrcBit, /**< @brief External clock through GPIN1. */
+        };
+
+        /**
+         * @brief Register to control the peripheral clock.
+         */
+        struct ctrl {
+            static constexpr std::uintptr_t addr = base_addr + ctrl_offset; /**< @brief The address of the ctrl register of the peripheral clock control. */
+            using ctrl_reg = utils::reg_access::Reg<addr, utils::reg_access::read_write_access, std::uint32_t>; /**< @brief The control register of the peripheral clock. */
+
+
+            /**
+             * @brief The enable bit of the peripheral clock.
+             */
+            using EnableBitField = utils::reg_access::BitFieldEnableDisable<ctrl_reg, 11U>;
+            /**
+             * @brief The enable bit of the peripheral clock.
+             */
+            using enable_bits = ctrl_reg::Bits<EnableBitField>;
+
+            /**
+             * @brief The kill bit of the peripheral clock.
+             */
+            using KillBitField = utils::reg_access::BitFieldEnableDisable<ctrl_reg, 10U>;
+            /**
+             * @brief The kill bit of the peripheral clock.
+             */
+            using kill_bits = ctrl_reg::Bits<KillBitField>;
+
+            /**
+             * @brief The auxiliary clock source bits as a BitField.
+             *
+             * @tparam Value The value for the auxiliary source for the peripheral clock.
+             */
+            template <std::uint32_t Value>
+            struct AuxSrcBitField {
+                using reg = ctrl_reg; /**< @brief The register to which the bitfield belongs. */
+                using T = reg::RegType; /**< @brief The type of the register. */
+
+                static constexpr T position = 0x05U; /**< @brief The position of the bits in the register. */
+                static constexpr T mask = (0x07U << position); /**< @brief The mask of the bits. */
+
+                static_assert(Value <= 0x06U, "Invalid value for the auxiliary src of the peripheral clock.");
+
+                /**
+                 * @brief The values to which the auxiliary clock source can be set.
+                 *
+                 * Values:
+                 * - 0x00 CLK_SYS
+                 * - 0x01 PLL_SYS
+                 * - 0x02 PLL_USB
+                 * - 0x03 ROSC
+                 * - 0x04 XOSC
+                 * - 0x05 GPIN0
+                 * - 0x06 GPIN1
+                 */
+                enum class value : T {
+                    val = Value
+                };
+            };
+
+            /**
+             * @brief The auxiliary source bits.
+             *
+             * @tparam Value The value for the auxiliary source for the peripheral clock.
+             */
+            template <std::uint32_t Value>
+            using aux_src_bits = ctrl_reg::Bits<AuxSrcBitField<Value>>;
+        };
+    };
+
     /** @}*/ //rp2040_clocks
 } // rp2040::system::clocks
 
