@@ -160,6 +160,13 @@ namespace rp2040::system::clocks {
         template <ClockConfType<ClockDefType> conf>
         void configureClock();
 
+        /**
+         * @brief Returns the frequency at which the clock is running.
+         *
+         * @return std::uint32_t The frequency of the clock in hertz.
+         */
+        std::uint32_t getFrequencyHz();
+
     private:
         ClockBaseType() : m_frequency_hz(0) {};
 

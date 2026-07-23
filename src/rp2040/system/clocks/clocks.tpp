@@ -111,6 +111,11 @@ namespace rp2040::system::clocks {
         this->m_frequency_hz = conf.frequency_hz;
     }
 
+    template <typename ClockDefType>
+    requires IsClockType<ClockDefType>
+    std::uint32_t ClockBaseType<ClockDefType>::getFrequencyHz() {
+        return this->m_frequency_hz;
+    }
 }
 
 #endif // RP2040_SYSTEM_CLOCKS_T_H
