@@ -66,7 +66,7 @@ namespace rp2040::system::pll {
         if constexpr (pll_addr == pll_sys_base) {
             static_assert(achievedFreq <= limits::PLL_SysMaxFreq_Hz, "System pll frequency must be lower than or equal to 133 MHz");
         } else if constexpr (pll_addr == pll_usb_base) {
-            static_assert(achievedFreq <= limits::PLL_USB_MaxFreq_Hz, "USB pll frequency must be lower than or equal to 48 MHz");
+            static_assert(achievedFreq == limits::PLL_USB_Freq_Hz, "USB pll frequency must be 48 MHz");
         }
 
         // If the PLL is already running with the correct frequency, there is no need to configure it again.

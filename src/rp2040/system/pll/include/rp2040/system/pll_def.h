@@ -49,7 +49,7 @@ namespace rp2040::system::pll {
         constexpr std::uint8_t postdivMinVal = 1U; /**< @brief The minimum value for the post divider. */
         constexpr std::uint8_t postdivMaxVal = 7U; /**< @brief The maximum value for the post divider. */
         constexpr std::uint32_t PLL_SysMaxFreq_Hz = 133'000'000U; /**< @brief The maximum value for the RP2040's system PLL. */
-        constexpr std::uint32_t PLL_USB_MaxFreq_Hz = 48'000'000U; /**< @brief The maximum value for the RP2040's USB PLL. */
+        constexpr std::uint32_t PLL_USB_Freq_Hz = 48'000'000U; /**< @brief The value for the RP2040's USB PLL. */
     }
 
     /**
