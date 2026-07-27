@@ -25,4 +25,48 @@
 #ifndef RP2040_SYSTEM_GPIO_DEF_H
 #define RP2040_SYSTEM_GPIO_DEF_H
 
+#include <cstdint>
+
+namespace rp2040::system::gpio {
+    /**
+     * @addtogroup rp2040_gpio
+     */
+
+    /**
+     * @brief Available functions for GPIOs without clock functionality.
+     *
+     * These functions are available for GPIO0 - GPIO19 and GPIO26 - GPIO29.
+     */
+    enum class GPIO_Functions : std::uint32_t {
+        SPI = 1U,
+        UART = 2U,
+        I2C = 3U,
+        PWM = 4U,
+        SIO = 5U,
+        PIO0 = 6U,
+        PIO1 = 7U,
+        USB = 9U,
+    };
+
+    /**
+     * @brief Available functions for GPIOs with clock functionality.
+     *
+     * These functions are available for GPIO20 - GPIO25
+     */
+    enum class GPIO_FunctionsWithClock : std::uint32_t {
+        SPI = 1U,
+        UART = 2U,
+        I2C = 3U,
+        PWM = 4U,
+        SIO = 5U,
+        PIO0 = 6U,
+        PIO1 = 7U,
+        CLOCK = 8U,
+        USB = 9U,
+    };
+
+    /** @} */ // rp2040_gpio
+
+} // rp2040::system::gpio
+
 #endif //RP2040_SYSTEM_GPIO_DEF_H
