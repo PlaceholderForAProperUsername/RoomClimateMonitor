@@ -32,6 +32,46 @@ namespace rp2040::system::gpio {
      * @addtogroup rp2040_gpio
      */
 
+    constexpr std::uintptr_t IO_BANK0_BASE = 0x40014000U; /**< @brief Base address of the user bank IO registers. */
+
+    /**
+     * @brief The GPIOs of the RP2040.
+     */
+    enum class GPIO : std::uint8_t {
+        GPIO0 = 0U,
+        GPIO1 = 1U,
+        GPIO2 = 2U,
+        GPIO3 = 3U,
+        GPIO4 = 4U,
+        GPIO5 = 5U,
+        GPIO6 = 6U,
+        GPIO7 = 7U,
+        GPIO8 = 8U,
+        GPIO9 = 9U,
+        GPIO10 = 10U,
+        GPIO11 = 11U,
+        GPIO12 = 12U,
+        GPIO13 = 13U,
+        GPIO14 = 14U,
+        GPIO15 = 15U,
+        GPIO16 = 16U,
+        GPIO17 = 17U,
+        GPIO18 = 18U,
+        GPIO19 = 19U,
+        GPIO20 = 20U,
+        GPIO21 = 21U,
+        GPIO22 = 22U,
+        GPIO23 = 23U,
+        GPIO24 = 24U,
+        GPIO25 = 25U,
+        GPIO26 = 26U,
+        GPIO27 = 27U,
+        GPIO28 = 28U,
+        GPIO29 = 29U,
+        NumberOfGPIOs
+    };
+
+
     /**
      * @brief Available functions for GPIOs without clock functionality.
      *
@@ -63,6 +103,19 @@ namespace rp2040::system::gpio {
         PIO1 = 7U,
         CLOCK = 8U,
         USB = 9U,
+    };
+
+    /**
+     * @brief General register map to configure and read the status of a GPIO of the user bank IO.
+     *
+     * @tparam gpio The GPIO to which the regmap belongs.
+     */
+    template <GPIO gpio>
+    struct IO_BANK0_GPIOX_RegMap {
+        static_assert(gpio < GPIO::NumberOfGPIOs, "Invalid GPIO. There are only 29 user GPIOs.");
+
+        static constexpr std::uint8_t BytesPerGPIORegisters {8U};
+        static constexpr std::uint8_t offset = static_cast<std::uint8_t>(gpio) * BytesPerGPIORegisters;
     };
 
     /** @} */ // rp2040_gpio
