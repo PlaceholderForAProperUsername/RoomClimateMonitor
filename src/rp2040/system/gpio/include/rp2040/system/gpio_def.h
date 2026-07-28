@@ -25,7 +25,9 @@
 #ifndef RP2040_SYSTEM_GPIO_DEF_H
 #define RP2040_SYSTEM_GPIO_DEF_H
 
+#include <complex.h>
 #include <cstdint>
+#include "utils/reg_access.h"
 
 namespace rp2040::system::gpio {
     /**
@@ -114,8 +116,91 @@ namespace rp2040::system::gpio {
     struct IO_BANK0_GPIOX_RegMap {
         static_assert(gpio < GPIO::NumberOfGPIOs, "Invalid GPIO. There are only 29 user GPIOs.");
 
-        static constexpr std::uint8_t BytesPerGPIORegisters {8U};
-        static constexpr std::uint8_t offset = static_cast<std::uint8_t>(gpio) * BytesPerGPIORegisters;
+        static constexpr std::uint8_t BytesPerGPIORegisters {8U}; /**< @brief The number of bytes required for the ctrl and status registers of a GPIO. */
+        static constexpr std::uint8_t offset = static_cast<std::uint8_t>(gpio) * BytesPerGPIORegisters; /** @brief The offset of the registers of the gpio. */
+        static constexpr std::uintptr_t base_addr = IO_BANK0_BASE + offset; /** @brief The base address of the registers of the gpio. */
+        static constexpr std::uint8_t statusOffset = 0x00U; /** @brief The offset of the status register to the gpio base address. */
+        static constexpr std::uint8_t ctrlOffset = 0x04U; /** @brief The offset of the ctrl register to the gpio base address. */
+
+        /**
+         * @brief The status register of the gpio.
+         */
+        struct status {
+            static constexpr std::uintptr_t addr = base_addr + statusOffset; /** @brief The address of the gpio's status register. */
+            using status_r = utils::reg_access::Reg<addr, utils::reg_access::read_access, std::uint32_t>; /** @brief The status register. */
+
+            /**
+             * @brief Bitfield for the status bit "interrupt to processors, after override is applied".
+             */
+            using IRQToProcBitfield = utils::reg_access::BitFieldEnableDisable<status_r, 26U>;
+            /**
+             * @brief The status bit "interrupt to processors, after override is applied".
+             */
+            using irqToProc_bits = status_r::template Bits<IRQToProcBitfield, utils::reg_access::read_access>;
+
+            /**
+             * @brief Bitfield for the status bit "interrupt from pad before override is applied".
+             */
+            using IRQFromPadBitField = utils::reg_access::BitFieldEnableDisable<status_r, 24U>;
+            /**
+             * @brief The status bit "interrupt from pad before override is applied".
+             */
+            using irqFromPad_bits = status_r::template Bits<IRQFromPadBitField, utils::reg_access::read_access>;
+
+            /**
+             * @brief Bitfield for the status bit "input signal to peripheral, after override is applied".
+             */
+            using IntToPeriBitField = utils::reg_access::BitFieldEnableDisable<status_r, 19U>;
+            /**
+             * @brief The status bit "input signal to peripheral, after override is applied".
+             */
+            using intToPeri_bits = status_r::template Bits<IntToPeriBitField, utils::reg_access::read_access>;
+
+            /**
+             * @brief Bitfield for the status bit "input signal from pad, before override is applied".
+             */
+            using IntFromPadBitField = utils::reg_access::BitFieldEnableDisable<status_r, 17U>;
+            /**
+             * @brief The status bit "input signal from pad, before override is applied".
+             */
+            using intFromPad_bits = status_r::template Bits<IntFromPadBitField, utils::reg_access::read_access>;
+
+            /**
+             * @brief Bitfield for the status bit "output enable to pad after register override is applied".
+             */
+            using OEToPadBitField = utils::reg_access::BitFieldEnableDisable<status_r, 13U>;
+            /**
+             * @brief The status bit "output enable to pad after register override is applied".
+             */
+            using oeToPad_bits = status_r::template Bits<OEToPadBitField, utils::reg_access::read_access>;
+
+            /**
+             * @brief Bitfield for the status bit "output enable from selected peripheral, before register override is applied".
+             */
+            using OEFromPeriBitField = utils::reg_access::BitFieldEnableDisable<status_r, 12U>;
+            /**
+             * @brief The status bit "output enable from selected peripheral, before register override is applied".
+             */
+            using oeFromPeri_bits = status_r::template Bits<OEFromPeriBitField, utils::reg_access::read_access>;
+
+            /**
+             * @brief Bitfield for the status bit "output signal to pad after register override is applied".
+             */
+            using OutToPadBitField = utils::reg_access::BitFieldEnableDisable<status_r, 9U>;
+            /**
+             * @brief The status bit "output signal to pad after register override is applied".
+             */
+            using outToPad_bits = status_r::template Bits<OutToPadBitField, utils::reg_access::read_access>;
+
+            /**
+             * @brief Bitfield for the status bit "output signal from selected peripheral, before register override is applied".
+             */
+            using OutFromPeriField = utils::reg_access::BitFieldEnableDisable<status_r, 8U>;
+            /**
+             * @brief The status bit "output signal from selected peripheral, before register override is applied".
+             */
+            using outFromPeri_bits = status_r::template Bits<OutFromPeriField, utils::reg_access::read_access>;
+        };
     };
 
     /** @} */ // rp2040_gpio
