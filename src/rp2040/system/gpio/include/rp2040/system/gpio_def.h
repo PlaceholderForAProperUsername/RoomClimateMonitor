@@ -108,6 +108,26 @@ namespace rp2040::system::gpio {
     };
 
     /**
+ * @brief The base of the interrupt register.
+ */
+    enum class InterruptBase : std::uint32_t {
+        RAW_INTERRUPT = 0x0F0U,
+        PROC0 = 0x100U,
+        PROC1 = 0x130U,
+        DORMANT_WAKE = 0x160U,
+    };
+
+    /**
+     * @brief The different interrupt register types.
+     */
+    enum class InterruptType : std::uint32_t {
+        RAW = 0x00U,
+        ENABLE = 0x00U,
+        FORCE = 0x10U,
+        STATUS = 0x20U,
+    };
+
+    /**
      * @brief General register map to configure and read the status of a GPIO of the user bank IO.
      *
      * @tparam gpio The GPIO to which the regmap belongs.
@@ -344,27 +364,6 @@ namespace rp2040::system::gpio {
         };
     };
 
-
-    /**
-     * @brief The base of the interrupt register.
-     */
-    enum class InterruptBase : std::uint32_t {
-        RAW_INTERRUPT = 0x0F0U,
-        PROC0 = 0x100U,
-        PROC1 = 0x130U,
-        DORMANT_WAKE = 0x160U,
-    };
-
-    /**
-     * @brief The different interrupt register types.
-     */
-    enum class InterruptType : std::uint32_t {
-        RAW = 0x00U,
-        ENABLE = 0x00U,
-        FORCE = 0x10U,
-        STATUS = 0x20U,
-    };
-
     /**
      * @brief The bits to check the interrupts for an GPIO.
      *
@@ -490,6 +489,86 @@ namespace rp2040::system::gpio {
             }());
         };
     };
+
+    /**
+     * @brief The raw interrupt registers.
+     *
+     * @tparam gpio The gpio for which the status of the interrupts is to be read/cleared.
+     */
+    template <GPIO gpio>
+    using rawInterruptRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::RAW_INTERRUPT, InterruptType::RAW>;
+
+    /**
+     * @brief The enable interrupt registers for processor 0.
+     *
+     * @tparam gpio The gpio for which the interrupt is to be enabled.
+     */
+    template <GPIO gpio>
+    using proc0InterruptEnableRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::PROC0, InterruptType::ENABLE>;
+
+    /**
+     * @brief The force interrupt registers for processor 0.
+     *
+     * @tparam gpio The gpio for which the interrupt is to be forced.
+     */
+    template <GPIO gpio>
+    using proc0InterruptForceRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::PROC0, InterruptType::FORCE>;
+
+    /**
+     * @brief The status interrupt registers for processor 0.
+     *
+     * @tparam gpio The gpio for which the interrupt status is to be read.
+     */
+    template <GPIO gpio>
+    using proc0InterruptStatusRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::PROC0, InterruptType::STATUS>;
+
+    /**
+     * @brief The enable interrupt registers for processor 1.
+     *
+     * @tparam gpio The gpio for which the interrupt is to be enabled.
+     */
+    template <GPIO gpio>
+    using proc1InterruptEnableRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::PROC1, InterruptType::ENABLE>;
+
+    /**
+     * @brief The force interrupt registers for processor 1.
+     *
+     * @tparam gpio The gpio for which the interrupt is to be forced.
+     */
+    template <GPIO gpio>
+    using proc1InterruptForceRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::PROC1, InterruptType::FORCE>;
+
+    /**
+     * @brief The status interrupt registers for processor 1.
+     *
+     * @tparam gpio The gpio for which the interrupt status is to be read.
+     */
+    template <GPIO gpio>
+    using proc1InterruptStatusRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::PROC1, InterruptType::STATUS>;
+
+    /**
+     * @brief The enable interrupt registers for dormant wake.
+     *
+     * @tparam gpio The gpio for which the interrupt is to be enabled.
+     */
+    template <GPIO gpio>
+    using dormWakeInterruptEnableRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::DORMANT_WAKE, InterruptType::ENABLE>;
+
+    /**
+     * @brief The force interrupt registers for dormant wake.
+     *
+     * @tparam gpio The gpio for which the interrupt is to be forced.
+     */
+    template <GPIO gpio>
+    using dormWakeInterruptForceRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::DORMANT_WAKE, InterruptType::FORCE>;
+
+    /**
+     * @brief The status interrupt registers for dormant wake.
+     *
+     * @tparam gpio The gpio for which the interrupt status is to be read.
+     */
+    template <GPIO gpio>
+    using dormWakeInterruptStatusRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::DORMANT_WAKE, InterruptType::STATUS>;
 
     /** @} */ // rp2040_gpio
 } // rp2040::system::gpio
