@@ -49,6 +49,8 @@ namespace utils::reg_access {
     struct read_write_access : read_access, write_access {};
     /** @brief Tag to control read and write access. Used for registers where access varies between bits. */
     struct reg_mixed_access : read_access, write_access {};
+    /** @brief Tag to control read and write access. Used to indicate a bit can be cleared with a write. */
+    struct bit_write_clear : read_access, write_access {};
     /** @}*/ // end group access_tags
 
 
