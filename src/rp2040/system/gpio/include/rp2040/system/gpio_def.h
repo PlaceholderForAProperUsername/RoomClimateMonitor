@@ -344,8 +344,154 @@ namespace rp2040::system::gpio {
         };
     };
 
-    /** @} */ // rp2040_gpio
 
+    /**
+     * @brief The base of the interrupt register.
+     */
+    enum class InterruptBase : std::uint32_t {
+        RAW_INTERRUPT = 0x0F0U,
+        PROC0 = 0x100U,
+        PROC1 = 0x130U,
+        DORMANT_WAKE = 0x160U,
+    };
+
+    /**
+     * @brief The different interrupt register types.
+     */
+    enum class InterruptType : std::uint32_t {
+        RAW = 0x00U,
+        ENABLE = 0x00U,
+        FORCE = 0x10U,
+        STATUS = 0x20U,
+    };
+
+    /**
+     * @brief The bits to check the interrupts for an GPIO.
+     *
+     * @tparam gpio The GPIO to which the interrupt bits belong.
+     * @tparam base The base of the interrupt register.
+     * @tparam type The type of the interrupt register.
+     */
+    template <GPIO gpio, InterruptBase base, InterruptType type>
+    struct InterruptGPIOX_RegMap {
+        static_assert(gpio < GPIO::NumberOfGPIOs, "Invalid GPIO.");
+
+        static_assert((base == InterruptBase::RAW_INTERRUPT && type == InterruptType::RAW) ||
+                ((base == InterruptBase::PROC0 || base == InterruptBase::PROC1 || base == InterruptBase::DORMANT_WAKE) &&
+                (type == InterruptType::ENABLE || type == InterruptType::FORCE || type == InterruptType::STATUS)), "Invalid combination of interrupt base and type");
+
+        static constexpr std::uint32_t baseOffset =  static_cast<std::uint32_t>(base) + static_cast<std::uint32_t>(type); /**< @brief The offset of the target register block to the USER_BANK_BASE address. */
+        static constexpr std::uint32_t gpioPerRegister = 8U; /**< @brief The maximum number of gpio per interrupt register. */
+        static constexpr std::uint32_t bytesPerRegister = 4U; /**< @brief A register is 4 byte wide. */
+        static constexpr std::uint32_t gpioRegOffset = (static_cast<std::uint32_t>(gpio) / gpioPerRegister) * bytesPerRegister; /**< @brief The offset of the register to which the gpio belongs from the first interrupt register of the register block. */
+        static constexpr std::uint32_t bitsPerGpio = 4U; /**< @brief There are four bits per gpio. */
+        static constexpr std::uint32_t gpioBitOffset = (static_cast<std::uint32_t>(gpio) % gpioPerRegister) * bitsPerGpio; /**< @brief The bit offset to the interrupt bits of the gpio. */
+
+        struct interrupt {
+            static constexpr std::uintptr_t addr = baseOffset + gpioRegOffset; /**< @brief The address of the specific interrupt register of the gpio. */
+            /**
+             * @brief The interrupt register of the GPIO.
+             *
+             * The read-write access depends on the interrupt type. Raw interrupt registers have mixed R0-WC bits, Status registers
+             * are read-only and enable and force interrupt registers have read-write access.
+             */
+            using interrupt_reg = decltype([]() {
+                if constexpr (type == InterruptType::RAW) {
+                    return std::type_identity_t<utils::reg_access::Reg<addr, utils::reg_access::reg_mixed_access, std::uint32_t>>();
+                } else if constexpr (type == InterruptType::STATUS) {
+                    return std::type_identity_t<utils::reg_access::Reg<addr, utils::reg_access::read_access, std::uint32_t>>();
+                } else {
+                    return std::type_identity_t<utils::reg_access::Reg<addr, utils::reg_access::read_write_access, std::uint32_t>>();
+                }
+            }());
+
+
+
+            /**
+             * @brief The edge high bit field of the gpio's interrupt register.
+             */
+            using edgeHighBitField = utils::reg_access::BitFieldEnableDisable<interrupt_reg, gpioBitOffset + 3U>;
+            /**
+             * @brief The edge high bit of the gpio's interrupt register.
+             *
+             * The read-write access depends on the interrupt type. Raw interrupt edge high bits are write-clear, status
+             * interrupts edge high bits are read-only and enable and force interrupt edge high bits have read-write access.
+             */
+            using edgeHigh_bits = decltype([]() {
+                if constexpr (type == InterruptType::RAW) {
+                    return std::type_identity_t<typename interrupt_reg::template Bits<edgeHighBitField, utils::reg_access::bit_write_clear>>();
+                } else if constexpr (type == InterruptType::STATUS) {
+                    return std::type_identity_t<typename interrupt_reg::template Bits<edgeHighBitField, utils::reg_access::read_access>>();
+                } else {
+                    return std::type_identity_t<typename interrupt_reg::template Bits<edgeHighBitField, utils::reg_access::read_write_access>>();
+                }
+            }());
+
+
+
+            /**
+             * @brief The edge low bit field of the gpio's interrupt register.
+             */
+            using edgeLowBitField = utils::reg_access::BitFieldEnableDisable<interrupt_reg, gpioBitOffset + 2U>;
+            /**
+             * @brief The edge low bit of the gpio's interrupt register.
+             *
+             * The read-write access depends on the interrupt type. Raw interrupt edge low bits are write-clear, status
+             * interrupts edge low bits are read-only and enable and force interrupt edge low bits have read-write access.
+             */
+            using edgeLow_bits = decltype([]() {
+                if constexpr (type == InterruptType::RAW) {
+                    return std::type_identity_t<typename interrupt_reg::template Bits<edgeLowBitField, utils::reg_access::bit_write_clear>>();
+                } else if constexpr (type == InterruptType::STATUS) {
+                    return std::type_identity_t<typename interrupt_reg::template Bits<edgeLowBitField, utils::reg_access::read_access>>();
+                } else {
+                    return std::type_identity_t<typename interrupt_reg::template Bits<edgeLowBitField, utils::reg_access::read_write_access>>();
+                }
+            }());
+
+            /**
+             * @brief The high level interrupt bit field of the gpio.
+             */
+            using levelHighBitField = utils::reg_access::BitFieldEnableDisable<interrupt_reg, gpioBitOffset + 1U>;
+            /**
+             * @brief The high level interrupt bit of the gpio.
+             *
+             * The read-write access depends on the interrupt type. Raw interrupt level high bits are write-clear, status
+             * interrupts level high bits are read-only and enable and force interrupt level high bits have read-write access.
+             */
+            using levelHigh_bits = decltype([]() {
+                if constexpr (type == InterruptType::RAW) {
+                    return std::type_identity_t<typename interrupt_reg::template Bits<levelHighBitField, utils::reg_access::read_access>>();
+                } else if constexpr (type == InterruptType::STATUS) {
+                    return std::type_identity_t<typename interrupt_reg::template Bits<levelHighBitField, utils::reg_access::read_access>>();
+                } else {
+                    return std::type_identity_t<typename interrupt_reg::template Bits<levelHighBitField, utils::reg_access::read_write_access>>();
+                }
+            }());
+
+            /**
+             * @brief The low level interrupt bit field of the gpio.
+             */
+            using levelLowBitField = utils::reg_access::BitFieldEnableDisable<interrupt_reg, gpioBitOffset>;
+            /**
+             * @brief The low level interrupt bit of the gpio.
+             *
+             * The read-write access depends on the interrupt type. Raw interrupt level low bits are write-clear, status
+             * interrupts level low bits are read-only and enable and force interrupt level low bits have read-write access.
+             */
+            using levelLow_bits = decltype([]() {
+                if constexpr (type == InterruptType::RAW) {
+                    return std::type_identity_t<typename interrupt_reg::template Bits<levelLowBitField, utils::reg_access::read_access>>();
+                } else if constexpr (type == InterruptType::STATUS) {
+                    return std::type_identity_t<typename interrupt_reg::template Bits<levelLowBitField, utils::reg_access::read_access>>();
+                } else {
+                    return std::type_identity_t<typename interrupt_reg::template Bits<levelLowBitField, utils::reg_access::read_write_access>>();
+                }
+            }());
+        };
+    };
+
+    /** @} */ // rp2040_gpio
 } // rp2040::system::gpio
 
 #endif //RP2040_SYSTEM_GPIO_DEF_H
