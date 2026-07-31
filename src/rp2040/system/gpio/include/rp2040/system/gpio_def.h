@@ -35,6 +35,7 @@ namespace rp2040::system::gpio {
      */
 
     constexpr std::uintptr_t IO_BANK0_BASE = 0x40014000U; /**< @brief Base address of the user bank IO registers. */
+    constexpr std::uintptr_t PADS_BANK0_BASE = 0x4001C000U; /**< @brief Base address of the user bank pad control register. */
 
     /**
      * @brief The GPIOs of the RP2040.
@@ -71,6 +72,45 @@ namespace rp2040::system::gpio {
         GPIO28 = 28U,
         GPIO29 = 29U,
         NumberOfGPIOs
+    };
+
+    /**
+     * @brief The elements that can be configured via user bank pad control registers.
+     */
+    enum class Pads : std::uint8_t {
+        GPIO0 = 0U,
+        GPIO1 = 1U,
+        GPIO2 = 2U,
+        GPIO3 = 3U,
+        GPIO4 = 4U,
+        GPIO5 = 5U,
+        GPIO6 = 6U,
+        GPIO7 = 7U,
+        GPIO8 = 8U,
+        GPIO9 = 9U,
+        GPIO10 = 10U,
+        GPIO11 = 11U,
+        GPIO12 = 12U,
+        GPIO13 = 13U,
+        GPIO14 = 14U,
+        GPIO15 = 15U,
+        GPIO16 = 16U,
+        GPIO17 = 17U,
+        GPIO18 = 18U,
+        GPIO19 = 19U,
+        GPIO20 = 20U,
+        GPIO21 = 21U,
+        GPIO22 = 22U,
+        GPIO23 = 23U,
+        GPIO24 = 24U,
+        GPIO25 = 25U,
+        GPIO26 = 26U,
+        GPIO27 = 27U,
+        GPIO28 = 28U,
+        GPIO29 = 29U,
+        SWCLK = 30U,
+        SWD = 31U,
+        NumberOfPads
     };
 
 
