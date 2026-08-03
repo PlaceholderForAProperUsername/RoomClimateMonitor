@@ -32,10 +32,12 @@
 namespace rp2040::system::gpio {
     /**
      * @addtogroup rp2040_gpio
+     * @{
      */
 
     constexpr std::uintptr_t IO_BANK0_BASE = 0x40014000U; /**< @brief Base address of the user bank IO registers. */
-    constexpr std::uintptr_t PADS_BANK0_BASE = 0x4001C000U; /**< @brief Base address of the user bank pad control register. */
+    constexpr std::uintptr_t PADS_BANK0_BASE = 0x4001C000U; /**< @brief Base address of the user bank pad control registers. */
+    constexpr std::uintptr_t SIO_BASE = 0xD0000000U; /**< @brief Base address of the software input/output registers. */
 
     /**
      * @brief The GPIOs of the RP2040.
@@ -633,10 +635,16 @@ namespace rp2040::system::gpio {
         static constexpr std::uint8_t voltageSelectOffset = 0x00U; /**< @brief The offset of the voltage select register. */
         static constexpr std::uint8_t padRegisterStartOffset = 0x04U; /**< @brief The offset of the first pad control register. */
 
+        /**
+         * @brief The voltage select register.
+         */
         struct voltage_select {
-            static constexpr std::uintptr_t addr = PadsBaseAddr + voltageSelectOffset;
+            static constexpr std::uintptr_t addr = PadsBaseAddr + voltageSelectOffset; /**< @brief Base address of the voltage select register. */
             using voltage_select_reg = utils::reg_access::Reg<addr, utils::reg_access::read_write_access, std::uint32_t>;
 
+            /**
+             * @brief The voltage select bits as a bit field.
+             */
             struct VoltageSelectBitField {
                 using reg = voltage_select_reg; /**< @brief The register to which the bitfield belongs. */
                 using T = reg::RegType; /**< @brief The type of the register. */
@@ -652,6 +660,11 @@ namespace rp2040::system::gpio {
                     VOLTAGE_1_8 = 0x1U, /**< @brief Set the voltage to 1.8V. */
                 };
             };
+
+            /**
+             * @brief The voltage select bits.
+             */
+            using voltageSelect_bits = voltage_select_reg::template Bits<VoltageSelectBitField>;
         };
 
         /**
@@ -777,6 +790,59 @@ namespace rp2040::system::gpio {
              * @brief The slew rate control bit.
              */
             using slewFast_bits = ctrl_reg::template Bits<SlewFastBitField>;
+        };
+    };
+
+    /**
+     * @brief Register map to handle software input/output.
+     *
+     * @tparam SIOBaseAddr The base address of the software input/output registers.
+     */
+    template <std::uintptr_t SIOBaseAddr>
+    struct SIORegMap {
+        static_assert(SIOBaseAddr == SIO_BASE, "Invalid address for SIOBaseAddr.");
+
+        static constexpr std::uint32_t cpuidOffset = 0x000U; /**< @brief Offset of the cpuid register to the sio base address. */
+        static constexpr std::uint32_t gpioInOffset = 0x004U; /**< @brief Offset of the gpio_in register to the sio base address. */
+        static constexpr std::uint32_t gpioOutOffset = 0x010U; /**< @brief Offset of the gpio_out register to the sio base address. */
+        static constexpr std::uint32_t gpioOutSetOffset = 0x014U; /**< @brief Offset of the gpio_out_set register to the sio base address. */
+        static constexpr std::uint32_t gpioOutClearOffset = 0x018U; /**< @brief Offset of the gpio_out_clear register to the sio base address. */
+        static constexpr std::uint32_t gpioOutXorOffset = 0x01CU; /**< @brief Offset of the gpio_out_xor register to the sio base address. */
+        static constexpr std::uint32_t gpioOutEnOffset = 0x020U; /**< @brief Offset of the gpio_oe register to the sio base address. */
+        static constexpr std::uint32_t gpioOutEnSetOffset = 0x024U; /**< @brief Offset of the gpio_oe_set register to the sio base address. */
+        static constexpr std::uint32_t gpioOutEnClearOffset = 0x028U; /**< @brief Offset of the gpio_oe_clr register to the sio base address. */
+        static constexpr std::uint32_t gpioOutEnXorOffset = 0x02CU; /**< @brief Offset of the gpio_oe_xor register to the sio base address. */
+
+        /**
+         * @brief The processor core identifier register.
+         */
+        struct cpuid {
+            static constexpr std::uintptr_t addr = SIOBaseAddr + cpuidOffset; /**< @brief The base address of the cpuid register. */
+            using cpuid_reg = utils::reg_access::Reg<addr, utils::reg_access::read_access, std::uint32_t>; /**< @brief The the cpuid register. */
+
+            /**
+             * @brief The processor core identifier bits as a bit field.
+             */
+            struct CPUIDBitField {
+                using reg = cpuid_reg; /**< @brief The register to which the bitfield belongs. */
+                using T = reg::RegType; /**< @brief The type of the register. */
+
+                static constexpr T position = 0x00U; /**< @brief The position of the bits in the register. */
+                static constexpr T mask = (0xFFFFFFFFU << position); /**< @brief The mask of the bits. */
+
+                /**
+                 * @brief The value depends on from which processor core this register is read.
+                 */
+                enum class value : T {
+                    PROC0 = 0x0U, /**< @brief Value when read from processor core 0. */
+                    PROC1 = 0x1U, /**< @brief Value when read from processor core 1. */
+                };
+            };
+
+            /**
+             * @brief The processor core identifier bits.
+             */
+            using cpuid_bits = cpuid_reg::template Bits<CPUIDBitField>;
         };
     };
 
