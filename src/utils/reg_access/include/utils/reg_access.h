@@ -45,12 +45,14 @@ namespace utils::reg_access {
     struct read_access {};
     /** @brief Tag to control write access. */
     struct write_access {};
+    /** @brief Tag to control atomic write access. */
+    struct atomic_write_access : write_access {};
     /** @brief Tag to control read and write access. */
     struct read_write_access : read_access, write_access {};
     /** @brief Tag to control read and write access. Used for registers where access varies between bits. */
     struct reg_mixed_access : read_access, write_access {};
     /** @brief Tag to control read and write access. Used to indicate a bit can be cleared with a write. */
-    struct bit_write_clear : read_access, write_access {};
+    struct bit_write_clear : read_write_access {};
     /** @}*/ // end group access_tags
 
 
@@ -118,6 +120,23 @@ namespace utils::reg_access {
                 auto reg_value = read();
                 reg_value &= ~BitField::mask;
                 reg_value |= ((static_cast<T>(bits_value) << BitField::position) & BitField::mask);
+                write(reg_value);
+            }
+
+            /**
+             * @brief Sets the bits to the value.
+             *
+             * This overwrite handles atomic writes.
+             *
+             * @tparam BitsAccess_ Access specifier for the bits.
+             * @param[in] bits_value The value to be set.
+             * @return
+             */
+            template <typename BitsAccess_ = BitsAccess>
+            static std::enable_if_t<std::is_base_of_v<atomic_write_access, BitsAccess_>, void>
+            set(BitField::value bits_value)
+            {
+                T reg_value = ((static_cast<T>(bits_value) << BitField::position) & BitField::mask);
                 write(reg_value);
             }
 
