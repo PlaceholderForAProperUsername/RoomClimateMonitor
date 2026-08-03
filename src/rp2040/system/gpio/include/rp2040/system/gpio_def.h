@@ -168,459 +168,505 @@ namespace rp2040::system::gpio {
     };
 
     /**
-     * @brief General register map to configure and read the status of a GPIO of the user bank IO.
+     * @brief Register map for user bank IO registers.
      *
-     * @tparam gpio The GPIO to which the regmap belongs.
+     * @tparam ioBankBaseAddr The base address of the user bank IO registers.
      */
-    template <GPIO gpio>
-    struct IO_BANK0_GPIOX_RegMap {
-        static_assert(gpio < GPIO::NumberOfGPIOs, "Invalid GPIO. There are only 29 user GPIOs.");
-
-        static constexpr std::uint8_t BytesPerGPIORegisters {8U}; /**< @brief The number of bytes required for the ctrl and status registers of a GPIO. */
-        static constexpr std::uint8_t offset = static_cast<std::uint8_t>(gpio) * BytesPerGPIORegisters; /** @brief The offset of the registers of the gpio. */
-        static constexpr std::uintptr_t base_addr = IO_BANK0_BASE + offset; /** @brief The base address of the registers of the gpio. */
-        static constexpr std::uint8_t statusOffset = 0x00U; /** @brief The offset of the status register to the gpio base address. */
-        static constexpr std::uint8_t ctrlOffset = 0x04U; /** @brief The offset of the ctrl register to the gpio base address. */
+    template <std::uintptr_t ioBankBaseAddr>
+    struct IO_BankRegMap {
+        static_assert(ioBankBaseAddr == IO_BANK0_BASE, "Invalid base address for IO_BankRegMap.");
 
         /**
-         * @brief The status register of the gpio.
+         * @brief General register map to configure and read the status of a GPIO of the user bank IO.
+         *
+         * @tparam gpio The GPIO to which the regmap belongs.
          */
-        struct status {
-            static constexpr std::uintptr_t addr = base_addr + statusOffset; /** @brief The address of the gpio's status register. */
-            using status_reg = utils::reg_access::Reg<addr, utils::reg_access::read_access, std::uint32_t>; /** @brief The status register. */
+        template <GPIO gpio>
+        struct GPIOX_RegMap {
+            static_assert(gpio < GPIO::NumberOfGPIOs, "Invalid GPIO. There are only 29 user GPIOs.");
+
+            static constexpr std::uint8_t BytesPerGPIORegisters {8U}; /**< @brief The number of bytes required for the ctrl and status registers of a GPIO. */
+            static constexpr std::uint8_t offset = static_cast<std::uint8_t>(gpio) * BytesPerGPIORegisters; /** @brief The offset of the registers of the gpio. */
+            static constexpr std::uintptr_t base_addr = ioBankBaseAddr + offset; /** @brief The base address of the registers of the gpio. */
+            static constexpr std::uint8_t statusOffset = 0x00U; /** @brief The offset of the status register to the gpio base address. */
+            static constexpr std::uint8_t ctrlOffset = 0x04U; /** @brief The offset of the ctrl register to the gpio base address. */
 
             /**
-             * @brief Bitfield for the status bit "interrupt to processors, after override is applied".
+             * @brief The status register of the gpio.
              */
-            using IRQToProcBitfield = utils::reg_access::BitFieldEnableDisable<status_reg, 26U>;
-            /**
-             * @brief The status bit "interrupt to processors, after override is applied".
-             */
-            using irqToProc_bits = status_reg::template Bits<IRQToProcBitfield, utils::reg_access::read_access>;
+            struct status {
+                static constexpr std::uintptr_t addr = base_addr + statusOffset; /** @brief The address of the gpio's status register. */
+                using status_reg = utils::reg_access::Reg<addr, utils::reg_access::read_access, std::uint32_t>; /** @brief The status register. */
+
+                /**
+                 * @brief Bitfield for the status bit "interrupt to processors, after override is applied".
+                 */
+                using IRQToProcBitfield = utils::reg_access::BitFieldEnableDisable<status_reg, 26U>;
+                /**
+                 * @brief The status bit "interrupt to processors, after override is applied".
+                 */
+                using irqToProc_bits = status_reg::template Bits<IRQToProcBitfield, utils::reg_access::read_access>;
+
+                /**
+                 * @brief Bitfield for the status bit "interrupt from pad before override is applied".
+                 */
+                using IRQFromPadBitField = utils::reg_access::BitFieldEnableDisable<status_reg, 24U>;
+                /**
+                 * @brief The status bit "interrupt from pad before override is applied".
+                 */
+                using irqFromPad_bits = status_reg::template Bits<IRQFromPadBitField, utils::reg_access::read_access>;
+
+                /**
+                 * @brief Bitfield for the status bit "input signal to peripheral, after override is applied".
+                 */
+                using IntToPeriBitField = utils::reg_access::BitFieldEnableDisable<status_reg, 19U>;
+                /**
+                 * @brief The status bit "input signal to peripheral, after override is applied".
+                 */
+                using intToPeri_bits = status_reg::template Bits<IntToPeriBitField, utils::reg_access::read_access>;
+
+                /**
+                 * @brief Bitfield for the status bit "input signal from pad, before override is applied".
+                 */
+                using IntFromPadBitField = utils::reg_access::BitFieldEnableDisable<status_reg, 17U>;
+                /**
+                 * @brief The status bit "input signal from pad, before override is applied".
+                 */
+                using intFromPad_bits = status_reg::template Bits<IntFromPadBitField, utils::reg_access::read_access>;
+
+                /**
+                 * @brief Bitfield for the status bit "output enable to pad after register override is applied".
+                 */
+                using OEToPadBitField = utils::reg_access::BitFieldEnableDisable<status_reg, 13U>;
+                /**
+                 * @brief The status bit "output enable to pad after register override is applied".
+                 */
+                using oeToPad_bits = status_reg::template Bits<OEToPadBitField, utils::reg_access::read_access>;
+
+                /**
+                 * @brief Bitfield for the status bit "output enable from selected peripheral, before register override is applied".
+                 */
+                using OEFromPeriBitField = utils::reg_access::BitFieldEnableDisable<status_reg, 12U>;
+                /**
+                 * @brief The status bit "output enable from selected peripheral, before register override is applied".
+                 */
+                using oeFromPeri_bits = status_reg::template Bits<OEFromPeriBitField, utils::reg_access::read_access>;
+
+                /**
+                 * @brief Bitfield for the status bit "output signal to pad after register override is applied".
+                 */
+                using OutToPadBitField = utils::reg_access::BitFieldEnableDisable<status_reg, 9U>;
+                /**
+                 * @brief The status bit "output signal to pad after register override is applied".
+                 */
+                using outToPad_bits = status_reg::template Bits<OutToPadBitField, utils::reg_access::read_access>;
+
+                /**
+                 * @brief Bitfield for the status bit "output signal from selected peripheral, before register override is applied".
+                 */
+                using OutFromPeriField = utils::reg_access::BitFieldEnableDisable<status_reg, 8U>;
+                /**
+                 * @brief The status bit "output signal from selected peripheral, before register override is applied".
+                 */
+                using outFromPeri_bits = status_reg::template Bits<OutFromPeriField, utils::reg_access::read_access>;
+            };
 
             /**
-             * @brief Bitfield for the status bit "interrupt from pad before override is applied".
+             * @brief GPIO control register to set the function and overrides.
              */
-            using IRQFromPadBitField = utils::reg_access::BitFieldEnableDisable<status_reg, 24U>;
-            /**
-             * @brief The status bit "interrupt from pad before override is applied".
-             */
-            using irqFromPad_bits = status_reg::template Bits<IRQFromPadBitField, utils::reg_access::read_access>;
+            struct ctrl {
+                static constexpr std::uintptr_t addr = base_addr + ctrlOffset; /** @brief The address of the gpio's ctrl register. */
+                using ctrl_reg = utils::reg_access::Reg<addr, utils::reg_access::read_write_access, std::uint32_t>;
 
-            /**
-             * @brief Bitfield for the status bit "input signal to peripheral, after override is applied".
-             */
-            using IntToPeriBitField = utils::reg_access::BitFieldEnableDisable<status_reg, 19U>;
-            /**
-             * @brief The status bit "input signal to peripheral, after override is applied".
-             */
-            using intToPeri_bits = status_reg::template Bits<IntToPeriBitField, utils::reg_access::read_access>;
+                /**
+                 * @brief The interrupt override bit field
+                 */
+                struct IRQOverBitField {
+                    using reg = ctrl_reg; /**< @brief The register to which the bitfield belongs. */
+                    using T = reg::RegType; /**< @brief The type of the register. */
 
-            /**
-             * @brief Bitfield for the status bit "input signal from pad, before override is applied".
-             */
-            using IntFromPadBitField = utils::reg_access::BitFieldEnableDisable<status_reg, 17U>;
-            /**
-             * @brief The status bit "input signal from pad, before override is applied".
-             */
-            using intFromPad_bits = status_reg::template Bits<IntFromPadBitField, utils::reg_access::read_access>;
+                    static constexpr T position = 0x28U; /**< @brief The position of the bits in the register. */
+                    static constexpr T mask = (0x03U << position); /**< @brief The mask of the bits. */
 
-            /**
-             * @brief Bitfield for the status bit "output enable to pad after register override is applied".
-             */
-            using OEToPadBitField = utils::reg_access::BitFieldEnableDisable<status_reg, 13U>;
-            /**
-             * @brief The status bit "output enable to pad after register override is applied".
-             */
-            using oeToPad_bits = status_reg::template Bits<OEToPadBitField, utils::reg_access::read_access>;
+                    /**
+                     * @brief The override values for the interrupt.
+                     */
+                    enum class value : T {
+                        NORMAL = 0x0U, /** @brief Interrupt set to normal. */
+                        INVERT = 0x1U, /** @brief Interrupt is inverted. */
+                        LOW = 0x02U, /** @brief Interrupt is driven low. */
+                        HIGH = 0x3U, /** @brief Interrupt is driven high. */
+                    };
+                };
 
-            /**
-             * @brief Bitfield for the status bit "output enable from selected peripheral, before register override is applied".
-             */
-            using OEFromPeriBitField = utils::reg_access::BitFieldEnableDisable<status_reg, 12U>;
-            /**
-             * @brief The status bit "output enable from selected peripheral, before register override is applied".
-             */
-            using oeFromPeri_bits = status_reg::template Bits<OEFromPeriBitField, utils::reg_access::read_access>;
+                /**
+                 * @brief The interrupt override bits.
+                 */
+                using irqOver_bits = ctrl_reg::template Bits<IRQOverBitField>;
 
-            /**
-             * @brief Bitfield for the status bit "output signal to pad after register override is applied".
-             */
-            using OutToPadBitField = utils::reg_access::BitFieldEnableDisable<status_reg, 9U>;
-            /**
-             * @brief The status bit "output signal to pad after register override is applied".
-             */
-            using outToPad_bits = status_reg::template Bits<OutToPadBitField, utils::reg_access::read_access>;
+                /**
+                 * @brief The input override bit field
+                 */
+                struct InOverBitField {
+                    using reg = ctrl_reg; /**< @brief The register to which the bitfield belongs. */
+                    using T = reg::RegType; /**< @brief The type of the register. */
 
-            /**
-             * @brief Bitfield for the status bit "output signal from selected peripheral, before register override is applied".
-             */
-            using OutFromPeriField = utils::reg_access::BitFieldEnableDisable<status_reg, 8U>;
-            /**
-             * @brief The status bit "output signal from selected peripheral, before register override is applied".
-             */
-            using outFromPeri_bits = status_reg::template Bits<OutFromPeriField, utils::reg_access::read_access>;
+                    static constexpr T position = 0x16U; /**< @brief The position of the bits in the register. */
+                    static constexpr T mask = (0x03U << position); /**< @brief The mask of the bits. */
+
+                    /**
+                     * @brief The override values for the input.
+                     */
+                    enum class value : T {
+                        NORMAL = 0x0U, /** @brief Peripheral input set to normal. */
+                        INVERT = 0x1U, /** @brief Peripheral input is inverted. */
+                        LOW = 0x02U, /** @brief Peripheral input is driven low. */
+                        HIGH = 0x3U, /** @brief Peripheral input is driven high. */
+                    };
+                };
+
+                /**
+                 * @brief The input override bits.
+                 */
+                using inOver_bits = ctrl_reg::template Bits<InOverBitField>;
+
+                /**
+                 * @brief The output enable override bit field
+                 */
+                struct OutEnOverBitField {
+                    using reg = ctrl_reg; /**< @brief The register to which the bitfield belongs. */
+                    using T = reg::RegType; /**< @brief The type of the register. */
+
+                    static constexpr T position = 0x12U; /**< @brief The position of the bits in the register. */
+                    static constexpr T mask = (0x03U << position); /**< @brief The mask of the bits. */
+
+                    /**
+                     * @brief The override values for output enable.
+                     */
+                    enum class value : T {
+                        NORMAL = 0x0U, /** @brief Output enable from peripheral signal selected by funcsel is normal. */
+                        INVERT = 0x1U, /** @brief Output enable from peripheral signal selected by funcsel is inverted. */
+                        DISABLE = 0x02U, /** @brief Disable output. */
+                        ENABLE = 0x3U, /** @brief Enable output. */
+                    };
+                };
+
+                /**
+                 * @brief The output enable override bits.
+                 */
+                using outEnOver_bits = ctrl_reg::template Bits<OutEnOverBitField>;
+
+                /**
+                 * @brief The output override bit field
+                 */
+                struct OutOverBitField {
+                    using reg = ctrl_reg; /**< @brief The register to which the bitfield belongs. */
+                    using T = reg::RegType; /**< @brief The type of the register. */
+
+                    static constexpr T position = 0x08U; /**< @brief The position of the bits in the register. */
+                    static constexpr T mask = (0x03U << position); /**< @brief The mask of the bits. */
+
+                    /**
+                     * @brief The override values for output.
+                     */
+                    enum class value : T {
+                        NORMAL = 0x0U, /** @brief Output from peripheral signal selected by funcsel is normal. */
+                        INVERT = 0x1U, /** @brief Output from peripheral signal selected by funcsel is inverted. */
+                        LOW = 0x02U, /** @brief Output is driven low. */
+                        HIGH = 0x3U, /** @brief Output is driven high. */
+                    };
+                };
+
+                /**
+                 * @brief The output override bits.
+                 */
+                using outOver_bits = ctrl_reg::template Bits<OutOverBitField>;
+
+                /**
+                 * @brief The function select bit field
+                 */
+                struct FuncSelectBitField {
+                    using reg = ctrl_reg; /**< @brief The register to which the bitfield belongs. */
+                    using T = reg::RegType; /**< @brief The type of the register. */
+
+                    static constexpr T position = 0x00U; /**< @brief The position of the bits in the register. */
+                    static constexpr T mask = (0x1FU << position); /**< @brief The mask of the bits. */
+
+                    /**
+                     * @brief The functions the GPIO can be configured for.
+                     *
+                     * GPIO20 - GPIO25 can additionally be configured for clock input/output.
+                     */
+                    using value = decltype([]() {
+                        if constexpr ((gpio >= GPIO::GPIO20) && (gpio <= GPIO::GPIO25)) {
+                            return std::type_identity_t<GPIO_FunctionsWithClock>();
+                        } else {
+                            return std::type_identity_t<GPIO_Functions>();
+                        }
+                    }());
+                };
+
+                /**
+                 * @brief The function select bits.
+                 */
+                using funcSelect_bits = ctrl_reg::template Bits<FuncSelectBitField>;
+            };
         };
 
         /**
-         * @brief GPIO control register to set the function and overrides.
+         * @brief The bits to check the interrupts for an GPIO.
+         *
+         * @tparam gpio The GPIO to which the interrupt bits belong.
+         * @tparam base The base of the interrupt register.
+         * @tparam type The type of the interrupt register.
          */
-        struct ctrl {
-            static constexpr std::uintptr_t addr = base_addr + ctrlOffset; /** @brief The address of the gpio's ctrl register. */
-            using ctrl_reg = utils::reg_access::Reg<addr, utils::reg_access::read_write_access, std::uint32_t>;
+        template <GPIO gpio, InterruptBase base, InterruptType type>
+        struct InterruptGPIOX_RegMap {
+            static_assert(gpio < GPIO::NumberOfGPIOs, "Invalid GPIO.");
 
-            /**
-             * @brief The interrupt override bit field
-             */
-            struct IRQOverBitField {
-                using reg = ctrl_reg; /**< @brief The register to which the bitfield belongs. */
-                using T = reg::RegType; /**< @brief The type of the register. */
+            static_assert((base == InterruptBase::RAW_INTERRUPT && type == InterruptType::RAW) ||
+                    ((base == InterruptBase::PROC0 || base == InterruptBase::PROC1 || base == InterruptBase::DORMANT_WAKE) &&
+                    (type == InterruptType::ENABLE || type == InterruptType::FORCE || type == InterruptType::STATUS)), "Invalid combination of interrupt base and type");
 
-                static constexpr T position = 0x28U; /**< @brief The position of the bits in the register. */
-                static constexpr T mask = (0x03U << position); /**< @brief The mask of the bits. */
+            static constexpr std::uint32_t baseOffset =  static_cast<std::uint32_t>(base) + static_cast<std::uint32_t>(type); /**< @brief The offset of the target register block to the USER_BANK_BASE address. */
+            static constexpr std::uint32_t gpioPerRegister = 8U; /**< @brief The maximum number of gpio per interrupt register. */
+            static constexpr std::uint32_t bytesPerRegister = 4U; /**< @brief A register is 4 byte wide. */
+            static constexpr std::uint32_t gpioRegOffset = (static_cast<std::uint32_t>(gpio) / gpioPerRegister) * bytesPerRegister; /**< @brief The offset of the register to which the gpio belongs from the first interrupt register of the register block. */
+            static constexpr std::uint32_t bitsPerGpio = 4U; /**< @brief There are four bits per gpio. */
+            static constexpr std::uint32_t gpioBitOffset = (static_cast<std::uint32_t>(gpio) % gpioPerRegister) * bitsPerGpio; /**< @brief The bit offset to the interrupt bits of the gpio. */
 
+            struct interrupt {
+                static constexpr std::uintptr_t addr = ioBankBaseAddr + baseOffset + gpioRegOffset; /**< @brief The address of the specific interrupt register of the gpio. */
                 /**
-                 * @brief The override values for the interrupt.
-                 */
-                enum class value : T {
-                    NORMAL = 0x0U, /** @brief Interrupt set to normal. */
-                    INVERT = 0x1U, /** @brief Interrupt is inverted. */
-                    LOW = 0x02U, /** @brief Interrupt is driven low. */
-                    HIGH = 0x3U, /** @brief Interrupt is driven high. */
-                };
-            };
-
-            /**
-             * @brief The interrupt override bits.
-             */
-            using irqOver_bits = ctrl_reg::template Bits<IRQOverBitField>;
-
-            /**
-             * @brief The input override bit field
-             */
-            struct InOverBitField {
-                using reg = ctrl_reg; /**< @brief The register to which the bitfield belongs. */
-                using T = reg::RegType; /**< @brief The type of the register. */
-
-                static constexpr T position = 0x16U; /**< @brief The position of the bits in the register. */
-                static constexpr T mask = (0x03U << position); /**< @brief The mask of the bits. */
-
-                /**
-                 * @brief The override values for the input.
-                 */
-                enum class value : T {
-                    NORMAL = 0x0U, /** @brief Peripheral input set to normal. */
-                    INVERT = 0x1U, /** @brief Peripheral input is inverted. */
-                    LOW = 0x02U, /** @brief Peripheral input is driven low. */
-                    HIGH = 0x3U, /** @brief Peripheral input is driven high. */
-                };
-            };
-
-            /**
-             * @brief The input override bits.
-             */
-            using inOver_bits = ctrl_reg::template Bits<InOverBitField>;
-
-            /**
-             * @brief The output enable override bit field
-             */
-            struct OutEnOverBitField {
-                using reg = ctrl_reg; /**< @brief The register to which the bitfield belongs. */
-                using T = reg::RegType; /**< @brief The type of the register. */
-
-                static constexpr T position = 0x12U; /**< @brief The position of the bits in the register. */
-                static constexpr T mask = (0x03U << position); /**< @brief The mask of the bits. */
-
-                /**
-                 * @brief The override values for output enable.
-                 */
-                enum class value : T {
-                    NORMAL = 0x0U, /** @brief Output enable from peripheral signal selected by funcsel is normal. */
-                    INVERT = 0x1U, /** @brief Output enable from peripheral signal selected by funcsel is inverted. */
-                    DISABLE = 0x02U, /** @brief Disable output. */
-                    ENABLE = 0x3U, /** @brief Enable output. */
-                };
-            };
-
-            /**
-             * @brief The output enable override bits.
-             */
-            using outEnOver_bits = ctrl_reg::template Bits<OutEnOverBitField>;
-
-            /**
-             * @brief The output override bit field
-             */
-            struct OutOverBitField {
-                using reg = ctrl_reg; /**< @brief The register to which the bitfield belongs. */
-                using T = reg::RegType; /**< @brief The type of the register. */
-
-                static constexpr T position = 0x08U; /**< @brief The position of the bits in the register. */
-                static constexpr T mask = (0x03U << position); /**< @brief The mask of the bits. */
-
-                /**
-                 * @brief The override values for output.
-                 */
-                enum class value : T {
-                    NORMAL = 0x0U, /** @brief Output from peripheral signal selected by funcsel is normal. */
-                    INVERT = 0x1U, /** @brief Output from peripheral signal selected by funcsel is inverted. */
-                    LOW = 0x02U, /** @brief Output is driven low. */
-                    HIGH = 0x3U, /** @brief Output is driven high. */
-                };
-            };
-
-            /**
-             * @brief The output override bits.
-             */
-            using outOver_bits = ctrl_reg::template Bits<OutOverBitField>;
-
-            /**
-             * @brief The function select bit field
-             */
-            struct FuncSelectBitField {
-                using reg = ctrl_reg; /**< @brief The register to which the bitfield belongs. */
-                using T = reg::RegType; /**< @brief The type of the register. */
-
-                static constexpr T position = 0x00U; /**< @brief The position of the bits in the register. */
-                static constexpr T mask = (0x1FU << position); /**< @brief The mask of the bits. */
-
-                /**
-                 * @brief The functions the GPIO can be configured for.
+                 * @brief The interrupt register of the GPIO.
                  *
-                 * GPIO20 - GPIO25 can additionally be configured for clock input/output.
+                 * The read-write access depends on the interrupt type. Raw interrupt registers have mixed R0-WC bits, Status registers
+                 * are read-only and enable and force interrupt registers have read-write access.
                  */
-                using value = decltype([]() {
-                    if constexpr ((gpio >= GPIO::GPIO20) && (gpio <= GPIO::GPIO25)) {
-                        return std::type_identity_t<GPIO_FunctionsWithClock>();
+                using interrupt_reg = decltype([]() {
+                    if constexpr (type == InterruptType::RAW) {
+                        return std::type_identity_t<utils::reg_access::Reg<addr, utils::reg_access::reg_mixed_access, std::uint32_t>>();
+                    } else if constexpr (type == InterruptType::STATUS) {
+                        return std::type_identity_t<utils::reg_access::Reg<addr, utils::reg_access::read_access, std::uint32_t>>();
                     } else {
-                        return std::type_identity_t<GPIO_Functions>();
+                        return std::type_identity_t<utils::reg_access::Reg<addr, utils::reg_access::read_write_access, std::uint32_t>>();
+                    }
+                }());
+
+
+
+                /**
+                 * @brief The edge high bit field of the gpio's interrupt register.
+                 */
+                using edgeHighBitField = utils::reg_access::BitFieldEnableDisable<interrupt_reg, gpioBitOffset + 3U>;
+                /**
+                 * @brief The edge high bit of the gpio's interrupt register.
+                 *
+                 * The read-write access depends on the interrupt type. Raw interrupt edge high bits are write-clear, status
+                 * interrupts edge high bits are read-only and enable and force interrupt edge high bits have read-write access.
+                 */
+                using edgeHigh_bits = decltype([]() {
+                    if constexpr (type == InterruptType::RAW) {
+                        return std::type_identity_t<typename interrupt_reg::template Bits<edgeHighBitField, utils::reg_access::bit_write_clear>>();
+                    } else if constexpr (type == InterruptType::STATUS) {
+                        return std::type_identity_t<typename interrupt_reg::template Bits<edgeHighBitField, utils::reg_access::read_access>>();
+                    } else {
+                        return std::type_identity_t<typename interrupt_reg::template Bits<edgeHighBitField, utils::reg_access::read_write_access>>();
+                    }
+                }());
+
+
+
+                /**
+                 * @brief The edge low bit field of the gpio's interrupt register.
+                 */
+                using edgeLowBitField = utils::reg_access::BitFieldEnableDisable<interrupt_reg, gpioBitOffset + 2U>;
+                /**
+                 * @brief The edge low bit of the gpio's interrupt register.
+                 *
+                 * The read-write access depends on the interrupt type. Raw interrupt edge low bits are write-clear, status
+                 * interrupts edge low bits are read-only and enable and force interrupt edge low bits have read-write access.
+                 */
+                using edgeLow_bits = decltype([]() {
+                    if constexpr (type == InterruptType::RAW) {
+                        return std::type_identity_t<typename interrupt_reg::template Bits<edgeLowBitField, utils::reg_access::bit_write_clear>>();
+                    } else if constexpr (type == InterruptType::STATUS) {
+                        return std::type_identity_t<typename interrupt_reg::template Bits<edgeLowBitField, utils::reg_access::read_access>>();
+                    } else {
+                        return std::type_identity_t<typename interrupt_reg::template Bits<edgeLowBitField, utils::reg_access::read_write_access>>();
+                    }
+                }());
+
+                /**
+                 * @brief The high level interrupt bit field of the gpio.
+                 */
+                using levelHighBitField = utils::reg_access::BitFieldEnableDisable<interrupt_reg, gpioBitOffset + 1U>;
+                /**
+                 * @brief The high level interrupt bit of the gpio.
+                 *
+                 * The read-write access depends on the interrupt type. Raw interrupt level high bits are write-clear, status
+                 * interrupts level high bits are read-only and enable and force interrupt level high bits have read-write access.
+                 */
+                using levelHigh_bits = decltype([]() {
+                    if constexpr (type == InterruptType::RAW) {
+                        return std::type_identity_t<typename interrupt_reg::template Bits<levelHighBitField, utils::reg_access::read_access>>();
+                    } else if constexpr (type == InterruptType::STATUS) {
+                        return std::type_identity_t<typename interrupt_reg::template Bits<levelHighBitField, utils::reg_access::read_access>>();
+                    } else {
+                        return std::type_identity_t<typename interrupt_reg::template Bits<levelHighBitField, utils::reg_access::read_write_access>>();
+                    }
+                }());
+
+                /**
+                 * @brief The low level interrupt bit field of the gpio.
+                 */
+                using levelLowBitField = utils::reg_access::BitFieldEnableDisable<interrupt_reg, gpioBitOffset>;
+                /**
+                 * @brief The low level interrupt bit of the gpio.
+                 *
+                 * The read-write access depends on the interrupt type. Raw interrupt level low bits are write-clear, status
+                 * interrupts level low bits are read-only and enable and force interrupt level low bits have read-write access.
+                 */
+                using levelLow_bits = decltype([]() {
+                    if constexpr (type == InterruptType::RAW) {
+                        return std::type_identity_t<typename interrupt_reg::template Bits<levelLowBitField, utils::reg_access::read_access>>();
+                    } else if constexpr (type == InterruptType::STATUS) {
+                        return std::type_identity_t<typename interrupt_reg::template Bits<levelLowBitField, utils::reg_access::read_access>>();
+                    } else {
+                        return std::type_identity_t<typename interrupt_reg::template Bits<levelLowBitField, utils::reg_access::read_write_access>>();
                     }
                 }());
             };
-
-            /**
-             * @brief The function select bits.
-             */
-            using funcSelect_bits = ctrl_reg::template Bits<FuncSelectBitField>;
         };
+
+        /**
+         * @brief The raw interrupt registers.
+         *
+         * @tparam gpio The gpio for which the status of the interrupts is to be read/cleared.
+         */
+        template <GPIO gpio>
+        using rawInterruptRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::RAW_INTERRUPT, InterruptType::RAW>;
+
+        /**
+         * @brief The enable interrupt registers for processor 0.
+         *
+         * @tparam gpio The gpio for which the interrupt is to be enabled.
+         */
+        template <GPIO gpio>
+        using proc0InterruptEnableRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::PROC0, InterruptType::ENABLE>;
+
+        /**
+         * @brief The force interrupt registers for processor 0.
+         *
+         * @tparam gpio The gpio for which the interrupt is to be forced.
+         */
+        template <GPIO gpio>
+        using proc0InterruptForceRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::PROC0, InterruptType::FORCE>;
+
+        /**
+         * @brief The status interrupt registers for processor 0.
+         *
+         * @tparam gpio The gpio for which the interrupt status is to be read.
+         */
+        template <GPIO gpio>
+        using proc0InterruptStatusRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::PROC0, InterruptType::STATUS>;
+
+        /**
+         * @brief The enable interrupt registers for processor 1.
+         *
+         * @tparam gpio The gpio for which the interrupt is to be enabled.
+         */
+        template <GPIO gpio>
+        using proc1InterruptEnableRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::PROC1, InterruptType::ENABLE>;
+
+        /**
+         * @brief The force interrupt registers for processor 1.
+         *
+         * @tparam gpio The gpio for which the interrupt is to be forced.
+         */
+        template <GPIO gpio>
+        using proc1InterruptForceRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::PROC1, InterruptType::FORCE>;
+
+        /**
+         * @brief The status interrupt registers for processor 1.
+         *
+         * @tparam gpio The gpio for which the interrupt status is to be read.
+         */
+        template <GPIO gpio>
+        using proc1InterruptStatusRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::PROC1, InterruptType::STATUS>;
+
+        /**
+         * @brief The enable interrupt registers for dormant wake.
+         *
+         * @tparam gpio The gpio for which the interrupt is to be enabled.
+         */
+        template <GPIO gpio>
+        using dormWakeInterruptEnableRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::DORMANT_WAKE, InterruptType::ENABLE>;
+
+        /**
+         * @brief The force interrupt registers for dormant wake.
+         *
+         * @tparam gpio The gpio for which the interrupt is to be forced.
+         */
+        template <GPIO gpio>
+        using dormWakeInterruptForceRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::DORMANT_WAKE, InterruptType::FORCE>;
+
+        /**
+         * @brief The status interrupt registers for dormant wake.
+         *
+         * @tparam gpio The gpio for which the interrupt status is to be read.
+         */
+        template <GPIO gpio>
+        using dormWakeInterruptStatusRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::DORMANT_WAKE, InterruptType::STATUS>;
+
     };
 
     /**
-     * @brief The bits to check the interrupts for an GPIO.
+     * @brief The user bank pad control registers.
      *
-     * @tparam gpio The GPIO to which the interrupt bits belong.
-     * @tparam base The base of the interrupt register.
-     * @tparam type The type of the interrupt register.
+     * @tparam PadsBaseAddr The base address of the user bank pad control registers.
      */
-    template <GPIO gpio, InterruptBase base, InterruptType type>
-    struct InterruptGPIOX_RegMap {
-        static_assert(gpio < GPIO::NumberOfGPIOs, "Invalid GPIO.");
+    template <std::uintptr_t PadsBaseAddr>
+    struct PadsBankRegMap {
+        static_assert(PadsBaseAddr == PADS_BANK0_BASE, "Invalid address for PadsBaseAddr.");
 
-        static_assert((base == InterruptBase::RAW_INTERRUPT && type == InterruptType::RAW) ||
-                ((base == InterruptBase::PROC0 || base == InterruptBase::PROC1 || base == InterruptBase::DORMANT_WAKE) &&
-                (type == InterruptType::ENABLE || type == InterruptType::FORCE || type == InterruptType::STATUS)), "Invalid combination of interrupt base and type");
+        static constexpr std::uint8_t voltageSelectOffset = 0x00U; /**< @brief The offset of the voltage select register. */
+        static constexpr std::uint8_t padRegisterStartOffset = 0x04U; /**< @brief The offset of the first pad control register. */
 
-        static constexpr std::uint32_t baseOffset =  static_cast<std::uint32_t>(base) + static_cast<std::uint32_t>(type); /**< @brief The offset of the target register block to the USER_BANK_BASE address. */
-        static constexpr std::uint32_t gpioPerRegister = 8U; /**< @brief The maximum number of gpio per interrupt register. */
-        static constexpr std::uint32_t bytesPerRegister = 4U; /**< @brief A register is 4 byte wide. */
-        static constexpr std::uint32_t gpioRegOffset = (static_cast<std::uint32_t>(gpio) / gpioPerRegister) * bytesPerRegister; /**< @brief The offset of the register to which the gpio belongs from the first interrupt register of the register block. */
-        static constexpr std::uint32_t bitsPerGpio = 4U; /**< @brief There are four bits per gpio. */
-        static constexpr std::uint32_t gpioBitOffset = (static_cast<std::uint32_t>(gpio) % gpioPerRegister) * bitsPerGpio; /**< @brief The bit offset to the interrupt bits of the gpio. */
+        struct voltage_select {
+            static constexpr std::uintptr_t addr = PadsBaseAddr + voltageSelectOffset;
+            using voltage_select_reg = utils::reg_access::Reg<addr, utils::reg_access::read_write_access, std::uint32_t>;
 
-        struct interrupt {
-            static constexpr std::uintptr_t addr = baseOffset + gpioRegOffset; /**< @brief The address of the specific interrupt register of the gpio. */
-            /**
-             * @brief The interrupt register of the GPIO.
-             *
-             * The read-write access depends on the interrupt type. Raw interrupt registers have mixed R0-WC bits, Status registers
-             * are read-only and enable and force interrupt registers have read-write access.
-             */
-            using interrupt_reg = decltype([]() {
-                if constexpr (type == InterruptType::RAW) {
-                    return std::type_identity_t<utils::reg_access::Reg<addr, utils::reg_access::reg_mixed_access, std::uint32_t>>();
-                } else if constexpr (type == InterruptType::STATUS) {
-                    return std::type_identity_t<utils::reg_access::Reg<addr, utils::reg_access::read_access, std::uint32_t>>();
-                } else {
-                    return std::type_identity_t<utils::reg_access::Reg<addr, utils::reg_access::read_write_access, std::uint32_t>>();
-                }
-            }());
+            struct VoltageSelectBitField {
+                using reg = voltage_select_reg; /**< @brief The register to which the bitfield belongs. */
+                using T = reg::RegType; /**< @brief The type of the register. */
 
+                static constexpr T position = 0x00U; /**< @brief The position of the bits in the register. */
+                static constexpr T mask = (0x01U << position); /**< @brief The mask of the bits. */
 
-
-            /**
-             * @brief The edge high bit field of the gpio's interrupt register.
-             */
-            using edgeHighBitField = utils::reg_access::BitFieldEnableDisable<interrupt_reg, gpioBitOffset + 3U>;
-            /**
-             * @brief The edge high bit of the gpio's interrupt register.
-             *
-             * The read-write access depends on the interrupt type. Raw interrupt edge high bits are write-clear, status
-             * interrupts edge high bits are read-only and enable and force interrupt edge high bits have read-write access.
-             */
-            using edgeHigh_bits = decltype([]() {
-                if constexpr (type == InterruptType::RAW) {
-                    return std::type_identity_t<typename interrupt_reg::template Bits<edgeHighBitField, utils::reg_access::bit_write_clear>>();
-                } else if constexpr (type == InterruptType::STATUS) {
-                    return std::type_identity_t<typename interrupt_reg::template Bits<edgeHighBitField, utils::reg_access::read_access>>();
-                } else {
-                    return std::type_identity_t<typename interrupt_reg::template Bits<edgeHighBitField, utils::reg_access::read_write_access>>();
-                }
-            }());
-
-
-
-            /**
-             * @brief The edge low bit field of the gpio's interrupt register.
-             */
-            using edgeLowBitField = utils::reg_access::BitFieldEnableDisable<interrupt_reg, gpioBitOffset + 2U>;
-            /**
-             * @brief The edge low bit of the gpio's interrupt register.
-             *
-             * The read-write access depends on the interrupt type. Raw interrupt edge low bits are write-clear, status
-             * interrupts edge low bits are read-only and enable and force interrupt edge low bits have read-write access.
-             */
-            using edgeLow_bits = decltype([]() {
-                if constexpr (type == InterruptType::RAW) {
-                    return std::type_identity_t<typename interrupt_reg::template Bits<edgeLowBitField, utils::reg_access::bit_write_clear>>();
-                } else if constexpr (type == InterruptType::STATUS) {
-                    return std::type_identity_t<typename interrupt_reg::template Bits<edgeLowBitField, utils::reg_access::read_access>>();
-                } else {
-                    return std::type_identity_t<typename interrupt_reg::template Bits<edgeLowBitField, utils::reg_access::read_write_access>>();
-                }
-            }());
-
-            /**
-             * @brief The high level interrupt bit field of the gpio.
-             */
-            using levelHighBitField = utils::reg_access::BitFieldEnableDisable<interrupt_reg, gpioBitOffset + 1U>;
-            /**
-             * @brief The high level interrupt bit of the gpio.
-             *
-             * The read-write access depends on the interrupt type. Raw interrupt level high bits are write-clear, status
-             * interrupts level high bits are read-only and enable and force interrupt level high bits have read-write access.
-             */
-            using levelHigh_bits = decltype([]() {
-                if constexpr (type == InterruptType::RAW) {
-                    return std::type_identity_t<typename interrupt_reg::template Bits<levelHighBitField, utils::reg_access::read_access>>();
-                } else if constexpr (type == InterruptType::STATUS) {
-                    return std::type_identity_t<typename interrupt_reg::template Bits<levelHighBitField, utils::reg_access::read_access>>();
-                } else {
-                    return std::type_identity_t<typename interrupt_reg::template Bits<levelHighBitField, utils::reg_access::read_write_access>>();
-                }
-            }());
-
-            /**
-             * @brief The low level interrupt bit field of the gpio.
-             */
-            using levelLowBitField = utils::reg_access::BitFieldEnableDisable<interrupt_reg, gpioBitOffset>;
-            /**
-             * @brief The low level interrupt bit of the gpio.
-             *
-             * The read-write access depends on the interrupt type. Raw interrupt level low bits are write-clear, status
-             * interrupts level low bits are read-only and enable and force interrupt level low bits have read-write access.
-             */
-            using levelLow_bits = decltype([]() {
-                if constexpr (type == InterruptType::RAW) {
-                    return std::type_identity_t<typename interrupt_reg::template Bits<levelLowBitField, utils::reg_access::read_access>>();
-                } else if constexpr (type == InterruptType::STATUS) {
-                    return std::type_identity_t<typename interrupt_reg::template Bits<levelLowBitField, utils::reg_access::read_access>>();
-                } else {
-                    return std::type_identity_t<typename interrupt_reg::template Bits<levelLowBitField, utils::reg_access::read_write_access>>();
-                }
-            }());
+                /**
+                 * @brief The voltage select control per bank control.
+                 */
+                enum class value : T {
+                    VOLTAGE_3_3 = 0x0U, /**< @brief Set the voltage to 3.3V. */
+                    VOLTAGE_1_8 = 0x1U, /**< @brief Set the voltage to 1.8V. */
+                };
+            };
         };
-    };
 
-    /**
-     * @brief The raw interrupt registers.
-     *
-     * @tparam gpio The gpio for which the status of the interrupts is to be read/cleared.
-     */
-    template <GPIO gpio>
-    using rawInterruptRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::RAW_INTERRUPT, InterruptType::RAW>;
+        /**
+         * @brief The register to configure a pad.
+         *
+         * @tparam pad The pad to be configured.
+         */
+        template <Pads pad>
+        struct padX {
+            static_assert(pad < Pads::NumberOfPads, "Invalid Pad. For valid options see enum Pads.");
 
-    /**
-     * @brief The enable interrupt registers for processor 0.
-     *
-     * @tparam gpio The gpio for which the interrupt is to be enabled.
-     */
-    template <GPIO gpio>
-    using proc0InterruptEnableRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::PROC0, InterruptType::ENABLE>;
+            static constexpr std::uint8_t bytesPerRegister = 0x04U; /**< @brief The RP2040 is a 32 bit architecture and every register is therefore 4 bytes. */
+            static constexpr std::uint8_t padOffset = padRegisterStartOffset + static_cast<std::uint8_t>(pad) * bytesPerRegister; /**< @brief The offset of the specified pad from the first pad (GPIO0). */
 
-    /**
-     * @brief The force interrupt registers for processor 0.
-     *
-     * @tparam gpio The gpio for which the interrupt is to be forced.
-     */
-    template <GPIO gpio>
-    using proc0InterruptForceRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::PROC0, InterruptType::FORCE>;
-
-    /**
-     * @brief The status interrupt registers for processor 0.
-     *
-     * @tparam gpio The gpio for which the interrupt status is to be read.
-     */
-    template <GPIO gpio>
-    using proc0InterruptStatusRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::PROC0, InterruptType::STATUS>;
-
-    /**
-     * @brief The enable interrupt registers for processor 1.
-     *
-     * @tparam gpio The gpio for which the interrupt is to be enabled.
-     */
-    template <GPIO gpio>
-    using proc1InterruptEnableRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::PROC1, InterruptType::ENABLE>;
-
-    /**
-     * @brief The force interrupt registers for processor 1.
-     *
-     * @tparam gpio The gpio for which the interrupt is to be forced.
-     */
-    template <GPIO gpio>
-    using proc1InterruptForceRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::PROC1, InterruptType::FORCE>;
-
-    /**
-     * @brief The status interrupt registers for processor 1.
-     *
-     * @tparam gpio The gpio for which the interrupt status is to be read.
-     */
-    template <GPIO gpio>
-    using proc1InterruptStatusRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::PROC1, InterruptType::STATUS>;
-
-    /**
-     * @brief The enable interrupt registers for dormant wake.
-     *
-     * @tparam gpio The gpio for which the interrupt is to be enabled.
-     */
-    template <GPIO gpio>
-    using dormWakeInterruptEnableRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::DORMANT_WAKE, InterruptType::ENABLE>;
-
-    /**
-     * @brief The force interrupt registers for dormant wake.
-     *
-     * @tparam gpio The gpio for which the interrupt is to be forced.
-     */
-    template <GPIO gpio>
-    using dormWakeInterruptForceRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::DORMANT_WAKE, InterruptType::FORCE>;
-
-    /**
-     * @brief The status interrupt registers for dormant wake.
-     *
-     * @tparam gpio The gpio for which the interrupt status is to be read.
-     */
-    template <GPIO gpio>
-    using dormWakeInterruptStatusRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::DORMANT_WAKE, InterruptType::STATUS>;
-
-
-    template <Pads pad>
-    struct PadX_RegMap {
-        static_assert(pad < Pads::NumberOfPads, "Invalid Pad. For valid options the enum Pads.");
-
-        static constexpr std::uint8_t bytesPerRegister = 0x04U; /**< @brief The RP2040 is a 32 bit architecture and every register is therefore 4 bytes. */
-        static constexpr std::uint8_t voltageSelectOffset = bytesPerRegister; /**< @brief There is a single register (voltage_select) before the pads register start. */
-        static constexpr std::uint8_t padOffset = static_cast<std::uint8_t>(pad) * bytesPerRegister; /**< @brief The offset of the specified pad from the first pad (GPIO0). */
-
-        struct ctrl {
-            static constexpr std::uintptr_t addr = PADS_BANK0_BASE + voltageSelectOffset + padOffset; /**< @brief The address of the pad register to be configured. */
+            static constexpr std::uintptr_t addr = PadsBaseAddr + padOffset; /**< @brief The address of the pad register to be configured. */
             using ctrl_reg = utils::reg_access::Reg<addr, utils::reg_access::read_write_access, std::uint32_t>;
 
             /**
