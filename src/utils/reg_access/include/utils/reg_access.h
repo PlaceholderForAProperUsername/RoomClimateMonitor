@@ -45,12 +45,18 @@ namespace utils::reg_access {
     struct read_access {};
     /** @brief Tag to control write access. */
     struct write_access {};
-    /** @brief Tag to control atomic write access. */
-    struct atomic_write_access : write_access {};
+    /** @brief The register supports atomic operations. */
+    struct atomic {};
+    /** @brief Tag to enable atomic set operation. */
+    struct atomic_set : write_access, atomic {};
+    /** @brief Tag to enable atomic clear operation. */
+    struct atomic_clear : write_access, atomic {};
+    /** @brief Tag to enable atomic xor operation. */
+    struct atomic_xor : write_access, atomic {};
     /** @brief Tag to control read and write access. */
     struct read_write_access : read_access, write_access {};
     /** @brief Tag to control read and write access. Used for registers where access varies between bits. */
-    struct reg_mixed_access : read_access, write_access {};
+    struct reg_mixed_access : read_write_access {};
     /** @brief Tag to control read and write access. Used to indicate a bit can be cleared with a write. */
     struct bit_write_clear : read_write_access {};
     /** @}*/ // end group access_tags
@@ -126,14 +132,14 @@ namespace utils::reg_access {
             /**
              * @brief Sets the bits to the value.
              *
-             * This overwrite handles atomic writes.
+             * Requires atomic set register.
              *
              * @tparam BitsAccess_ Access specifier for the bits.
              * @param[in] bits_value The value to be set.
              * @return
              */
             template <typename BitsAccess_ = BitsAccess>
-            static std::enable_if_t<std::is_base_of_v<atomic_write_access, BitsAccess_>, void>
+            static std::enable_if_t<std::is_base_of_v<atomic_set, BitsAccess_>, void>
             set(BitField::value bits_value)
             {
                 T reg_value = ((static_cast<T>(bits_value) << BitField::position) & BitField::mask);
@@ -187,6 +193,23 @@ namespace utils::reg_access {
             }
 
             /**
+             * @brief Toggles the bits.
+             *
+             * Requires atomic xor register.
+             *
+             * @tparam BitsAccess_ Access specifier for the bits.
+             * @return None
+             */
+            template <typename BitsAccess_ = BitsAccess>
+            static std::enable_if_t<std::is_base_of_v<atomic_xor, BitsAccess_>, void>
+            toggle()
+            {
+
+                T reg_value = BitField::mask;
+                write(reg_value);
+            }
+
+            /**
              * @brief Clears the bits.
              *
              * @tparam BitsAccess_ Access specifier for the bits.
@@ -194,6 +217,24 @@ namespace utils::reg_access {
              */
             template <typename BitsAccess_ = BitsAccess>
             static std::enable_if_t<std::is_base_of_v<read_write_access, BitsAccess_>, void>
+            clear()
+            {
+                auto reg_value = read();
+                reg_value &= ~BitField::mask;
+                write(reg_value);
+            }
+
+
+            /**
+             * @brief Clears the bits.
+             *
+             * Requires atomic clear register.
+             *
+             * @tparam BitsAccess_ Access specifier for the bits.
+             * @return None
+             */
+            template <typename BitsAccess_ = BitsAccess>
+            static std::enable_if_t<std::is_base_of_v<atomic_clear, BitsAccess_>, void>
             clear()
             {
                 auto reg_value = read();
