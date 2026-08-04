@@ -237,8 +237,7 @@ namespace utils::reg_access {
             static std::enable_if_t<std::is_base_of_v<atomic_clear, BitsAccess_>, void>
             clear()
             {
-                auto reg_value = read();
-                reg_value &= ~BitField::mask;
+                T reg_value = BitField::mask;
                 write(reg_value);
             }
         };
