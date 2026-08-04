@@ -188,17 +188,17 @@ namespace rp2040::system::gpio {
             static_assert(gpio < GPIO::NumberOfGPIOs, "Invalid GPIO. There are only 29 user GPIOs.");
 
             static constexpr std::uint8_t BytesPerGPIORegisters {8U}; /**< @brief The number of bytes required for the ctrl and status registers of a GPIO. */
-            static constexpr std::uint8_t offset = static_cast<std::uint8_t>(gpio) * BytesPerGPIORegisters; /** @brief The offset of the registers of the gpio. */
-            static constexpr std::uintptr_t base_addr = ioBankBaseAddr + offset; /** @brief The base address of the registers of the gpio. */
-            static constexpr std::uint8_t statusOffset = 0x00U; /** @brief The offset of the status register to the gpio base address. */
-            static constexpr std::uint8_t ctrlOffset = 0x04U; /** @brief The offset of the ctrl register to the gpio base address. */
+            static constexpr std::uint8_t offset = static_cast<std::uint8_t>(gpio) * BytesPerGPIORegisters; /**< @brief The offset of the registers of the gpio. */
+            static constexpr std::uintptr_t base_addr = ioBankBaseAddr + offset; /**< @brief The base address of the registers of the gpio. */
+            static constexpr std::uint8_t statusOffset = 0x00U; /**< @brief The offset of the status register to the gpio base address. */
+            static constexpr std::uint8_t ctrlOffset = 0x04U; /**< @brief The offset of the ctrl register to the gpio base address. */
 
             /**
              * @brief The status register of the gpio.
              */
             struct status {
-                static constexpr std::uintptr_t addr = base_addr + statusOffset; /** @brief The address of the gpio's status register. */
-                using status_reg = utils::reg_access::Reg<addr, utils::reg_access::read_access, std::uint32_t>; /** @brief The status register. */
+                static constexpr std::uintptr_t addr = base_addr + statusOffset; /**< @brief The address of the gpio's status register. */
+                using status_reg = utils::reg_access::Reg<addr, utils::reg_access::read_access, std::uint32_t>; /**< @brief The status register. */
 
                 /**
                  * @brief Bitfield for the status bit "interrupt to processors, after override is applied".
@@ -277,8 +277,8 @@ namespace rp2040::system::gpio {
              * @brief GPIO control register to set the function and overrides.
              */
             struct ctrl {
-                static constexpr std::uintptr_t addr = base_addr + ctrlOffset; /** @brief The address of the gpio's ctrl register. */
-                using ctrl_reg = utils::reg_access::Reg<addr, utils::reg_access::read_write_access, std::uint32_t>;
+                static constexpr std::uintptr_t addr = base_addr + ctrlOffset; /**< @brief The address of the gpio's ctrl register. */
+                using ctrl_reg = utils::reg_access::Reg<addr, utils::reg_access::read_write_access, std::uint32_t>; /**< @brief The gpio control register. */
 
                 /**
                  * @brief The interrupt override bit field
@@ -437,6 +437,9 @@ namespace rp2040::system::gpio {
             static constexpr std::uint32_t bitsPerGpio = 4U; /**< @brief There are four bits per gpio. */
             static constexpr std::uint32_t gpioBitOffset = (static_cast<std::uint32_t>(gpio) % gpioPerRegister) * bitsPerGpio; /**< @brief The bit offset to the interrupt bits of the gpio. */
 
+            /**
+             * @brief The interrupt bits of the gpio.
+             */
             struct interrupt {
                 static constexpr std::uintptr_t addr = ioBankBaseAddr + baseOffset + gpioRegOffset; /**< @brief The address of the specific interrupt register of the gpio. */
                 /**
@@ -640,7 +643,7 @@ namespace rp2040::system::gpio {
          */
         struct voltage_select {
             static constexpr std::uintptr_t addr = PadsBaseAddr + voltageSelectOffset; /**< @brief Base address of the voltage select register. */
-            using voltage_select_reg = utils::reg_access::Reg<addr, utils::reg_access::read_write_access, std::uint32_t>;
+            using voltage_select_reg = utils::reg_access::Reg<addr, utils::reg_access::read_write_access, std::uint32_t>; /**< @brief The voltage select register. */
 
             /**
              * @brief The voltage select bits as a bit field.
@@ -680,7 +683,7 @@ namespace rp2040::system::gpio {
             static constexpr std::uint8_t padOffset = padRegisterStartOffset + static_cast<std::uint8_t>(pad) * bytesPerRegister; /**< @brief The offset of the specified pad from the first pad (GPIO0). */
 
             static constexpr std::uintptr_t addr = PadsBaseAddr + padOffset; /**< @brief The address of the pad register to be configured. */
-            using ctrl_reg = utils::reg_access::Reg<addr, utils::reg_access::read_write_access, std::uint32_t>;
+            using ctrl_reg = utils::reg_access::Reg<addr, utils::reg_access::read_write_access, std::uint32_t>; /**< @brief The pad register to be configured. */
 
             /**
              * @brief The output disable bit as a bit field.
@@ -738,6 +741,9 @@ namespace rp2040::system::gpio {
                 };
             };
 
+            /**
+             * @brief The drive strength bits.
+             */
             using drive_bits = ctrl_reg::template Bits<DriveBitField>;
 
             /**
@@ -843,6 +849,45 @@ namespace rp2040::system::gpio {
              * @brief The processor core identifier bits.
              */
             using cpuid_bits = cpuid_reg::template Bits<CPUIDBitField>;
+        };
+
+        /**
+         * @brief The gpio input register.
+         */
+        struct input {
+            static constexpr std::uintptr_t addr = SIOBaseAddr + gpioInOffset; /**< @brief The base address of the sio input register. */
+            using input_reg = utils::reg_access::Reg<addr, utils::reg_access::read_access, std::uint32_t>; /**< @brief The sio input register. */
+
+            /**
+             * @brief The gpio input bit as a bit field.
+             *
+             * @tparam gpio The GPIO where the input value is to be get.
+             */
+            template <GPIO gpio>
+            struct InputBitField {
+                using reg = input_reg; /**< @brief The register to which the bitfield belongs. */
+                using T = reg::RegType; /**< @brief The type of the register. */
+
+                static_assert(gpio < GPIO::NumberOfGPIOs, "Invalid GPIO for SIO input register.");
+
+                static constexpr T position = static_cast<std::uint32_t>(gpio); /**< @brief The position of the bits in the register. */
+                static constexpr T mask = (0x1U << position); /**< @brief The mask of the bits. */
+
+                /**
+                 * @brief The values the input can have.
+                 */
+                enum class value : T {
+                    Low = 0x0U,
+                    High = 0x1U,
+                };
+            };
+            /**
+             * @brief The input bit of the gpio.
+             *
+             * @tparam gpio The GPIO where the input value is to be get.
+             */
+            template <GPIO gpio>
+            using input_bits = input_reg::template Bits<InputBitField<gpio>>;
         };
     };
 
