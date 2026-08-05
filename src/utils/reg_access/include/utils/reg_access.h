@@ -297,6 +297,31 @@ namespace utils::reg_access {
     };
 
     /**
+     * @brief General BitField for a single high/low bit.
+     *
+     * @tparam Reg The register to which the BitField belongs. @see Reg
+     * @tparam Pos The position of the bit within the register.
+     *
+     * @ingroup reg_access
+     */
+    template <typename Reg, std::uint32_t Pos>
+    struct BitFieldHighLow {
+        using reg = Reg; /**< @brief Alias for the register the bitfield belongs to. */
+        using T = reg::RegType; /**< @brief Alias for the underlying data type of the register. */
+
+        static constexpr T position = Pos; /**< @brief The position of the bitfield in the register. */
+        static constexpr T mask = (0x1UL << position); /**< @brief The mask of the bitfield used in bit operations. */
+
+        /**
+         * @brief The possible values for this bitfield.
+         */
+        enum class value : T {
+            low = 0,
+            high = 1
+        };
+    };
+
+    /**
      * @brief General BitField for several bits with continuous values.
      *
      * @tparam Value The value for the BitField.
