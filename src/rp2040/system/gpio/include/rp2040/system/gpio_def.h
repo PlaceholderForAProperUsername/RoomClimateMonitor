@@ -811,13 +811,7 @@ namespace rp2040::system::gpio {
         static constexpr std::uint32_t cpuidOffset = 0x000U; /**< @brief Offset of the cpuid register to the sio base address. */
         static constexpr std::uint32_t gpioInOffset = 0x004U; /**< @brief Offset of the gpio_in register to the sio base address. */
         static constexpr std::uint32_t gpioOutOffset = 0x010U; /**< @brief Offset of the gpio_out register to the sio base address. */
-        static constexpr std::uint32_t gpioOutSetOffset = 0x014U; /**< @brief Offset of the gpio_out_set register to the sio base address. */
-        static constexpr std::uint32_t gpioOutClearOffset = 0x018U; /**< @brief Offset of the gpio_out_clear register to the sio base address. */
-        static constexpr std::uint32_t gpioOutXorOffset = 0x01CU; /**< @brief Offset of the gpio_out_xor register to the sio base address. */
         static constexpr std::uint32_t gpioOutEnOffset = 0x020U; /**< @brief Offset of the gpio_oe register to the sio base address. */
-        static constexpr std::uint32_t gpioOutEnSetOffset = 0x024U; /**< @brief Offset of the gpio_oe_set register to the sio base address. */
-        static constexpr std::uint32_t gpioOutEnClearOffset = 0x028U; /**< @brief Offset of the gpio_oe_clr register to the sio base address. */
-        static constexpr std::uint32_t gpioOutEnXorOffset = 0x02CU; /**< @brief Offset of the gpio_oe_xor register to the sio base address. */
 
         /**
          * @brief The processor core identifier register.
@@ -888,6 +882,69 @@ namespace rp2040::system::gpio {
              */
             template <GPIO gpio>
             using input_bits = input_reg::template Bits<InputBitField<gpio>>;
+        };
+
+        /**
+         * @brief The gpio output/output enable registers.
+         *
+         * The output registers comprises four different registers: a regular register and 3 atomic access registers (set, clear and xor).
+         * These registers are all used to configure either the output value or the output enable status, depending on the base address
+         * non-type template parameter. The output and output enable register are in an identical format, therefore these registers
+         * share a template.
+         *
+         * @tparam baseOffset Base offset of either the output or output enable registers to SIO_Base address.
+         */
+        template <std::uint32_t baseOffset>
+        struct OutputRegMap {
+            static_assert((baseOffset == gpioOutOffset) || (baseOffset == gpioOutEnOffset), "Invalid base offset for output.");
+
+            static constexpr std::uint32_t setOffset = 0x04U; /**< @brief Offset of the atomic set register. */
+            static constexpr std::uint32_t clearOffset = 0x08U; /**< @brief Offset of the atomic clear register. */
+            static constexpr std::uint32_t xorOffset = 0x0C; /**< @brief Offset of the atomic xor register. */
+
+            static constexpr std::uintptr_t outputBaseAddr = SIOBaseAddr + baseOffset; /**< @brief Base address of either the output or output enable register. */
+
+
+            static constexpr std::uintptr_t outputSetAddr = outputBaseAddr + setOffset; /**< @brief Base address of the atomic set register. */
+            using outputSet_reg = utils::reg_access::Reg<outputSetAddr, utils::reg_access::atomic_set, std::uint32_t>; /**< @brief The atomic set register. */
+
+            static constexpr std::uintptr_t outputClearAddr = outputSetAddr + clearOffset; /**< @brief Base address of the atomic clear register. */
+            using outputClear_reg = utils::reg_access::Reg<outputClearAddr, utils::reg_access::atomic_clear, std::uint32_t>; /**< @brief The atomic clear register. */
+
+            static constexpr std::uintptr_t outputXorAddr = outputClearAddr + xorOffset; /**< @brief Base address of the atomic xor register. */
+            using outputToggle_reg = utils::reg_access::Reg<outputXorAddr, utils::reg_access::atomic_xor, std::uint32_t>; /**< @brief The atomic xor register. */
+
+            /**
+             * @brief The output register.
+             */
+            struct output {
+                using output_reg = utils::reg_access::Reg<outputBaseAddr, utils::reg_access::read_write_access, std::uint32_t>; /**< @brief The output or output enable register. */
+
+                /**
+                 * @brief The output/output enable bits as a Bitfield.
+                 *
+                 * The options only differ in the enum values. High/Low is more reasonable for the output value, while
+                 * Enable/Disable is more reasonable to set output enable bits.
+                 *
+                 * @tparam gpio The gpio to be configured.
+                 */
+                template <GPIO gpio>
+                using OutputBitField = decltype([] () {
+                    if constexpr(baseOffset == gpioOutOffset) {
+                        return std::type_identity_t<utils::reg_access::BitFieldHighLow<output_reg, static_cast<output_reg::RegType>(gpio)>>();
+                    } else if constexpr (baseOffset == gpioOutEnOffset) {
+                        return std::type_identity_t<utils::reg_access::BitFieldEnableDisable<output_reg, static_cast<output_reg::RegType>(gpio)>>();
+                    }
+                }());
+
+                /**
+                 * @brief The output/output enable bits.
+                 *
+                 * @tparam gpio The gpio to be configured.
+                 */
+                template <GPIO gpio>
+                using output_bits = output_reg::template Bits<OutputBitField<gpio>>;
+            };
         };
     };
 
