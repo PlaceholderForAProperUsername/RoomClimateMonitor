@@ -858,23 +858,8 @@ namespace rp2040::system::gpio {
              * @tparam gpio The GPIO where the input value is to be get.
              */
             template <GPIO gpio>
-            struct InputBitField {
-                using reg = input_reg; /**< @brief The register to which the bitfield belongs. */
-                using T = reg::RegType; /**< @brief The type of the register. */
-
-                static_assert(gpio < GPIO::NumberOfGPIOs, "Invalid GPIO for SIO input register.");
-
-                static constexpr T position = static_cast<std::uint32_t>(gpio); /**< @brief The position of the bits in the register. */
-                static constexpr T mask = (0x1U << position); /**< @brief The mask of the bits. */
-
-                /**
-                 * @brief The values the input can have.
-                 */
-                enum class value : T {
-                    Low = 0x0U,
-                    High = 0x1U,
-                };
-            };
+            requires (gpio < GPIO::NumberOfGPIOs)
+            using InputBitField = utils::reg_access::BitFieldHighLow<input_reg, static_cast<input_reg::RegType>(gpio)>;
             /**
              * @brief The input bit of the gpio.
              *
@@ -904,7 +889,6 @@ namespace rp2040::system::gpio {
 
             static constexpr std::uintptr_t outputBaseAddr = SIOBaseAddr + baseOffset; /**< @brief Base address of either the output or output enable register. */
 
-
             static constexpr std::uintptr_t outputSetAddr = outputBaseAddr + setOffset; /**< @brief Base address of the atomic set register. */
             using outputSet_reg = utils::reg_access::Reg<outputSetAddr, utils::reg_access::atomic_set, std::uint32_t>; /**< @brief The atomic set register. */
 
@@ -930,6 +914,7 @@ namespace rp2040::system::gpio {
                  */
                 template <GPIO gpio>
                 using OutputBitField = decltype([] () {
+                    static_assert(gpio < GPIO::NumberOfGPIOs);
                     if constexpr(baseOffset == gpioOutOffset) {
                         return std::type_identity_t<utils::reg_access::BitFieldHighLow<output_reg, static_cast<output_reg::RegType>(gpio)>>();
                     } else if constexpr (baseOffset == gpioOutEnOffset) {
