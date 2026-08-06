@@ -27,6 +27,7 @@
 #define UTILS_REG_ACCESS_H
 
 #include <cstdint>
+#include <concepts>
 #include <type_traits>
 
 /**
@@ -49,6 +50,8 @@ namespace utils::reg_access {
     struct atomic {};
     /** @brief Tag to enable atomic set operation. */
     struct atomic_set : write_access, atomic {};
+    /** @brief Tag to enable atomic set operation where the value is the mask. This is to distinguish the set overloads to prevent accidental writes without a value, where a write with value was intended. */
+    struct atomic_set_mask : write_access, atomic {};
     /** @brief Tag to enable atomic clear operation. */
     struct atomic_clear : write_access, atomic {};
     /** @brief Tag to enable atomic xor operation. */
@@ -73,7 +76,9 @@ namespace utils::reg_access {
      * Furthermore, the following variables must be defined:
      *  - position: position of the first bit in the register
      *  - mask: Bitmask of the bits contained in the BitField
-     *  - value: An enum with the allowed values for the BitField.
+     *
+     *  For write access, an enum must be provided @see HasEnumConcept, except for atomic set operation, where the
+     *  bit mask is the value.
      *
      * For generic examples, @see BitFieldEnableDisable and @see BitFieldValues
      *
@@ -85,9 +90,24 @@ namespace utils::reg_access {
      */
     template <typename BitField, typename Reg, typename T>
     concept BitFieldConcept =
-        std::is_same_v<Reg, typename BitField::reg> &&
-        std::is_enum_v<typename BitField::value> &&
-        std::is_same_v<std::underlying_type_t<typename BitField::value>, T>;
+            std::is_same_v<Reg, typename BitField::reg> &&
+            std::is_same_v<decltype(BitField::position), const T> &&
+            std::is_same_v<decltype(BitField::mask), const T>;
+
+    /**
+     * @brief Check if a bit field has an enum.
+     *
+     * This is required for bit set operations, except for atomic set where the mask is the only valid value.
+     *
+     * @tparam BitField The BitField instance to check.
+     * @tparam T The base data type of the register.
+     *
+     * @ingroup reg_access
+     */
+    template <typename BitField, typename T>
+    concept HasEnumConcept =
+            std::is_enum_v<typename BitField::value> &&
+            std::is_same_v<std::underlying_type_t<typename BitField::value>, T>;
 
     /**
      * @brief Represents a register and provides functions to configure the register.
@@ -110,7 +130,7 @@ namespace utils::reg_access {
          * @tparam BitsAccess The access specifier for the group of bits.
          */
         template <typename BitField, typename BitsAccess = RegAccess>
-        requires BitFieldConcept<BitField, ThisReg, T>
+        requires BitFieldConcept<BitField, ThisReg, RegType>
         struct Bits {
             /**
              * @brief Sets the bits to the value.
@@ -120,6 +140,7 @@ namespace utils::reg_access {
              * @return None
              */
             template <typename BitsAccess_ = BitsAccess>
+            requires HasEnumConcept<BitField, RegType>
             static std::enable_if_t<std::is_base_of_v<read_write_access, BitsAccess_>, void>
             set(BitField::value bits_value)
             {
@@ -139,10 +160,29 @@ namespace utils::reg_access {
              * @return
              */
             template <typename BitsAccess_ = BitsAccess>
+            requires HasEnumConcept<BitField, RegType>
             static std::enable_if_t<std::is_base_of_v<atomic_set, BitsAccess_>, void>
             set(BitField::value bits_value)
             {
                 T reg_value = ((static_cast<T>(bits_value) << BitField::position) & BitField::mask);
+                write(reg_value);
+            }
+
+            /**
+             * @brief Sets the bits to the value.
+             *
+             * Requires atomic set register. This version is intended where the mask is the only valid value to be set,
+             * where defining an enum with the values and providing the value when calling is unnecessary and clutters the
+             * program.
+             *
+             * @tparam BitsAccess_ Access specifier for the bits.
+             * @return
+             */
+            template <typename BitsAccess_ = BitsAccess>
+            static std::enable_if_t<std::is_base_of_v<atomic_set_mask, BitsAccess_>, void>
+            set()
+            {
+                T reg_value =  BitField::mask;
                 write(reg_value);
             }
 
