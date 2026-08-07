@@ -949,6 +949,26 @@ namespace rp2040::system::gpio {
                 template <GPIO gpio>
                 using outputSet_bits = outputSet_reg::template Bits<utils::reg_access::BitFieldAtomicBitOp<outputSet_reg, static_cast<outputSet_reg::RegType>(gpio)>>;
             };
+
+            /**
+             * @brief The output clear register.
+             *
+             * This is an atomic register.
+             */
+            struct output_clear {
+                static constexpr std::uintptr_t outputClearAddr = outputBaseAddr + clearOffset; /**< @brief Base address of the atomic clear register. */
+                using outputClear_reg = utils::reg_access::Reg<outputClearAddr, utils::reg_access::atomic_clear, std::uint32_t>; /**< @brief The atomic clear register. */
+
+                /**
+                 * @brief The output clear bits.
+                 *
+                 * This is an atomic operation.
+                 *
+                 * @tparam gpio The gpio for which the output is to be cleared.
+                 */
+                template <GPIO gpio>
+                using outputClear_bits = outputClear_reg::template Bits<utils::reg_access::BitFieldAtomicBitOp<outputClear_reg, static_cast<outputClear_reg::RegType>(gpio)>>;
+            };
         };
     };
 
