@@ -50,8 +50,6 @@ namespace utils::reg_access {
     struct atomic {};
     /** @brief Tag to enable atomic set operation. */
     struct atomic_set : write_access, atomic {};
-    /** @brief Tag to enable atomic set operation where the value is the mask. This is to distinguish the set overloads to prevent accidental writes without a value, where a write with value was intended. */
-    struct atomic_set_mask : write_access, atomic {};
     /** @brief Tag to enable atomic clear operation. */
     struct atomic_clear : write_access, atomic {};
     /** @brief Tag to enable atomic xor operation. */
@@ -179,7 +177,8 @@ namespace utils::reg_access {
              * @return
              */
             template <typename BitsAccess_ = BitsAccess>
-            static std::enable_if_t<std::is_base_of_v<atomic_set_mask, BitsAccess_>, void>
+            requires (!HasEnumConcept<BitField, RegType>)
+            static std::enable_if_t<std::is_base_of_v<atomic_set, BitsAccess_>, void>
             set()
             {
                 T reg_value =  BitField::mask;
