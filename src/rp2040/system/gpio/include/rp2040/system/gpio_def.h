@@ -889,14 +889,6 @@ namespace rp2040::system::gpio {
 
             static constexpr std::uintptr_t outputBaseAddr = SIOBaseAddr + baseOffset; /**< @brief Base address of either the output or output enable register. */
 
-
-
-            static constexpr std::uintptr_t outputClearAddr = outputBaseAddr + clearOffset; /**< @brief Base address of the atomic clear register. */
-            using outputClear_reg = utils::reg_access::Reg<outputClearAddr, utils::reg_access::atomic_clear, std::uint32_t>; /**< @brief The atomic clear register. */
-
-            static constexpr std::uintptr_t outputXorAddr = outputBaseAddr + xorOffset; /**< @brief Base address of the atomic xor register. */
-            using outputToggle_reg = utils::reg_access::Reg<outputXorAddr, utils::reg_access::atomic_xor, std::uint32_t>; /**< @brief The atomic xor register. */
-
             /**
              * @brief The output register.
              */
@@ -969,7 +961,30 @@ namespace rp2040::system::gpio {
                 template <GPIO gpio>
                 using outputClear_bits = outputClear_reg::template Bits<utils::reg_access::BitFieldAtomicBitOp<outputClear_reg, static_cast<outputClear_reg::RegType>(gpio)>>;
             };
+
+            /**
+            * @brief The output toggle register.
+            *
+            * This is an atomic register.
+            */
+            struct output_toggle {
+                static constexpr std::uintptr_t outputXorAddr = outputBaseAddr + xorOffset; /**< @brief Base address of the atomic xor register. */
+                using outputToggle_reg = utils::reg_access::Reg<outputXorAddr, utils::reg_access::atomic_xor, std::uint32_t>; /**< @brief The atomic xor register. */
+
+                /**
+                 * @brief The output toggle bits.
+                 *
+                 * This is an atomic operation.
+                 *
+                 * @tparam gpio The gpio for which the output is to be toggled.
+                 */
+                template <GPIO gpio>
+                using outputClear_bits = outputToggle_reg::template Bits<utils::reg_access::BitFieldAtomicBitOp<outputToggle_reg, static_cast<outputToggle_reg::RegType>(gpio)>>;
+            };
         };
+
+        using output = OutputRegMap<gpioOutOffset>; /**< @brief The output registers. */
+        using outputEnable = OutputRegMap<gpioOutEnOffset>; /**< @brief The output enable registers. */
     };
 
     /** @} */ // rp2040_gpio
