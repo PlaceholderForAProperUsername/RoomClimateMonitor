@@ -889,13 +889,12 @@ namespace rp2040::system::gpio {
 
             static constexpr std::uintptr_t outputBaseAddr = SIOBaseAddr + baseOffset; /**< @brief Base address of either the output or output enable register. */
 
-            static constexpr std::uintptr_t outputSetAddr = outputBaseAddr + setOffset; /**< @brief Base address of the atomic set register. */
-            using outputSet_reg = utils::reg_access::Reg<outputSetAddr, utils::reg_access::atomic_set, std::uint32_t>; /**< @brief The atomic set register. */
 
-            static constexpr std::uintptr_t outputClearAddr = outputSetAddr + clearOffset; /**< @brief Base address of the atomic clear register. */
+
+            static constexpr std::uintptr_t outputClearAddr = outputBaseAddr + clearOffset; /**< @brief Base address of the atomic clear register. */
             using outputClear_reg = utils::reg_access::Reg<outputClearAddr, utils::reg_access::atomic_clear, std::uint32_t>; /**< @brief The atomic clear register. */
 
-            static constexpr std::uintptr_t outputXorAddr = outputClearAddr + xorOffset; /**< @brief Base address of the atomic xor register. */
+            static constexpr std::uintptr_t outputXorAddr = outputBaseAddr + xorOffset; /**< @brief Base address of the atomic xor register. */
             using outputToggle_reg = utils::reg_access::Reg<outputXorAddr, utils::reg_access::atomic_xor, std::uint32_t>; /**< @brief The atomic xor register. */
 
             /**
@@ -929,6 +928,26 @@ namespace rp2040::system::gpio {
                  */
                 template <GPIO gpio>
                 using output_bits = output_reg::template Bits<OutputBitField<gpio>>;
+            };
+
+            /**
+             * @brief The output set register.
+             *
+             * This is an atomic register.
+             */
+            struct output_set {
+                static constexpr std::uintptr_t outputSetAddr = outputBaseAddr + setOffset; /**< @brief Base address of the atomic set register. */
+                using outputSet_reg = utils::reg_access::Reg<outputSetAddr, utils::reg_access::atomic_set, std::uint32_t>; /**< @brief The atomic set register. */
+
+                /**
+                 * @brief The output set bits.
+                 *
+                 * This is an atomic operation.
+                 *
+                 * @tparam gpio The gpio for which the output is to be set.
+                 */
+                template <GPIO gpio>
+                using outputSet_bits = outputSet_reg::template Bits<utils::reg_access::BitFieldAtomicBitOp<outputSet_reg, static_cast<outputSet_reg::RegType>(gpio)>>;
             };
         };
     };
