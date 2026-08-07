@@ -890,13 +890,13 @@ namespace rp2040::system::gpio {
             static constexpr std::uintptr_t outputBaseAddr = SIOBaseAddr + baseOffset; /**< @brief Base address of either the output or output enable register. */
 
             /**
-             * @brief The output register.
+             * @brief The output/output enable value register.
              */
-            struct output {
-                using output_reg = utils::reg_access::Reg<outputBaseAddr, utils::reg_access::read_write_access, std::uint32_t>; /**< @brief The output or output enable register. */
+            struct value {
+                using value_reg = utils::reg_access::Reg<outputBaseAddr, utils::reg_access::read_write_access, std::uint32_t>; /**< @brief The output or output enable register. */
 
                 /**
-                 * @brief The output/output enable bits as a Bitfield.
+                 * @brief The output/output enable value bits as a Bitfield.
                  *
                  * The options only differ in the enum values. High/Low is more reasonable for the output value, while
                  * Enable/Disable is more reasonable to set output enable bits.
@@ -904,22 +904,22 @@ namespace rp2040::system::gpio {
                  * @tparam gpio The gpio to be configured.
                  */
                 template <GPIO gpio>
-                using OutputBitField = decltype([] () {
+                using ValueBitField = decltype([] () {
                     static_assert(gpio < GPIO::NumberOfGPIOs);
                     if constexpr(baseOffset == gpioOutOffset) {
-                        return std::type_identity_t<utils::reg_access::BitFieldHighLow<output_reg, static_cast<output_reg::RegType>(gpio)>>();
+                        return std::type_identity_t<utils::reg_access::BitFieldHighLow<value_reg, static_cast<value_reg::RegType>(gpio)>>();
                     } else if constexpr (baseOffset == gpioOutEnOffset) {
-                        return std::type_identity_t<utils::reg_access::BitFieldEnableDisable<output_reg, static_cast<output_reg::RegType>(gpio)>>();
+                        return std::type_identity_t<utils::reg_access::BitFieldEnableDisable<value_reg, static_cast<value_reg::RegType>(gpio)>>();
                     }
                 }());
 
                 /**
-                 * @brief The output/output enable bits.
+                 * @brief The output/output enable value bits.
                  *
                  * @tparam gpio The gpio to be configured.
                  */
                 template <GPIO gpio>
-                using output_bits = output_reg::template Bits<OutputBitField<gpio>>;
+                using value_bits = value_reg::template Bits<ValueBitField<gpio>>;
             };
 
             /**
@@ -927,9 +927,9 @@ namespace rp2040::system::gpio {
              *
              * This is an atomic register.
              */
-            struct output_set {
+            struct set {
                 static constexpr std::uintptr_t outputSetAddr = outputBaseAddr + setOffset; /**< @brief Base address of the atomic set register. */
-                using outputSet_reg = utils::reg_access::Reg<outputSetAddr, utils::reg_access::atomic_set, std::uint32_t>; /**< @brief The atomic set register. */
+                using set_reg = utils::reg_access::Reg<outputSetAddr, utils::reg_access::atomic_set, std::uint32_t>; /**< @brief The atomic set register. */
 
                 /**
                  * @brief The output set bits.
@@ -939,7 +939,7 @@ namespace rp2040::system::gpio {
                  * @tparam gpio The gpio for which the output is to be set.
                  */
                 template <GPIO gpio>
-                using outputSet_bits = outputSet_reg::template Bits<utils::reg_access::BitFieldAtomicBitOp<outputSet_reg, static_cast<outputSet_reg::RegType>(gpio)>>;
+                using set_bits = set_reg::template Bits<utils::reg_access::BitFieldAtomicBitOp<set_reg, static_cast<set_reg::RegType>(gpio)>>;
             };
 
             /**
@@ -947,9 +947,9 @@ namespace rp2040::system::gpio {
              *
              * This is an atomic register.
              */
-            struct output_clear {
+            struct clear {
                 static constexpr std::uintptr_t outputClearAddr = outputBaseAddr + clearOffset; /**< @brief Base address of the atomic clear register. */
-                using outputClear_reg = utils::reg_access::Reg<outputClearAddr, utils::reg_access::atomic_clear, std::uint32_t>; /**< @brief The atomic clear register. */
+                using clear_reg = utils::reg_access::Reg<outputClearAddr, utils::reg_access::atomic_clear, std::uint32_t>; /**< @brief The atomic clear register. */
 
                 /**
                  * @brief The output clear bits.
@@ -959,7 +959,7 @@ namespace rp2040::system::gpio {
                  * @tparam gpio The gpio for which the output is to be cleared.
                  */
                 template <GPIO gpio>
-                using outputClear_bits = outputClear_reg::template Bits<utils::reg_access::BitFieldAtomicBitOp<outputClear_reg, static_cast<outputClear_reg::RegType>(gpio)>>;
+                using clear_bits = clear_reg::template Bits<utils::reg_access::BitFieldAtomicBitOp<clear_reg, static_cast<clear_reg::RegType>(gpio)>>;
             };
 
             /**
@@ -967,9 +967,9 @@ namespace rp2040::system::gpio {
             *
             * This is an atomic register.
             */
-            struct output_toggle {
+            struct toggle {
                 static constexpr std::uintptr_t outputXorAddr = outputBaseAddr + xorOffset; /**< @brief Base address of the atomic xor register. */
-                using outputToggle_reg = utils::reg_access::Reg<outputXorAddr, utils::reg_access::atomic_xor, std::uint32_t>; /**< @brief The atomic xor register. */
+                using toggle_reg = utils::reg_access::Reg<outputXorAddr, utils::reg_access::atomic_xor, std::uint32_t>; /**< @brief The atomic xor register. */
 
                 /**
                  * @brief The output toggle bits.
@@ -979,7 +979,7 @@ namespace rp2040::system::gpio {
                  * @tparam gpio The gpio for which the output is to be toggled.
                  */
                 template <GPIO gpio>
-                using outputClear_bits = outputToggle_reg::template Bits<utils::reg_access::BitFieldAtomicBitOp<outputToggle_reg, static_cast<outputToggle_reg::RegType>(gpio)>>;
+                using toggle_bits = toggle_reg::template Bits<utils::reg_access::BitFieldAtomicBitOp<toggle_reg, static_cast<toggle_reg::RegType>(gpio)>>;
             };
         };
 
