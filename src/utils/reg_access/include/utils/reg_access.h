@@ -310,6 +310,10 @@ namespace utils::reg_access {
         }
     };
 
+
+
+    constexpr unsigned int bitsPerByte = 8U; /**< @brief Constant used in general BitField error checking. */
+
     /**
      * @brief General BitField for a single enable/disable bit.
      *
@@ -322,6 +326,8 @@ namespace utils::reg_access {
     struct BitFieldEnableDisable {
         using reg = Reg; /**< @brief Alias for the register the bitfield belongs to. */
         using T = reg::RegType; /**< @brief Alias for the underlying data type of the register. */
+
+        static_assert(Pos < (sizeof(T) * bitsPerByte), "Pos too large for register data type.");
 
         static constexpr T position = Pos; /**< @brief The position of the bitfield in the register. */
         static constexpr T mask = (0x1UL << position); /**< @brief The mask of the bitfield used in bit operations. */
@@ -347,6 +353,8 @@ namespace utils::reg_access {
     struct BitFieldHighLow {
         using reg = Reg; /**< @brief Alias for the register the bitfield belongs to. */
         using T = reg::RegType; /**< @brief Alias for the underlying data type of the register. */
+
+        static_assert(Pos < (sizeof(T) * bitsPerByte), "Pos too large for register data type.");
 
         static constexpr T position = Pos; /**< @brief The position of the bitfield in the register. */
         static constexpr T mask = (0x1UL << position); /**< @brief The mask of the bitfield used in bit operations. */
@@ -376,6 +384,8 @@ namespace utils::reg_access {
         using T = reg::RegType; /**< @brief Alias for the underlying data type of the register. */
 
         static_assert(std::is_same_v<T, decltype(Value)>);
+        static_assert(Pos < (sizeof(T) * bitsPerByte), "Pos too large for register data type.");
+        static_assert(((Mask << Pos) >> Pos) == Mask, "Mask overflows after shifting by Pos.");
 
         static constexpr T position = Pos; /**< @brief The position of the bitfield in the register. */
         static constexpr T mask = (Mask << position); /**< @brief The mask of the bitfield used in bit operations. */
@@ -391,6 +401,23 @@ namespace utils::reg_access {
         enum class value : T {
             val = Value
         };
+    };
+
+    /**
+     * @brief Specialized BitField for atomic operations where only a single bit needs to be set.
+     *
+     * @tparam Reg The register to which the BitField belongs. @see Reg
+     * @tparam Pos The position of the bit within the register.
+     */
+    template <typename Reg, std::uint32_t Pos>
+    struct BitFieldAtomicBitOp {
+        using reg = Reg; /**< @brief Alias for the register the bitfield belongs to. */
+        using T = reg::RegType; /**< @brief Alias for the underlying data type of the register. */
+
+        static_assert(Pos < (sizeof(T) * bitsPerByte), "Pos too large for register data type.");
+
+        static constexpr T position = Pos; /**< @brief The position of the bitfield in the register. */
+        static constexpr T mask = (0x1UL << position); /**< @brief The mask of the bitfield used in bit operations. */
     };
 
 } // utils::reg_access
