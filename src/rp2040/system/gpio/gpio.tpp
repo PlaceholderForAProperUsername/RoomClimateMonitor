@@ -27,6 +27,7 @@
 #define RP2040_SYSTEM_GPIO_TPP
 
 #include "rp2040/system/gpio.h"
+#include "rp2040/system/resets.h"
 
 namespace rp2040::system::gpio {
     /**
@@ -38,6 +39,18 @@ namespace rp2040::system::gpio {
     GpioType<ioBankBase, padsBankBase, sioBase>& GpioType<ioBankBase, padsBankBase, sioBase>::getInstance() {
         static GpioType<ioBankBase, padsBankBase, sioBase> instance;
         return instance;
+    }
+
+    template <std::uintptr_t ioBankBase, std::uintptr_t padsBankBase, std::uintptr_t sioBase>
+    void GpioType<ioBankBase, padsBankBase, sioBase>::init() {
+        if (m_flags.test(static_cast<std::uint32_t>(Flags::Initialized))) {
+            return;
+        }
+
+        Resets::getInstance().reset<SubsystemBits::IO_BANK0>();
+        Resets::getInstance().reset<SubsystemBits::PADS_BANK0>();
+
+        m_flags.set(static_cast<std::uint32_t>(Flags::Initialized));
     }
 
     /** @} */ // rp2040_gpio

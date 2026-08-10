@@ -25,6 +25,9 @@
 #ifndef RP2040_SYSTEM_GPIO_H
 #define RP2040_SYSTEM_GPIO_H
 
+#include <bitset>
+#include <cstdint>
+
 #include "gpio_def.h"
 
 
@@ -40,8 +43,18 @@ namespace rp2040::system::gpio {
 
     public:
         static GpioType<ioBankBase, padsBankBase, sioBase>& getInstance();
+
+        void init();
+
     private:
-        GpioType() = default;
+        GpioType() : m_flags(0) {};
+
+        enum Flags : std::uint32_t {
+            Initialized = 0x0U,
+            NumberOfFlags,
+        };
+
+        std::bitset<static_cast<std::uint32_t>(Flags::NumberOfFlags)> m_flags;
     };
 
     using GPIO = GpioType<IO_BANK0_BASE, PADS_BANK0_BASE, SIO_BASE>;
