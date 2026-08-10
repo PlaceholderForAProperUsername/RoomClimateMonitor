@@ -40,9 +40,9 @@ namespace rp2040::system::gpio {
     constexpr std::uintptr_t SIO_BASE = 0xD0000000U; /**< @brief Base address of the software input/output registers. */
 
     /**
-     * @brief The GPIOs of the RP2040.
+     * @brief The GPIO pins of the RP2040.
      */
-    enum class GPIO : std::uint8_t {
+    enum class Pins : std::uint8_t {
         GPIO0 = 0U,
         GPIO1 = 1U,
         GPIO2 = 2U,
@@ -183,9 +183,9 @@ namespace rp2040::system::gpio {
          *
          * @tparam gpio The GPIO to which the regmap belongs.
          */
-        template <GPIO gpio>
+        template <Pins gpio>
         struct GPIOX_RegMap {
-            static_assert(gpio < GPIO::NumberOfGPIOs, "Invalid GPIO. There are only 29 user GPIOs.");
+            static_assert(gpio < Pins::NumberOfGPIOs, "Invalid GPIO. There are only 29 user GPIOs.");
 
             static constexpr std::uint8_t BytesPerGPIORegisters {8U}; /**< @brief The number of bytes required for the ctrl and status registers of a GPIO. */
             static constexpr std::uint8_t offset = static_cast<std::uint8_t>(gpio) * BytesPerGPIORegisters; /**< @brief The offset of the registers of the gpio. */
@@ -400,7 +400,7 @@ namespace rp2040::system::gpio {
                      * GPIO20 - GPIO25 can additionally be configured for clock input/output.
                      */
                     using value = decltype([]() {
-                        if constexpr ((gpio >= GPIO::GPIO20) && (gpio <= GPIO::GPIO25)) {
+                        if constexpr ((gpio >= Pins::GPIO20) && (gpio <= Pins::GPIO25)) {
                             return std::type_identity_t<GPIO_FunctionsWithClock>();
                         } else {
                             return std::type_identity_t<GPIO_Functions>();
@@ -422,9 +422,9 @@ namespace rp2040::system::gpio {
          * @tparam base The base of the interrupt register.
          * @tparam type The type of the interrupt register.
          */
-        template <GPIO gpio, InterruptBase base, InterruptType type>
+        template <Pins gpio, InterruptBase base, InterruptType type>
         struct InterruptGPIOX_RegMap {
-            static_assert(gpio < GPIO::NumberOfGPIOs, "Invalid GPIO.");
+            static_assert(gpio < Pins::NumberOfGPIOs, "Invalid GPIO.");
 
             static_assert((base == InterruptBase::RAW_INTERRUPT && type == InterruptType::RAW) ||
                     ((base == InterruptBase::PROC0 || base == InterruptBase::PROC1 || base == InterruptBase::DORMANT_WAKE) &&
@@ -549,7 +549,7 @@ namespace rp2040::system::gpio {
          *
          * @tparam gpio The gpio for which the status of the interrupts is to be read/cleared.
          */
-        template <GPIO gpio>
+        template <Pins gpio>
         using rawInterruptRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::RAW_INTERRUPT, InterruptType::RAW>;
 
         /**
@@ -557,7 +557,7 @@ namespace rp2040::system::gpio {
          *
          * @tparam gpio The gpio for which the interrupt is to be enabled.
          */
-        template <GPIO gpio>
+        template <Pins gpio>
         using proc0InterruptEnableRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::PROC0, InterruptType::ENABLE>;
 
         /**
@@ -565,7 +565,7 @@ namespace rp2040::system::gpio {
          *
          * @tparam gpio The gpio for which the interrupt is to be forced.
          */
-        template <GPIO gpio>
+        template <Pins gpio>
         using proc0InterruptForceRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::PROC0, InterruptType::FORCE>;
 
         /**
@@ -573,7 +573,7 @@ namespace rp2040::system::gpio {
          *
          * @tparam gpio The gpio for which the interrupt status is to be read.
          */
-        template <GPIO gpio>
+        template <Pins gpio>
         using proc0InterruptStatusRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::PROC0, InterruptType::STATUS>;
 
         /**
@@ -581,7 +581,7 @@ namespace rp2040::system::gpio {
          *
          * @tparam gpio The gpio for which the interrupt is to be enabled.
          */
-        template <GPIO gpio>
+        template <Pins gpio>
         using proc1InterruptEnableRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::PROC1, InterruptType::ENABLE>;
 
         /**
@@ -589,7 +589,7 @@ namespace rp2040::system::gpio {
          *
          * @tparam gpio The gpio for which the interrupt is to be forced.
          */
-        template <GPIO gpio>
+        template <Pins gpio>
         using proc1InterruptForceRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::PROC1, InterruptType::FORCE>;
 
         /**
@@ -597,7 +597,7 @@ namespace rp2040::system::gpio {
          *
          * @tparam gpio The gpio for which the interrupt status is to be read.
          */
-        template <GPIO gpio>
+        template <Pins gpio>
         using proc1InterruptStatusRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::PROC1, InterruptType::STATUS>;
 
         /**
@@ -605,7 +605,7 @@ namespace rp2040::system::gpio {
          *
          * @tparam gpio The gpio for which the interrupt is to be enabled.
          */
-        template <GPIO gpio>
+        template <Pins gpio>
         using dormWakeInterruptEnableRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::DORMANT_WAKE, InterruptType::ENABLE>;
 
         /**
@@ -613,7 +613,7 @@ namespace rp2040::system::gpio {
          *
          * @tparam gpio The gpio for which the interrupt is to be forced.
          */
-        template <GPIO gpio>
+        template <Pins gpio>
         using dormWakeInterruptForceRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::DORMANT_WAKE, InterruptType::FORCE>;
 
         /**
@@ -621,7 +621,7 @@ namespace rp2040::system::gpio {
          *
          * @tparam gpio The gpio for which the interrupt status is to be read.
          */
-        template <GPIO gpio>
+        template <Pins gpio>
         using dormWakeInterruptStatusRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::DORMANT_WAKE, InterruptType::STATUS>;
 
     };
@@ -857,15 +857,15 @@ namespace rp2040::system::gpio {
              *
              * @tparam gpio The GPIO where the input value is to be get.
              */
-            template <GPIO gpio>
-            requires (gpio < GPIO::NumberOfGPIOs)
+            template <Pins gpio>
+            requires (gpio < Pins::NumberOfGPIOs)
             using InputBitField = utils::reg_access::BitFieldHighLow<input_reg, static_cast<input_reg::RegType>(gpio)>;
             /**
              * @brief The input bit of the gpio.
              *
              * @tparam gpio The GPIO where the input value is to be get.
              */
-            template <GPIO gpio>
+            template <Pins gpio>
             using input_bits = input_reg::template Bits<InputBitField<gpio>>;
         };
 
@@ -903,9 +903,9 @@ namespace rp2040::system::gpio {
                  *
                  * @tparam gpio The gpio to be configured.
                  */
-                template <GPIO gpio>
+                template <Pins gpio>
                 using ValueBitField = decltype([] () {
-                    static_assert(gpio < GPIO::NumberOfGPIOs);
+                    static_assert(gpio < Pins::NumberOfGPIOs);
                     if constexpr(baseOffset == gpioOutOffset) {
                         return std::type_identity_t<utils::reg_access::BitFieldHighLow<value_reg, static_cast<value_reg::RegType>(gpio)>>();
                     } else if constexpr (baseOffset == gpioOutEnOffset) {
@@ -918,7 +918,7 @@ namespace rp2040::system::gpio {
                  *
                  * @tparam gpio The gpio to be configured.
                  */
-                template <GPIO gpio>
+                template <Pins gpio>
                 using value_bits = value_reg::template Bits<ValueBitField<gpio>>;
             };
 
@@ -938,7 +938,7 @@ namespace rp2040::system::gpio {
                  *
                  * @tparam gpio The gpio for which the output is to be set.
                  */
-                template <GPIO gpio>
+                template <Pins gpio>
                 using set_bits = set_reg::template Bits<utils::reg_access::BitFieldAtomicBitOp<set_reg, static_cast<set_reg::RegType>(gpio)>>;
             };
 
@@ -958,7 +958,7 @@ namespace rp2040::system::gpio {
                  *
                  * @tparam gpio The gpio for which the output is to be cleared.
                  */
-                template <GPIO gpio>
+                template <Pins gpio>
                 using clear_bits = clear_reg::template Bits<utils::reg_access::BitFieldAtomicBitOp<clear_reg, static_cast<clear_reg::RegType>(gpio)>>;
             };
 
@@ -978,7 +978,7 @@ namespace rp2040::system::gpio {
                  *
                  * @tparam gpio The gpio for which the output is to be toggled.
                  */
-                template <GPIO gpio>
+                template <Pins gpio>
                 using toggle_bits = toggle_reg::template Bits<utils::reg_access::BitFieldAtomicBitOp<toggle_reg, static_cast<toggle_reg::RegType>(gpio)>>;
             };
         };
