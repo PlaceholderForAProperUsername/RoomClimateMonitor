@@ -1,4 +1,4 @@
-set(TARGET "RP2040_GPIO")
+set(TARGET "RP2040_System_GPIO")
 
 add_library(${TARGET} INTERFACE)
 

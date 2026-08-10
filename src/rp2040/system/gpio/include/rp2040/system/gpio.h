@@ -28,6 +28,27 @@
 #include "gpio_def.h"
 
 
+namespace rp2040::system::gpio {
+    /**
+     * @addtogroup rp2040_gpio
+     * @{
+     */
+
+    template <std::uintptr_t ioBankBase, std::uintptr_t padsBankBase, std::uintptr_t sioBase>
+    class GpioType {
+        static_assert((ioBankBase == IO_BANK0_BASE) && (padsBankBase == PADS_BANK0_BASE) && (sioBase == SIO_BASE), "Invalid gpio base addresses.");
+
+    public:
+        static GpioType<ioBankBase, padsBankBase, sioBase>& getInstance();
+    private:
+        GpioType() = default;
+    };
+
+    using GPIO = GpioType<IO_BANK0_BASE, PADS_BANK0_BASE, SIO_BASE>;
+
+    /** @} */ // rp2040_gpio
+} // rp2040::system::gpio
+
 
 
 #include "../../../gpio.tpp"

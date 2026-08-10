@@ -26,4 +26,21 @@
 #ifndef RP2040_SYSTEM_GPIO_TPP
 #define RP2040_SYSTEM_GPIO_TPP
 
+#include "rp2040/system/gpio.h"
+
+namespace rp2040::system::gpio {
+    /**
+     * @addtogroup rp2040_gpio
+     * @{
+     */
+
+    template <std::uintptr_t ioBankBase, std::uintptr_t padsBankBase, std::uintptr_t sioBase>
+    GpioType<ioBankBase, padsBankBase, sioBase>& GpioType<ioBankBase, padsBankBase, sioBase>::getInstance() {
+        static GpioType<ioBankBase, padsBankBase, sioBase> instance;
+        return instance;
+    }
+
+    /** @} */ // rp2040_gpio
+} // rp2040::system::gpio
+
 #endif //RP2040_SYSTEM_GPIO_TPP
