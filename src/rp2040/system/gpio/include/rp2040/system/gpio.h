@@ -37,27 +37,47 @@ namespace rp2040::system::gpio {
      * @{
      */
 
+    /**
+     * @brief The GPIO type to configure and use the GPIOs.
+     *
+     * @tparam ioBankBase The address of the User Bank IO registers.
+     * @tparam padsBankBase The address of the User Bank Pad Control registers.
+     * @tparam sioBase The address of the Software IO registers.
+     */
     template <std::uintptr_t ioBankBase, std::uintptr_t padsBankBase, std::uintptr_t sioBase>
     class GpioType {
         static_assert((ioBankBase == IO_BANK0_BASE) && (padsBankBase == PADS_BANK0_BASE) && (sioBase == SIO_BASE), "Invalid gpio base addresses.");
 
     public:
+        /**
+         * @brief Gets the Singleton instance.
+         *
+         * @return GpioType& The Singleton instance.
+         */
         static GpioType<ioBankBase, padsBankBase, sioBase>& getInstance();
 
+        /**
+         * @brief Initializes the GPIO module by taking it out of reset.
+         *
+         * @pre None
+         *
+         * @post The GPIO is taken out of reset and the GPIO is configurable/usable.
+         */
         void init();
 
     private:
         GpioType() : m_flags(0) {};
 
         enum Flags : std::uint32_t {
-            Initialized = 0x0U,
+            Initialized = 0U,
             NumberOfFlags,
         };
 
         std::bitset<static_cast<std::uint32_t>(Flags::NumberOfFlags)> m_flags;
     };
 
-    using GPIO = GpioType<IO_BANK0_BASE, PADS_BANK0_BASE, SIO_BASE>;
+
+    using GPIO = GpioType<IO_BANK0_BASE, PADS_BANK0_BASE, SIO_BASE>; /**< @brief The GPIO. */
 
     /** @} */ // rp2040_gpio
 } // rp2040::system::gpio
