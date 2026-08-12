@@ -65,6 +65,15 @@ namespace rp2040::system::gpio {
          */
         void init();
 
+        /**
+         * @brief Deinitializes the GPIO module by putting it in reset.
+         *
+         * @pre None
+         *
+         * @post The GPIO is deinitialized.
+         */
+        void deinit();
+
     private:
         GpioType() : m_flags(0) {};
 

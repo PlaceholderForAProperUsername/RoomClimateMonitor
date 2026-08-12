@@ -53,6 +53,18 @@ namespace rp2040::system::gpio {
         m_flags.set(static_cast<std::uint32_t>(Flags::Initialized));
     }
 
+    template <std::uintptr_t ioBankBase, std::uintptr_t padsBankBase, std::uintptr_t sioBase>
+    void GpioType<ioBankBase, padsBankBase, sioBase>::deinit() {
+        if (!m_flags.test(static_cast<std::uint32_t>(Flags::Initialized))) {
+            return;
+        }
+
+        Resets::getInstance().disable<SubsystemBits::IO_BANK0>();
+        Resets::getInstance().disable<SubsystemBits::PADS_BANK0>();
+
+        m_flags.reset(static_cast<std::uint32_t>(Flags::Initialized));
+    }
+
     /** @} */ // rp2040_gpio
 } // rp2040::system::gpio
 
