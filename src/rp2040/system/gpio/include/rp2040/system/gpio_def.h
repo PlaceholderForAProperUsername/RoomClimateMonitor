@@ -130,6 +130,7 @@ namespace rp2040::system::gpio {
         PIO1 = 7U,
         CLOCK = 8U, /**< @brief Only available for GPIO20 - GPIO25.  */
         USB = 9U,
+        NumberOfFunctions,
     };
 
     /**
