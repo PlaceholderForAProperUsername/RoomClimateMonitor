@@ -77,7 +77,9 @@ namespace rp2040::system::gpio {
     };
 
     /**
-     * @brief The elements that can be configured via user bank pad control registers.
+     * @brief The pads of the RP2040.
+     *
+     * The pads include the GPIOs and additionally SWCLK and SWD.
      */
     enum class Pads : std::uint8_t {
         GPIO0 = 0U,
@@ -115,13 +117,10 @@ namespace rp2040::system::gpio {
         NumberOfPads
     };
 
-
     /**
-     * @brief Available functions for GPIOs without clock functionality.
-     *
-     * These functions are available for GPIO0 - GPIO19 and GPIO26 - GPIO29.
+     * @brief The functions a GPIO can be configured for.
      */
-    enum class GPIO_Functions : std::uint32_t {
+    enum class FuncSelect : std::uint32_t {
         SPI = 1U,
         UART = 2U,
         I2C = 3U,
@@ -129,29 +128,13 @@ namespace rp2040::system::gpio {
         SIO = 5U,
         PIO0 = 6U,
         PIO1 = 7U,
+        CLOCK = 8U, /**< @brief Only available for GPIO20 - GPIO25.  */
         USB = 9U,
     };
 
     /**
-     * @brief Available functions for GPIOs with clock functionality.
-     *
-     * These functions are available for GPIO20 - GPIO25
+     * @brief The base of the interrupt register.
      */
-    enum class GPIO_FunctionsWithClock : std::uint32_t {
-        SPI = 1U,
-        UART = 2U,
-        I2C = 3U,
-        PWM = 4U,
-        SIO = 5U,
-        PIO0 = 6U,
-        PIO1 = 7U,
-        CLOCK = 8U,
-        USB = 9U,
-    };
-
-    /**
- * @brief The base of the interrupt register.
- */
     enum class InterruptBase : std::uint32_t {
         RAW_INTERRUPT = 0x0F0U,
         PROC0 = 0x100U,
@@ -399,13 +382,7 @@ namespace rp2040::system::gpio {
                      *
                      * GPIO20 - GPIO25 can additionally be configured for clock input/output.
                      */
-                    using value = decltype([]() {
-                        if constexpr ((gpio >= Pins::GPIO20) && (gpio <= Pins::GPIO25)) {
-                            return std::type_identity_t<GPIO_FunctionsWithClock>();
-                        } else {
-                            return std::type_identity_t<GPIO_Functions>();
-                        }
-                    }());
+                    using value = FuncSelect;
                 };
 
                 /**
