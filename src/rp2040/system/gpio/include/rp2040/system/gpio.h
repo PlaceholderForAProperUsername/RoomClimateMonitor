@@ -29,6 +29,7 @@
 #include <cstdint>
 
 #include "gpio_def.h"
+#include "utils/status.h"
 
 
 namespace rp2040::system::gpio {
@@ -74,6 +75,22 @@ namespace rp2040::system::gpio {
          */
         void deinit();
 
+        /**
+         * @brief Sets the function for the specified GPIO pin.
+         *
+         * @tparam pin The GPIO pin for which the function is to be set.
+         * @tparam func The function to which the GPIO is to be set.
+         * @return utils::status::Status The status code.
+         * @retval OK The function has been successfully set.
+         * @retval ERROR_INIT The GPIO module was not initialized.
+         *
+         * @pre The GPIO module must be initialized. @see init
+         *
+         * @post The GPIO pin has been configured for the function.
+         */
+        template <Pins pin, FuncSelect func>
+        utils::status::Status set_function();
+
     private:
         GpioType() : m_flags(0) {};
 
@@ -83,6 +100,10 @@ namespace rp2040::system::gpio {
         };
 
         std::bitset<static_cast<std::uint32_t>(Flags::NumberOfFlags)> m_flags;
+
+        using io_bank = IO_BankRegMap<ioBankBase>; /**< @brief The user IO bank to read the status and configure the pin. */
+        using pad_bank = PadsBankRegMap<padsBankBase>; /**< @brief The user pads bank to configure electrical parameters of the pad. */
+        using sio_bank = SIORegMap<sioBase>; /**< @brief Software input/output control. */
     };
 
 

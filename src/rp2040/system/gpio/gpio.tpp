@@ -65,6 +65,23 @@ namespace rp2040::system::gpio {
         m_flags.reset(static_cast<std::uint32_t>(Flags::Initialized));
     }
 
+    template <std::uintptr_t ioBankBase, std::uintptr_t padsBankBase, std::uintptr_t sioBase>
+    template <Pins pin, FuncSelect func>
+    utils::status::Status GpioType<ioBankBase, padsBankBase, sioBase>::set_function() {
+        if (!m_flags.test(static_cast<std::uint32_t>(Flags::Initialized))) {
+            return utils::status::Status::ERROR_INIT;
+        }
+
+        static_assert(pin < Pins::NumberOfGPIOs, "Invalid GPIO pin!");
+        static_assert(func < FuncSelect::NumberOfFunctions &&
+            !(((pin < Pins::GPIO20) || (pin > Pins::GPIO25)) && (func == FuncSelect::CLOCK)),
+            "Invalid function or invalid function assignment (Clock functionality only available for GPIO20-GPIO25)!");
+
+        io_bank::template GPIOX_RegMap<pin>::ctrl::funcSelect_bits::set(func);
+
+        return utils::status::Status::OK;
+    }
+
     /** @} */ // rp2040_gpio
 } // rp2040::system::gpio
 
