@@ -92,7 +92,9 @@ namespace rp2040::system::gpio {
         utils::status::Status set_function();
 
     private:
-        GpioType() : m_flags(0) {};
+        GpioType() : m_flags(0), m_output_enabled(0) {
+            m_input_enabled.set(); // The input is enabled for all GPIO at reset.
+        };
 
         enum Flags : std::uint32_t {
             Initialized = 0U,
@@ -100,6 +102,8 @@ namespace rp2040::system::gpio {
         };
 
         std::bitset<static_cast<std::uint32_t>(Flags::NumberOfFlags)> m_flags;
+        std::bitset<static_cast<std::uint32_t>(Pins::NumberOfGPIOs)> m_input_enabled;
+        std::bitset<static_cast<std::uint32_t>(Pins::NumberOfGPIOs)> m_output_enabled;
 
         using io_bank = IO_BankRegMap<ioBankBase>; /**< @brief The user IO bank to read the status and configure the pin. */
         using pad_bank = PadsBankRegMap<padsBankBase>; /**< @brief The user pads bank to configure electrical parameters of the pad. */

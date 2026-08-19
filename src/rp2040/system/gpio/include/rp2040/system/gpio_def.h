@@ -25,7 +25,6 @@
 #ifndef RP2040_SYSTEM_GPIO_DEF_H
 #define RP2040_SYSTEM_GPIO_DEF_H
 
-#include <complex.h>
 #include <cstdint>
 #include "utils/reg_access.h"
 
