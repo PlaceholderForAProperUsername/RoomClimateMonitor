@@ -26,6 +26,8 @@
 #ifndef RP2040_SYSTEM_GPIO_TPP
 #define RP2040_SYSTEM_GPIO_TPP
 
+#include <utility>
+
 #include "rp2040/system/gpio.h"
 #include "rp2040/system/resets.h"
 
@@ -78,6 +80,30 @@ namespace rp2040::system::gpio {
             "Invalid function or invalid function assignment (Clock functionality only available for GPIO20-GPIO25)!");
 
         io_bank::template GPIOX_RegMap<pin>::ctrl::funcSelect_bits::set(func);
+
+        return utils::status::Status::OK;
+    }
+
+    template <std::uintptr_t ioBankBase, std::uintptr_t padsBankBase, std::uintptr_t sioBase>
+    template <Pins pin, bool enable>
+    utils::status::Status GpioType<ioBankBase, padsBankBase, sioBase>::enable_output() {
+        if (!m_flags.test(static_cast<std::uint32_t>(Flags::Initialized))) {
+            return utils::status::Status::ERROR_INIT;
+        }
+        static_assert(pin < Pins::NumberOfGPIOs, "Invalid GPIO pin!");
+
+        if constexpr (enable) {
+            if (!m_output_enabled.test(static_cast<std::uint32_t>(pin))) {
+                pad_bank::template padX<static_cast<Pads>(std::to_underlying(pin))>::outputDisable_bits::clear();
+                sio_bank::outputEnable::set::template set_bits<pin>::set();
+                m_output_enabled.set(static_cast<std::uint32_t>(pin));
+            }
+        } else {
+            if (m_output_enabled.test(static_cast<std::uint32_t>(pin))) {
+                sio_bank::outputEnable::clear::template clear_bits<pin>::clear();
+                m_output_enabled.reset(static_cast<std::uint32_t>(pin));
+            }
+        }
 
         return utils::status::Status::OK;
     }
