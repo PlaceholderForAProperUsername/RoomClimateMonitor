@@ -108,6 +108,30 @@ namespace rp2040::system::gpio {
         return utils::status::Status::OK;
     }
 
+    template <std::uintptr_t ioBankBase, std::uintptr_t padsBankBase, std::uintptr_t sioBase>
+    template <Pins pin, bool enable>
+    utils::status::Status GpioType<ioBankBase, padsBankBase, sioBase>::enable_input() {
+        if (!m_flags.test(static_cast<std::uint32_t>(Flags::Initialized))) {
+            return utils::status::Status::ERROR_INIT;
+        }
+
+        static_assert(pin < Pins::NumberOfGPIOs, "Invalid GPIO pin!");
+
+        if constexpr (enable) {
+            if (!m_input_enabled.test(static_cast<std::uint32_t>(pin))) {
+                pad_bank::template padX<static_cast<Pads>(std::to_underlying(pin))>::inputEnable_bits::set(pad_bank::template padX<static_cast<Pads>(std::to_underlying(pin))>::InputEnableBitField::value::enable);
+                m_input_enabled.set(static_cast<std::uint32_t>(pin));
+            }
+        } else {
+            if (m_input_enabled.test(static_cast<std::uint32_t>(pin))) {
+                pad_bank::template padX<static_cast<Pads>(std::to_underlying(pin))>::inputEnable_bits::clear();
+                m_input_enabled.reset(static_cast<std::uint32_t>(pin));
+            }
+        }
+
+        return utils::status::Status::OK;
+    }
+
     /** @} */ // rp2040_gpio
 } // rp2040::system::gpio
 

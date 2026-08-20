@@ -108,6 +108,22 @@ namespace rp2040::system::gpio {
         template <Pins pin, bool enable>
         utils::status::Status enable_output();
 
+        /**
+         * @brief Enables/disables the input for a pin.
+         *
+         * @tparam pin The GPIO pin for which the input is to be enabled/disabled.
+         * @tparam enable Boolean to enable (true) or disable (false) the input.
+         * @return utils::status::Status The status code.
+         * @retval OK The input has been successfully enabled/disabled.
+         * @retval ERROR_INIT The GPIO module was not initialized.
+         *
+         * @pre The GPIO module must be initialized. @see init
+         *
+         * @post The input for the GPIO pin is enabled/disabled.
+         */
+        template <Pins pin, bool enable>
+        utils::status::Status enable_input();
+
     private:
         GpioType() : m_flags(0), m_output_enabled(0) {
             m_input_enabled.set(); // The input is enabled for all GPIO at reset.
