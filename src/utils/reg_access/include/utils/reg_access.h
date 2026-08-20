@@ -50,6 +50,8 @@ namespace utils::reg_access {
     struct atomic {};
     /** @brief Tag to enable atomic set operation. */
     struct atomic_set : write_access, atomic {};
+    /** @brief Specialized Tag to enable atomic set operation where the value is the mask. */
+    struct atomic_set_mask : write_access, atomic {};
     /** @brief Tag to enable atomic clear operation. */
     struct atomic_clear : write_access, atomic {};
     /** @brief Tag to enable atomic xor operation. */
@@ -90,20 +92,7 @@ namespace utils::reg_access {
     concept BitFieldConcept =
             std::is_same_v<Reg, typename BitField::reg> &&
             std::is_same_v<decltype(BitField::position), const T> &&
-            std::is_same_v<decltype(BitField::mask), const T>;
-
-    /**
-     * @brief Check if a bit field has an enum.
-     *
-     * This is required for bit set operations, except for atomic set where the mask is the only valid value.
-     *
-     * @tparam BitField The BitField instance to check.
-     * @tparam T The base data type of the register.
-     *
-     * @ingroup reg_access
-     */
-    template <typename BitField, typename T>
-    concept HasEnumConcept =
+            std::is_same_v<decltype(BitField::mask), const T> &&
             std::is_enum_v<typename BitField::value> &&
             std::is_same_v<std::underlying_type_t<typename BitField::value>, T>;
 
@@ -138,7 +127,6 @@ namespace utils::reg_access {
              * @return None
              */
             template <typename BitsAccess_ = BitsAccess>
-            requires HasEnumConcept<BitField, RegType>
             static std::enable_if_t<std::is_base_of_v<read_write_access, BitsAccess_>, void>
             set(BitField::value bits_value)
             {
@@ -158,7 +146,6 @@ namespace utils::reg_access {
              * @return
              */
             template <typename BitsAccess_ = BitsAccess>
-            requires HasEnumConcept<BitField, RegType>
             static std::enable_if_t<std::is_base_of_v<atomic_set, BitsAccess_>, void>
             set(BitField::value bits_value)
             {
@@ -177,8 +164,7 @@ namespace utils::reg_access {
              * @return
              */
             template <typename BitsAccess_ = BitsAccess>
-            requires (!HasEnumConcept<BitField, RegType>)
-            static std::enable_if_t<std::is_base_of_v<atomic_set, BitsAccess_>, void>
+            static std::enable_if_t<std::is_base_of_v<atomic_set_mask, BitsAccess_>, void>
             set()
             {
                 T reg_value =  BitField::mask;
@@ -418,6 +404,15 @@ namespace utils::reg_access {
 
         static constexpr T position = Pos; /**< @brief The position of the bitfield in the register. */
         static constexpr T mask = (0x1UL << position); /**< @brief The mask of the bitfield used in bit operations. */
+
+        /** @brief Empty enum required to make the program compile.
+         *
+         * Even though this BitField is intended for the @see set function in @see Regs::Bits without arguments and a concept was used
+         * to only select the @see set function without arguments. The compilation would still fail, as the other set functions,
+         * which take a BitField::value as an argument, even though those functions would be discarded via concept, required
+         * that type to compile. Therefore this dummy enum is needed.
+         */
+        enum class value : T {};
     };
 
 } // utils::reg_access
