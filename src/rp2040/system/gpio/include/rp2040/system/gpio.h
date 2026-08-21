@@ -109,6 +109,23 @@ namespace rp2040::system::gpio {
         utils::status::Status enable_output();
 
         /**
+         * @brief Sets the output level of a GPIO pin.
+         *
+         * @tparam pin The GPIO pin for which the output is to be set.
+         * @tparam high Boolean to set the output high (true) or low (false).
+         * @return utils::status::Status The status code.
+         * @retval OK The output has been successfully set
+         * @retval ERROR_INIT The GPIO module was not initialized.
+         * @retval ERROR_GENERIC The GPIO pin is not configured to be an output.
+         *
+         * @pre The GPIO module must be initialized and be set as an output pin. @see init @see enable_output
+         *
+         * @post The output level for the GPIO pin has been set.
+         */
+        template <Pins pin, bool high>
+        utils::status::Status set_output();
+
+        /**
          * @brief Enables/disables the input for a pin.
          *
          * @tparam pin The GPIO pin for which the input is to be enabled/disabled.
