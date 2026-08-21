@@ -27,6 +27,7 @@
 
 #include <bitset>
 #include <cstdint>
+#include <expected>
 
 #include "gpio_def.h"
 #include "utils/status.h"
@@ -140,6 +141,22 @@ namespace rp2040::system::gpio {
          */
         template <Pins pin, bool enable>
         utils::status::Status enable_input();
+
+        /**
+         * @brief Gets the input value of a GPIO pin.
+         *
+         * @tparam pin The GPIO pin for which the input is read.
+         * @return std::expected<bool, utils::status::Status> Either a boolean indicating the level or a status code in case of failure.
+         * @retval Bool True if GPIO level is high or false if low.
+         * @retval ERROR_INIT The GPIO module was not initialized.
+         * @retval ERROR_GENERIC The GPIO pin is not configured to be an input pin.
+         *
+         * @pre The GPIO module must be initialized and the GPIO pin configured to be an input. @see init @see enable_input
+         *
+         * @post None
+         */
+        template <Pins pin>
+        std::expected<bool, utils::status::Status> get_input();
 
     private:
         GpioType() : m_flags(0), m_output_enabled(0) {
