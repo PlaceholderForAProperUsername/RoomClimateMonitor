@@ -1,0 +1,8 @@
+//
+//  on 25.08.26.
+//
+
+#ifndef RP2040_HARDWARE_I2C_DEF_H
+#define RP2040_HARDWARE_I2C_DEF_H
+
+#endif //RP2040_HARDWARE_I2C_DEF_H
