@@ -47,9 +47,9 @@ namespace rp2040::system::pll {
 
     template <std::uintptr_t pll_addr>
     template <PLL_ConfigType config, std::uint32_t refFreq_Hz>
-    std::expected<unsigned int, utils::status::Status> PLL_Type<pll_addr>::setFrequency() {
+    std::expected<unsigned int, status::Status> PLL_Type<pll_addr>::setFrequency() {
         if (!this->m_flags.test(static_cast<std::uint32_t>(Flags::isInitialized))) {
-            return std::unexpected(utils::status::Status::ERROR_INIT);
+            return std::unexpected(status::Status::ERROR_INIT);
         }
 
         static_assert((limits::refClockMinFreq_Hz <= refFreq_Hz) && (refFreq_Hz <= limits::refClockMaxFreq_Hz) , "Invalid reference clock frequency");
@@ -100,13 +100,13 @@ namespace rp2040::system::pll {
     }
 
     template <std::uintptr_t pll_addr>
-    std::expected<unsigned int, utils::status::Status> PLL_Type<pll_addr>::getFrequency() {
+    std::expected<unsigned int, status::Status> PLL_Type<pll_addr>::getFrequency() {
         if (!this->m_flags.test(static_cast<std::uint32_t>(Flags::isInitialized))) {
-            return std::unexpected(utils::status::Status::ERROR_INIT);
+            return std::unexpected(status::Status::ERROR_INIT);
         }
 
         if (this->m_frequency_hz == 0) {
-            return std::unexpected(utils::status::Status::ERROR_RESOURCE);
+            return std::unexpected(status::Status::ERROR_RESOURCE);
         }
 
         return this->m_frequency_hz;

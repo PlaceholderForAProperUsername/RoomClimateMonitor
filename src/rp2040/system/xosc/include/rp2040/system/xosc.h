@@ -30,7 +30,7 @@
 #include <expected>
 
 #include "xosc_def.h"
-#include "utils/status.h"
+#include "status.h"
 
 namespace rp2040::system {
     /**
@@ -111,7 +111,7 @@ namespace rp2040::system {
          * @retval ERROR_INIT The frequency is not initialized. @see init
          * @retval ERROR_RESOURCE The XOSC is paused and thus unavailable. @see wake
          */
-        std::expected<unsigned int, utils::status::Status> getFrequency();
+        std::expected<unsigned int, status::Status> getFrequency();
 
     private:
         XOSC_Type() : m_flags(0) {};

@@ -27,10 +27,9 @@
 
 /**
  * @defgroup status Status codes to verify the status of the program.
- * @ingroup utils
  */
 
-namespace utils::status {
+namespace status {
     /**
      * @brief The status codes.
      *

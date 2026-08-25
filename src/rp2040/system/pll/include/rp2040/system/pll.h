@@ -28,7 +28,7 @@
 #include <bitset>
 #include <expected>
 
-#include "utils/status.h"
+#include "status.h"
 #include "pll_def.h"
 
 
@@ -122,7 +122,7 @@ namespace rp2040::system::pll {
          * @post The PLL runs at the configured frequency.
          */
         template <PLL_ConfigType config, std::uint32_t refFreq_Hz = 12'000'000U>
-        std::expected<unsigned int, utils::status::Status> setFrequency();
+        std::expected<unsigned int, status::Status> setFrequency();
 
         /**
          * @brief Returns the frequency at which the PLL runs.
@@ -136,7 +136,7 @@ namespace rp2040::system::pll {
          *
          * @post None
          */
-        std::expected<unsigned int, utils::status::Status> getFrequency();
+        std::expected<unsigned int, status::Status> getFrequency();
 
 
     private:

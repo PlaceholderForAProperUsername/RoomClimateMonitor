@@ -69,9 +69,9 @@ namespace rp2040::system::gpio {
 
     template <std::uintptr_t ioBankBase, std::uintptr_t padsBankBase, std::uintptr_t sioBase>
     template <Pins pin, FuncSelect func>
-    utils::status::Status GpioType<ioBankBase, padsBankBase, sioBase>::set_function() {
+    status::Status GpioType<ioBankBase, padsBankBase, sioBase>::set_function() {
         if (!m_flags.test(static_cast<std::uint32_t>(Flags::Initialized))) {
-            return utils::status::Status::ERROR_INIT;
+            return status::Status::ERROR_INIT;
         }
 
         static_assert(pin < Pins::NumberOfGPIOs, "Invalid GPIO pin!");
@@ -81,14 +81,14 @@ namespace rp2040::system::gpio {
 
         io_bank::template GPIOX_RegMap<pin>::ctrl::funcSelect_bits::set(func);
 
-        return utils::status::Status::OK;
+        return status::Status::OK;
     }
 
     template <std::uintptr_t ioBankBase, std::uintptr_t padsBankBase, std::uintptr_t sioBase>
     template <Pins pin, bool enable>
-    utils::status::Status GpioType<ioBankBase, padsBankBase, sioBase>::enable_output() {
+    status::Status GpioType<ioBankBase, padsBankBase, sioBase>::enable_output() {
         if (!m_flags.test(static_cast<std::uint32_t>(Flags::Initialized))) {
-            return utils::status::Status::ERROR_INIT;
+            return status::Status::ERROR_INIT;
         }
         static_assert(pin < Pins::NumberOfGPIOs, "Invalid GPIO pin!");
 
@@ -105,17 +105,17 @@ namespace rp2040::system::gpio {
             }
         }
 
-        return utils::status::Status::OK;
+        return status::Status::OK;
     }
 
     template <std::uintptr_t ioBankBase, std::uintptr_t padsBankBase, std::uintptr_t sioBase>
     template <Pins pin, bool high>
-    utils::status::Status GpioType<ioBankBase, padsBankBase, sioBase>::set_output() {
+    status::Status GpioType<ioBankBase, padsBankBase, sioBase>::set_output() {
         if (!m_flags.test(static_cast<std::uint32_t>(Flags::Initialized))) {
-            return utils::status::Status::ERROR_INIT;
+            return status::Status::ERROR_INIT;
         }
         if (!m_output_enabled.test(static_cast<std::uint32_t>(pin))) {
-            return utils::status::Status::ERROR_GENERIC;
+            return status::Status::ERROR_GENERIC;
         }
         static_assert(pin < Pins::NumberOfGPIOs, "Invalid GPIO pin!");
 
@@ -124,30 +124,30 @@ namespace rp2040::system::gpio {
         } else {
             sio_bank::output::clear::template clear_bits<pin>::clear();
         }
-        return utils::status::Status::OK;
+        return status::Status::OK;
     }
 
     template <std::uintptr_t ioBankBase, std::uintptr_t padsBankBase, std::uintptr_t sioBase>
     template <Pins pin>
-    utils::status::Status GpioType<ioBankBase, padsBankBase, sioBase>::toggle_output() {
+    status::Status GpioType<ioBankBase, padsBankBase, sioBase>::toggle_output() {
         if (!m_flags.test(static_cast<std::uint32_t>(Flags::Initialized))) {
-            return utils::status::Status::ERROR_INIT;
+            return status::Status::ERROR_INIT;
         }
         if (!m_output_enabled.test(static_cast<std::uint32_t>(pin))) {
-            return utils::status::Status::ERROR_GENERIC;
+            return status::Status::ERROR_GENERIC;
         }
         static_assert(pin < Pins::NumberOfGPIOs, "Invalid GPIO pin!");
 
         sio_bank::output::toggle::template toggle_bits<pin>::toggle();
 
-        return utils::status::Status::OK;
+        return status::Status::OK;
     }
 
     template <std::uintptr_t ioBankBase, std::uintptr_t padsBankBase, std::uintptr_t sioBase>
     template <Pins pin, bool enable>
-    utils::status::Status GpioType<ioBankBase, padsBankBase, sioBase>::enable_input() {
+    status::Status GpioType<ioBankBase, padsBankBase, sioBase>::enable_input() {
         if (!m_flags.test(static_cast<std::uint32_t>(Flags::Initialized))) {
-            return utils::status::Status::ERROR_INIT;
+            return status::Status::ERROR_INIT;
         }
 
         static_assert(pin < Pins::NumberOfGPIOs, "Invalid GPIO pin!");
@@ -164,17 +164,17 @@ namespace rp2040::system::gpio {
             }
         }
 
-        return utils::status::Status::OK;
+        return status::Status::OK;
     }
 
     template <std::uintptr_t ioBankBase, std::uintptr_t padsBankBase, std::uintptr_t sioBase>
     template <Pins pin>
-    std::expected<bool, utils::status::Status> GpioType<ioBankBase, padsBankBase, sioBase>::get_input() {
+    std::expected<bool, status::Status> GpioType<ioBankBase, padsBankBase, sioBase>::get_input() {
         if (!m_flags.test(static_cast<std::uint32_t>(Flags::Initialized))) {
-            return std::unexpected(utils::status::Status::ERROR_INIT);
+            return std::unexpected(status::Status::ERROR_INIT);
         }
         if (!m_input_enabled.test(static_cast<std::uint32_t>(pin))) {
-            return std::unexpected(utils::status::Status::ERROR_GENERIC);
+            return std::unexpected(status::Status::ERROR_GENERIC);
         }
         static_assert(pin < Pins::NumberOfGPIOs, "Invalid GPIO pin!");
 
@@ -185,9 +185,9 @@ namespace rp2040::system::gpio {
 
     template <std::uintptr_t ioBankBase, std::uintptr_t padsBankBase, std::uintptr_t sioBase>
     template <Pins pin, bool enable>
-    utils::status::Status GpioType<ioBankBase, padsBankBase, sioBase>::enable_pull_up() {
+    status::Status GpioType<ioBankBase, padsBankBase, sioBase>::enable_pull_up() {
         if (!m_flags.test(static_cast<std::uint32_t>(Flags::Initialized))) {
-            return utils::status::Status::ERROR_INIT;
+            return status::Status::ERROR_INIT;
         }
 
         static_assert(pin < Pins::NumberOfGPIOs, "Invalid GPIO pin!");
@@ -201,14 +201,14 @@ namespace rp2040::system::gpio {
             pad_t::pullUpEnable_bits::set(pad_t::PullUpEnableBitField::value::disable);
         }
 
-        return utils::status::Status::OK;
+        return status::Status::OK;
     }
 
     template <std::uintptr_t ioBankBase, std::uintptr_t padsBankBase, std::uintptr_t sioBase>
     template <Pins pin, bool enable>
-    utils::status::Status GpioType<ioBankBase, padsBankBase, sioBase>::enable_pull_down() {
+    status::Status GpioType<ioBankBase, padsBankBase, sioBase>::enable_pull_down() {
         if (!m_flags.test(static_cast<std::uint32_t>(Flags::Initialized))) {
-            return utils::status::Status::ERROR_INIT;
+            return status::Status::ERROR_INIT;
         }
 
         static_assert(pin < Pins::NumberOfGPIOs, "Invalid GPIO pin!");
@@ -222,7 +222,7 @@ namespace rp2040::system::gpio {
             pad_t::pullDownEnable_bits::set(pad_t::PullDownEnableBitField::value::disable);
         }
 
-        return utils::status::Status::OK;
+        return status::Status::OK;
     }
 
     /** @} */ // rp2040_gpio

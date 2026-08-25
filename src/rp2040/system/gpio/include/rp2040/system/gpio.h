@@ -30,7 +30,7 @@
 #include <expected>
 
 #include "gpio_def.h"
-#include "utils/status.h"
+#include "status.h"
 
 
 namespace rp2040::system::gpio {
@@ -90,7 +90,7 @@ namespace rp2040::system::gpio {
          * @post The GPIO pin has been configured for the function.
          */
         template <Pins pin, FuncSelect func>
-        utils::status::Status set_function();
+        status::Status set_function();
 
 
         /**
@@ -107,7 +107,7 @@ namespace rp2040::system::gpio {
          * @post The output for the GPIO pin is enabled/disabled.
          */
         template <Pins pin, bool enable>
-        utils::status::Status enable_output();
+        status::Status enable_output();
 
         /**
          * @brief Sets the output level of a GPIO pin.
@@ -124,7 +124,7 @@ namespace rp2040::system::gpio {
          * @post The output level for the GPIO pin has been set.
          */
         template <Pins pin, bool high>
-        utils::status::Status set_output();
+        status::Status set_output();
 
         /**
          * @brief Toggles the output level of a GPIO pin.
@@ -140,7 +140,7 @@ namespace rp2040::system::gpio {
          * @post The output level for the GPIO pin has been toggled.
          */
         template <Pins pin>
-        utils::status::Status toggle_output();
+        status::Status toggle_output();
 
         /**
          * @brief Enables/disables the input for a pin.
@@ -156,7 +156,7 @@ namespace rp2040::system::gpio {
          * @post The input for the GPIO pin is enabled/disabled.
          */
         template <Pins pin, bool enable>
-        utils::status::Status enable_input();
+        status::Status enable_input();
 
         /**
          * @brief Gets the input value of a GPIO pin.
@@ -172,7 +172,7 @@ namespace rp2040::system::gpio {
          * @post None
          */
         template <Pins pin>
-        std::expected<bool, utils::status::Status> get_input();
+        std::expected<bool, status::Status> get_input();
 
         /**
          * @brief Enables/disables the internal pull-up resistor for a pin.
@@ -188,7 +188,7 @@ namespace rp2040::system::gpio {
          * @post The pull-up resistor for the GPIO pin is enabled/disabled.
          */
         template <Pins pin, bool enable>
-        utils::status::Status enable_pull_up();
+        status::Status enable_pull_up();
 
         /**
          * @brief Enables/disables the internal pull-down resistor for a pin.
@@ -204,7 +204,7 @@ namespace rp2040::system::gpio {
          * @post The pull-down resistor for the GPIO pin is enabled/disabled.
          */
         template <Pins pin, bool enable>
-        utils::status::Status enable_pull_down();
+        status::Status enable_pull_down();
 
     private:
         GpioType() : m_flags(0), m_output_enabled(0) {

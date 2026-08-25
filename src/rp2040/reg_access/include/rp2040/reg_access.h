@@ -23,8 +23,8 @@
  */
 
 
-#ifndef UTILS_REG_ACCESS_H
-#define UTILS_REG_ACCESS_H
+#ifndef RP2040_REG_ACCESS_H
+#define RP2040_REG_ACCESS_H
 
 #include <cstdint>
 #include <concepts>
@@ -32,10 +32,10 @@
 
 /**
  * @defgroup reg_access Reg_Access: Provides utilities to use registers.
- * @ingroup utils
+ * @ingroup rp2040
  */
 
-namespace utils::reg_access {
+namespace rp2040::reg_access {
     /**
      * @defgroup access_tags Tags to control access to register utilities.
      * @ingroup reg_access
@@ -417,4 +417,4 @@ namespace utils::reg_access {
 
 } // utils::reg_access
 
-#endif //UTILS_REG_ACCESS_H
+#endif //RP2040_REG_ACCESS_H

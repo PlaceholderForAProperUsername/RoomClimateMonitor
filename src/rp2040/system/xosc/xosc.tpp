@@ -83,12 +83,12 @@ namespace rp2040::system {
     }
 
     template <std::uintptr_t xosc_addr>
-    std::expected<unsigned int, utils::status::Status> XOSC_Type<xosc_addr>::getFrequency() {
+    std::expected<unsigned int, status::Status> XOSC_Type<xosc_addr>::getFrequency() {
         if (!this->m_flags.test(static_cast<std::uint32_t>(Flags::IsEnabled))) {
-            return std::unexpected(utils::status::Status::ERROR_INIT);
+            return std::unexpected(status::Status::ERROR_INIT);
         }
         if (this->m_flags.test(static_cast<std::uint32_t>(Flags::isPaused))) {
-            return std::unexpected(utils::status::Status::ERROR_RESOURCE);
+            return std::unexpected(status::Status::ERROR_RESOURCE);
         }
 
         return m_frequency_hz;

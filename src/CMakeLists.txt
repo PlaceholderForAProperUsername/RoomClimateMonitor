@@ -7,6 +7,6 @@ target_sources(${TARGET} PRIVATE main.cpp)
 target_link_libraries(${TARGET} PRIVATE RP2040 Config_System)
 
 add_subdirectory(config)
-add_subdirectory(rp2040)
 add_subdirectory(peripherals)
-add_subdirectory(utils)
+add_subdirectory(rp2040)
+add_subdirectory(status)

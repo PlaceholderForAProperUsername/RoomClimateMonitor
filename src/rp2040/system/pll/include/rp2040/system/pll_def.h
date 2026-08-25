@@ -27,7 +27,7 @@
 
 #include <cstdint>
 
-#include "utils/reg_access.h"
+#include "rp2040/reg_access.h"
 
 namespace rp2040::system::pll {
     /**
@@ -71,7 +71,7 @@ namespace rp2040::system::pll {
          */
         struct cs {
             static constexpr std::uintptr_t addr = pll_addr + cs_offset; /**< @brief The address of the cs register. */
-            using cs_reg = utils::reg_access::Reg<addr, utils::reg_access::reg_mixed_access, std::uint32_t>; /**< @brief The cs register */
+            using cs_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::reg_mixed_access, std::uint32_t>; /**< @brief The cs register */
 
             /**
              * @brief The lock bits of the cs register as a bitfield.
@@ -93,12 +93,12 @@ namespace rp2040::system::pll {
                     locked = 0x01U, /**< @brief The output frequency is stable. */
                 };
             };
-            using lock_bits = cs_reg::template Bits<LockBitField, utils::reg_access::read_access>; /**< @brief The lock bit of the cs register. */
+            using lock_bits = cs_reg::template Bits<LockBitField, rp2040::reg_access::read_access>; /**< @brief The lock bit of the cs register. */
 
             /**
              * @brief The bypass bits of the cs register as a bitfield.
              */
-            using BypassBitField = utils::reg_access::BitFieldEnableDisable<cs_reg, 0x08U>;
+            using BypassBitField = rp2040::reg_access::BitFieldEnableDisable<cs_reg, 0x08U>;
 
             /**
              * @brief The bypass bits of the cs register.
@@ -106,7 +106,7 @@ namespace rp2040::system::pll {
              * If the bypass is enabled, the reference clock will be passed directly to the output instead of the divided
              * voltage controlled oscillator (VCO):
              */
-            using bypass_bits = cs_reg::template Bits<BypassBitField, utils::reg_access::read_write_access>;
+            using bypass_bits = cs_reg::template Bits<BypassBitField, rp2040::reg_access::read_write_access>;
 
             /**
              * @brief The bits to set the divisor of the reference clock as a bitfield.
@@ -141,7 +141,7 @@ namespace rp2040::system::pll {
              * @tparam Value The value to be set to the refdiv bits.
              */
             template <std::uint32_t Value>
-            using refdiv_bits = cs_reg::template Bits<RefDivBitField<Value>, utils::reg_access::read_write_access>;
+            using refdiv_bits = cs_reg::template Bits<RefDivBitField<Value>, rp2040::reg_access::read_write_access>;
         };
 
 
@@ -150,7 +150,7 @@ namespace rp2040::system::pll {
          */
         struct pwr {
             static constexpr std::uintptr_t addr = pll_addr + pwr_offset; /**< @brief The address of the pwr register. */
-            using pwr_reg = utils::reg_access::Reg<addr, utils::reg_access::read_write_access, std::uint32_t>; /**< @brief The pwr register */
+            using pwr_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::read_write_access, std::uint32_t>; /**< @brief The pwr register */
 
 
             /**
@@ -160,7 +160,7 @@ namespace rp2040::system::pll {
              * - enable: The power down mode is enabled.
              * - disable: The power down mode is disabled.
              */
-            using VCOPDBitField = utils::reg_access::BitFieldEnableDisable<pwr_reg, 0x05U>;
+            using VCOPDBitField = rp2040::reg_access::BitFieldEnableDisable<pwr_reg, 0x05U>;
 
             /**
              * @brief The bits to power down the vco.
@@ -176,7 +176,7 @@ namespace rp2040::system::pll {
              * - enable: The power down mode is enabled.
              * - disable: The power down mode is disabled.
              */
-            using PostDivPDBitField = utils::reg_access::BitFieldEnableDisable<pwr_reg, 0x03U>;
+            using PostDivPDBitField = rp2040::reg_access::BitFieldEnableDisable<pwr_reg, 0x03U>;
 
             /**
              * @brief The bits to power down the post dividers.
@@ -193,7 +193,7 @@ namespace rp2040::system::pll {
              * - enable: The power down mode is enabled.
              * - disable: The power down mode is disabled.
              */
-            using PDBitField = utils::reg_access::BitFieldEnableDisable<pwr_reg, 0x00U>;
+            using PDBitField = rp2040::reg_access::BitFieldEnableDisable<pwr_reg, 0x00U>;
 
             /**
              * @brief The bit to power down the PLL.
@@ -208,7 +208,7 @@ namespace rp2040::system::pll {
          */
         struct fbdiv_int {
             static constexpr std::uintptr_t addr = pll_addr + fbdiv_int_offset; /**< @brief The address of the fbdiv_int register. */
-            using fbdiv_int_reg = utils::reg_access::Reg<addr, utils::reg_access::read_write_access, std::uint32_t>; /**< @brief The fbdiv_int register. */
+            using fbdiv_int_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::read_write_access, std::uint32_t>; /**< @brief The fbdiv_int register. */
 
 
             /**
@@ -248,7 +248,7 @@ namespace rp2040::system::pll {
          */
         struct prim {
             static constexpr std::uintptr_t addr = pll_addr + prim_offset; /**< @brief The address of the prim register. */
-            using prim_reg = utils::reg_access::Reg<addr, utils::reg_access::read_write_access, std::uint32_t>; /**< @brief The prim register. */
+            using prim_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::read_write_access, std::uint32_t>; /**< @brief The prim register. */
 
 
             /**

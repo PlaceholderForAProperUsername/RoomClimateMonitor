@@ -1,4 +1,4 @@
-set(TARGET "Utils_Status")
+set(TARGET "RP2040_RegAccess")
 
 add_library(${TARGET} INTERFACE)
 

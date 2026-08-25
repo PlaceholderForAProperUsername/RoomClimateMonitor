@@ -27,7 +27,7 @@
 
 #include <cstdint>
 
-#include "utils/reg_access.h"
+#include "rp2040/reg_access.h"
 
 namespace rp2040::system {
     /**
@@ -90,7 +90,7 @@ namespace rp2040::system {
          */
         struct reset {
             static constexpr std::uint32_t addr = resets_base + reset_offset; /**< @brief Address of the reset register. */
-            using reset_reg = utils::reg_access::Reg<addr, utils::reg_access::read_write_access, std::uint32_t>; /**< @brief The reset register type */
+            using reset_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::read_write_access, std::uint32_t>; /**< @brief The reset register type */
 
 
             /**
@@ -133,7 +133,7 @@ namespace rp2040::system {
          */
         struct wdsel {
             static constexpr std::uint32_t addr = resets_base + wdsel_offset; /**< @brief The address of the wdsel register. */
-            using wdsel_reg = utils::reg_access::Reg<addr, utils::reg_access::read_write_access, std::uint32_t>; /**< @brief The wdsel register. */
+            using wdsel_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::read_write_access, std::uint32_t>; /**< @brief The wdsel register. */
 
             /**
              * @brief The bits of the watchdog select register.
@@ -176,7 +176,7 @@ namespace rp2040::system {
          */
         struct reset_done {
             static constexpr std::uint32_t addr = resets_base + reset_done_offset; /**< @brief The address of the reset_done register. */
-            using reset_done_reg = utils::reg_access::Reg<addr, utils::reg_access::read_access, std::uint32_t>; /**< @brief The reset_done register. */
+            using reset_done_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::read_access, std::uint32_t>; /**< @brief The reset_done register. */
 
             /**
              * @brief The bits of the reset_done register.

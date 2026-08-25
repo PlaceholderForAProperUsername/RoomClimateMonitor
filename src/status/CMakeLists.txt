@@ -1,4 +1,4 @@
-set(TARGET "Utils_Reg_Access")
+set(TARGET "Status")
 
 add_library(${TARGET} INTERFACE)
 
