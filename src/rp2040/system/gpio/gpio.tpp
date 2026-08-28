@@ -226,6 +226,27 @@ namespace rp2040::system::gpio {
     }
 
     template <std::uintptr_t ioBankBase, std::uintptr_t padsBankBase, std::uintptr_t sioBase>
+    template <Pins pin, bool enable>
+    status::Status GpioType<ioBankBase, padsBankBase, sioBase>::enable_schmitt_trigger() {
+        if (!m_flags.test(static_cast<std::uint32_t>(Flags::Initialized))) {
+            return status::Status::ERROR_INIT;
+        }
+
+        static_assert(pin < Pins::NumberOfGPIOs, "Invalid GPIO pin!");
+
+        /** short hand for the pad register of the GPIO pin */
+        using pad_t = pad_bank::template padX<static_cast<Pads>(std::to_underlying(pin))>;
+
+        if constexpr (enable) {
+            pad_t::schmitt_bits::set(pad_t::SchmittBitField::value::enable);
+        } else {
+            pad_t::schmitt_bits::set(pad_t::SchmittBitField::value::disable);
+        }
+
+        return status::Status::OK;
+    }
+
+    template <std::uintptr_t ioBankBase, std::uintptr_t padsBankBase, std::uintptr_t sioBase>
     template <Pins pin, bool enable_fast_mode>
     status::Status GpioType<ioBankBase, padsBankBase, sioBase>::set_slew_rate()
     {

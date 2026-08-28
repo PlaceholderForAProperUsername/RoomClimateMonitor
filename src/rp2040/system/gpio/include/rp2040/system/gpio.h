@@ -207,6 +207,22 @@ namespace rp2040::system::gpio {
         status::Status enable_pull_down();
 
         /**
+         * @brief Enables/disables the schmitt trigger for a pin.
+         *
+         * @tparam pin The GPIO pin for which the schmitt trigger is to be enabled/disabled.
+         * @tparam enable Boolean to enable (true) or disable (false) the schmitt trigger.
+         * @return utils::status::Status The status code.
+         * @retval OK The schmitt trigger has been successfully enabled/disabled.
+         * @retval ERROR_INIT The GPIO module was not initialized.
+         *
+         * @pre The GPIO module must be initialized. @see init
+         *
+         * @post The schmitt trigger for the GPIO pin is enabled/disabled.
+         */
+        template <Pins pin, bool enable>
+        status::Status enable_schmitt_trigger();
+
+        /**
          * @brief Sets the mode of slew rate of a pin.
          *
          * @tparam pin The GPIO pin for which the slew rate mode is to be set.
