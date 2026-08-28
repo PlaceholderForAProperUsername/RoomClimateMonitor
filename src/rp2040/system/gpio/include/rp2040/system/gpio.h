@@ -206,6 +206,22 @@ namespace rp2040::system::gpio {
         template <Pins pin, bool enable>
         status::Status enable_pull_down();
 
+        /**
+         * @brief Sets the mode of slew rate of a pin.
+         *
+         * @tparam pin The GPIO pin for which the slew rate mode is to be set.
+         * @tparam enable_fast_mode Boolean to enable fast mode (true) or slow mode (false).
+         * @return utils::status::Status The status code.
+         * @retval OK The slew rate has been successfully set.
+         * @retval ERROR_INIT The GPIO module was not initialized.
+         *
+         * @pre The GPIO module must be initialized. @see init
+         *
+         * @post The slew rate mode for the GPIO pin has been set.
+         */
+        template <Pins pin, bool enable_fast_mode>
+        status::Status set_slew_rate();
+
     private:
         GpioType() : m_flags(0), m_output_enabled(0) {
             m_input_enabled.set(); // The input is enabled for all GPIO at reset.

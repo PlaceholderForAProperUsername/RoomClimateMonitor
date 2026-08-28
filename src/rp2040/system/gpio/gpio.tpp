@@ -225,6 +225,27 @@ namespace rp2040::system::gpio {
         return status::Status::OK;
     }
 
+    template <std::uintptr_t ioBankBase, std::uintptr_t padsBankBase, std::uintptr_t sioBase>
+    template <Pins pin, bool enable_fast_mode>
+    status::Status GpioType<ioBankBase, padsBankBase, sioBase>::set_slew_rate()
+    {
+        if (!m_flags.test(static_cast<std::uint32_t>(Flags::Initialized))) {
+            return status::Status::ERROR_INIT;
+        }
+
+        static_assert(pin < Pins::NumberOfGPIOs, "Invalid GPIO pin!");
+
+        using pad_t = pad_bank::template padX<static_cast<Pads>(std::to_underlying(pin))>;
+
+        if constexpr (enable_fast_mode) {
+            pad_t::slewFast_bits::set(pad_t::SlewFastBitField::value::Fast);
+        } else {
+            pad_t::slewFast_bits::set(pad_t::SlewFastBitField::value::Slow);
+        }
+
+        return status::Status::OK;
+    }
+
     /** @} */ // rp2040_gpio
 } // rp2040::system::gpio
 
