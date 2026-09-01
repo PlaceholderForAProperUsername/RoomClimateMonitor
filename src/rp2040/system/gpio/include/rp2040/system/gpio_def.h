@@ -181,7 +181,7 @@ namespace rp2040::system::gpio {
              */
             struct status {
                 static constexpr std::uintptr_t addr = base_addr + statusOffset; /**< @brief The address of the gpio's status register. */
-                using status_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::read_access, std::uint32_t>; /**< @brief The status register. */
+                using status_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::access::read, std::uint32_t>; /**< @brief The status register. */
 
                 /**
                  * @brief Bitfield for the status bit "interrupt to processors, after override is applied".
@@ -190,7 +190,7 @@ namespace rp2040::system::gpio {
                 /**
                  * @brief The status bit "interrupt to processors, after override is applied".
                  */
-                using irqToProc_bits = status_reg::template Bits<IRQToProcBitfield, rp2040::reg_access::read_access>;
+                using irqToProc_bits = status_reg::template Bits<IRQToProcBitfield, rp2040::reg_access::access::read>;
 
                 /**
                  * @brief Bitfield for the status bit "interrupt from pad before override is applied".
@@ -199,7 +199,7 @@ namespace rp2040::system::gpio {
                 /**
                  * @brief The status bit "interrupt from pad before override is applied".
                  */
-                using irqFromPad_bits = status_reg::template Bits<IRQFromPadBitField, rp2040::reg_access::read_access>;
+                using irqFromPad_bits = status_reg::template Bits<IRQFromPadBitField, rp2040::reg_access::access::read>;
 
                 /**
                  * @brief Bitfield for the status bit "input signal to peripheral, after override is applied".
@@ -208,7 +208,7 @@ namespace rp2040::system::gpio {
                 /**
                  * @brief The status bit "input signal to peripheral, after override is applied".
                  */
-                using intToPeri_bits = status_reg::template Bits<IntToPeriBitField, rp2040::reg_access::read_access>;
+                using intToPeri_bits = status_reg::template Bits<IntToPeriBitField, rp2040::reg_access::access::read>;
 
                 /**
                  * @brief Bitfield for the status bit "input signal from pad, before override is applied".
@@ -217,7 +217,7 @@ namespace rp2040::system::gpio {
                 /**
                  * @brief The status bit "input signal from pad, before override is applied".
                  */
-                using intFromPad_bits = status_reg::template Bits<IntFromPadBitField, rp2040::reg_access::read_access>;
+                using intFromPad_bits = status_reg::template Bits<IntFromPadBitField, rp2040::reg_access::access::read>;
 
                 /**
                  * @brief Bitfield for the status bit "output enable to pad after register override is applied".
@@ -226,7 +226,7 @@ namespace rp2040::system::gpio {
                 /**
                  * @brief The status bit "output enable to pad after register override is applied".
                  */
-                using oeToPad_bits = status_reg::template Bits<OEToPadBitField, rp2040::reg_access::read_access>;
+                using oeToPad_bits = status_reg::template Bits<OEToPadBitField, rp2040::reg_access::access::read>;
 
                 /**
                  * @brief Bitfield for the status bit "output enable from selected peripheral, before register override is applied".
@@ -235,7 +235,7 @@ namespace rp2040::system::gpio {
                 /**
                  * @brief The status bit "output enable from selected peripheral, before register override is applied".
                  */
-                using oeFromPeri_bits = status_reg::template Bits<OEFromPeriBitField, rp2040::reg_access::read_access>;
+                using oeFromPeri_bits = status_reg::template Bits<OEFromPeriBitField, rp2040::reg_access::access::read>;
 
                 /**
                  * @brief Bitfield for the status bit "output signal to pad after register override is applied".
@@ -244,7 +244,7 @@ namespace rp2040::system::gpio {
                 /**
                  * @brief The status bit "output signal to pad after register override is applied".
                  */
-                using outToPad_bits = status_reg::template Bits<OutToPadBitField, rp2040::reg_access::read_access>;
+                using outToPad_bits = status_reg::template Bits<OutToPadBitField, rp2040::reg_access::access::read>;
 
                 /**
                  * @brief Bitfield for the status bit "output signal from selected peripheral, before register override is applied".
@@ -253,7 +253,7 @@ namespace rp2040::system::gpio {
                 /**
                  * @brief The status bit "output signal from selected peripheral, before register override is applied".
                  */
-                using outFromPeri_bits = status_reg::template Bits<OutFromPeriField, rp2040::reg_access::read_access>;
+                using outFromPeri_bits = status_reg::template Bits<OutFromPeriField, rp2040::reg_access::access::read>;
             };
 
             /**
@@ -261,7 +261,7 @@ namespace rp2040::system::gpio {
              */
             struct ctrl {
                 static constexpr std::uintptr_t addr = base_addr + ctrlOffset; /**< @brief The address of the gpio's ctrl register. */
-                using ctrl_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::read_write_access, std::uint32_t>; /**< @brief The gpio control register. */
+                using ctrl_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::access::read_write, std::uint32_t>; /**< @brief The gpio control register. */
 
                 /**
                  * @brief The interrupt override bit field
@@ -427,11 +427,11 @@ namespace rp2040::system::gpio {
                  */
                 using interrupt_reg = decltype([]() {
                     if constexpr (type == InterruptType::RAW) {
-                        return std::type_identity_t<rp2040::reg_access::Reg<addr, rp2040::reg_access::reg_mixed_access, std::uint32_t>>();
+                        return std::type_identity_t<rp2040::reg_access::Reg<addr, rp2040::reg_access::access::reg_mixed, std::uint32_t>>();
                     } else if constexpr (type == InterruptType::STATUS) {
-                        return std::type_identity_t<rp2040::reg_access::Reg<addr, rp2040::reg_access::read_access, std::uint32_t>>();
+                        return std::type_identity_t<rp2040::reg_access::Reg<addr, rp2040::reg_access::access::read, std::uint32_t>>();
                     } else {
-                        return std::type_identity_t<rp2040::reg_access::Reg<addr, rp2040::reg_access::read_write_access, std::uint32_t>>();
+                        return std::type_identity_t<rp2040::reg_access::Reg<addr, rp2040::reg_access::access::read_write, std::uint32_t>>();
                     }
                 }());
 
@@ -449,11 +449,11 @@ namespace rp2040::system::gpio {
                  */
                 using edgeHigh_bits = decltype([]() {
                     if constexpr (type == InterruptType::RAW) {
-                        return std::type_identity_t<typename interrupt_reg::template Bits<edgeHighBitField, rp2040::reg_access::bit_write_clear>>();
+                        return std::type_identity_t<typename interrupt_reg::template Bits<edgeHighBitField, rp2040::reg_access::access::write_clear>>();
                     } else if constexpr (type == InterruptType::STATUS) {
-                        return std::type_identity_t<typename interrupt_reg::template Bits<edgeHighBitField, rp2040::reg_access::read_access>>();
+                        return std::type_identity_t<typename interrupt_reg::template Bits<edgeHighBitField, rp2040::reg_access::access::read>>();
                     } else {
-                        return std::type_identity_t<typename interrupt_reg::template Bits<edgeHighBitField, rp2040::reg_access::read_write_access>>();
+                        return std::type_identity_t<typename interrupt_reg::template Bits<edgeHighBitField, rp2040::reg_access::access::read_write>>();
                     }
                 }());
 
@@ -471,11 +471,11 @@ namespace rp2040::system::gpio {
                  */
                 using edgeLow_bits = decltype([]() {
                     if constexpr (type == InterruptType::RAW) {
-                        return std::type_identity_t<typename interrupt_reg::template Bits<edgeLowBitField, rp2040::reg_access::bit_write_clear>>();
+                        return std::type_identity_t<typename interrupt_reg::template Bits<edgeLowBitField, rp2040::reg_access::access::write_clear>>();
                     } else if constexpr (type == InterruptType::STATUS) {
-                        return std::type_identity_t<typename interrupt_reg::template Bits<edgeLowBitField, rp2040::reg_access::read_access>>();
+                        return std::type_identity_t<typename interrupt_reg::template Bits<edgeLowBitField, rp2040::reg_access::access::read>>();
                     } else {
-                        return std::type_identity_t<typename interrupt_reg::template Bits<edgeLowBitField, rp2040::reg_access::read_write_access>>();
+                        return std::type_identity_t<typename interrupt_reg::template Bits<edgeLowBitField, rp2040::reg_access::access::read_write>>();
                     }
                 }());
 
@@ -491,11 +491,11 @@ namespace rp2040::system::gpio {
                  */
                 using levelHigh_bits = decltype([]() {
                     if constexpr (type == InterruptType::RAW) {
-                        return std::type_identity_t<typename interrupt_reg::template Bits<levelHighBitField, rp2040::reg_access::read_access>>();
+                        return std::type_identity_t<typename interrupt_reg::template Bits<levelHighBitField, rp2040::reg_access::access::read>>();
                     } else if constexpr (type == InterruptType::STATUS) {
-                        return std::type_identity_t<typename interrupt_reg::template Bits<levelHighBitField, rp2040::reg_access::read_access>>();
+                        return std::type_identity_t<typename interrupt_reg::template Bits<levelHighBitField, rp2040::reg_access::access::read>>();
                     } else {
-                        return std::type_identity_t<typename interrupt_reg::template Bits<levelHighBitField, rp2040::reg_access::read_write_access>>();
+                        return std::type_identity_t<typename interrupt_reg::template Bits<levelHighBitField, rp2040::reg_access::access::read_write>>();
                     }
                 }());
 
@@ -511,11 +511,11 @@ namespace rp2040::system::gpio {
                  */
                 using levelLow_bits = decltype([]() {
                     if constexpr (type == InterruptType::RAW) {
-                        return std::type_identity_t<typename interrupt_reg::template Bits<levelLowBitField, rp2040::reg_access::read_access>>();
+                        return std::type_identity_t<typename interrupt_reg::template Bits<levelLowBitField, rp2040::reg_access::access::read>>();
                     } else if constexpr (type == InterruptType::STATUS) {
-                        return std::type_identity_t<typename interrupt_reg::template Bits<levelLowBitField, rp2040::reg_access::read_access>>();
+                        return std::type_identity_t<typename interrupt_reg::template Bits<levelLowBitField, rp2040::reg_access::access::read>>();
                     } else {
-                        return std::type_identity_t<typename interrupt_reg::template Bits<levelLowBitField, rp2040::reg_access::read_write_access>>();
+                        return std::type_identity_t<typename interrupt_reg::template Bits<levelLowBitField, rp2040::reg_access::access::read_write>>();
                     }
                 }());
             };
@@ -620,7 +620,7 @@ namespace rp2040::system::gpio {
          */
         struct voltage_select {
             static constexpr std::uintptr_t addr = PadsBaseAddr + voltageSelectOffset; /**< @brief Base address of the voltage select register. */
-            using voltage_select_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::read_write_access, std::uint32_t>; /**< @brief The voltage select register. */
+            using voltage_select_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::access::read_write, std::uint32_t>; /**< @brief The voltage select register. */
 
             /**
              * @brief The voltage select bits as a bit field.
@@ -660,7 +660,7 @@ namespace rp2040::system::gpio {
             static constexpr std::uint8_t padOffset = padRegisterStartOffset + static_cast<std::uint8_t>(pad) * bytesPerRegister; /**< @brief The offset of the specified pad from the first pad (GPIO0). */
 
             static constexpr std::uintptr_t addr = PadsBaseAddr + padOffset; /**< @brief The address of the pad register to be configured. */
-            using ctrl_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::read_write_access, std::uint32_t>; /**< @brief The pad register to be configured. */
+            using ctrl_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::access::read_write, std::uint32_t>; /**< @brief The pad register to be configured. */
 
             /**
              * @brief The output disable bit as a bit field.
@@ -795,7 +795,7 @@ namespace rp2040::system::gpio {
          */
         struct cpuid {
             static constexpr std::uintptr_t addr = SIOBaseAddr + cpuidOffset; /**< @brief The base address of the cpuid register. */
-            using cpuid_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::read_access, std::uint32_t>; /**< @brief The the cpuid register. */
+            using cpuid_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::access::read, std::uint32_t>; /**< @brief The the cpuid register. */
 
             /**
              * @brief The processor core identifier bits as a bit field.
@@ -827,7 +827,7 @@ namespace rp2040::system::gpio {
          */
         struct input {
             static constexpr std::uintptr_t addr = SIOBaseAddr + gpioInOffset; /**< @brief The base address of the sio input register. */
-            using input_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::read_access, std::uint32_t>; /**< @brief The sio input register. */
+            using input_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::access::read, std::uint32_t>; /**< @brief The sio input register. */
 
             /**
              * @brief The gpio input bit as a bit field.
@@ -870,7 +870,7 @@ namespace rp2040::system::gpio {
              * @brief The output/output enable value register.
              */
             struct value {
-                using value_reg = rp2040::reg_access::Reg<outputBaseAddr, rp2040::reg_access::read_write_access, std::uint32_t>; /**< @brief The output or output enable register. */
+                using value_reg = rp2040::reg_access::Reg<outputBaseAddr, rp2040::reg_access::access::read_write, std::uint32_t>; /**< @brief The output or output enable register. */
 
                 /**
                  * @brief The output/output enable value bits as a Bitfield.
@@ -906,7 +906,7 @@ namespace rp2040::system::gpio {
              */
             struct set {
                 static constexpr std::uintptr_t outputSetAddr = outputBaseAddr + setOffset; /**< @brief Base address of the atomic set register. */
-                using set_reg = rp2040::reg_access::Reg<outputSetAddr, rp2040::reg_access::atomic_set_mask, std::uint32_t>; /**< @brief The atomic set register. */
+                using set_reg = rp2040::reg_access::Reg<outputSetAddr, rp2040::reg_access::access::atomic_set_mask, std::uint32_t>; /**< @brief The atomic set register. */
 
                 /**
                  * @brief The output set bits.
@@ -926,7 +926,7 @@ namespace rp2040::system::gpio {
              */
             struct clear {
                 static constexpr std::uintptr_t outputClearAddr = outputBaseAddr + clearOffset; /**< @brief Base address of the atomic clear register. */
-                using clear_reg = rp2040::reg_access::Reg<outputClearAddr, rp2040::reg_access::atomic_clear, std::uint32_t>; /**< @brief The atomic clear register. */
+                using clear_reg = rp2040::reg_access::Reg<outputClearAddr, rp2040::reg_access::access::atomic_clear, std::uint32_t>; /**< @brief The atomic clear register. */
 
                 /**
                  * @brief The output clear bits.
@@ -946,7 +946,7 @@ namespace rp2040::system::gpio {
             */
             struct toggle {
                 static constexpr std::uintptr_t outputXorAddr = outputBaseAddr + xorOffset; /**< @brief Base address of the atomic xor register. */
-                using toggle_reg = rp2040::reg_access::Reg<outputXorAddr, rp2040::reg_access::atomic_xor, std::uint32_t>; /**< @brief The atomic xor register. */
+                using toggle_reg = rp2040::reg_access::Reg<outputXorAddr, rp2040::reg_access::access::atomic_xor, std::uint32_t>; /**< @brief The atomic xor register. */
 
                 /**
                  * @brief The output toggle bits.

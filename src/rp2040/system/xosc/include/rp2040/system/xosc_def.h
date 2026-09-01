@@ -57,7 +57,7 @@ namespace rp2040::system {
      */
     struct ctrl {
         constexpr static std::uintptr_t addr = xosc_addr + ctrl_offset; /**< @brief The address of the ctrl register. */
-        using ctrl_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::read_write_access, std::uint32_t>; /**< @brief The ctrl register. */
+        using ctrl_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::access::read_write, std::uint32_t>; /**< @brief The ctrl register. */
 
         /**
          * @brief The enable bits as a BitField.
@@ -108,7 +108,7 @@ namespace rp2040::system {
      */
     struct status {
         constexpr static std::uint32_t addr = xosc_addr + status_offset; /**< @brief Address of the status register. */
-        using status_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::reg_mixed_access, std::uint32_t>; /**< @brief The status register type. */
+        using status_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::access::reg_mixed, std::uint32_t>; /**< @brief The status register type. */
 
         /**
          * @brief The stable bit.
@@ -130,7 +130,7 @@ namespace rp2040::system {
                 stable = 0x01U, /**< @brief The xosc is running and stable */
             };
         };
-        using stable_bits = status_reg::template Bits<StableBitField, rp2040::reg_access::read_access>; /**< The StableBitField type. */
+        using stable_bits = status_reg::template Bits<StableBitField, rp2040::reg_access::access::read>; /**< The StableBitField type. */
 
         /**
          * @brief The badwrite bit.
@@ -154,7 +154,7 @@ namespace rp2040::system {
                 clear_bad_write = 0x01U /**< @brief Value to clear the bit. */
             };
         };
-        using bad_write_bits = status_reg::template Bits<BadWriteBitField, rp2040::reg_access::read_write_access>; /**< The BadWriteBitField type. */
+        using bad_write_bits = status_reg::template Bits<BadWriteBitField, rp2040::reg_access::access::read_write>; /**< The BadWriteBitField type. */
 
         /**
          * @brief The enabled bit.
@@ -174,7 +174,7 @@ namespace rp2040::system {
                 enabled = 0x01U, /**< @brief The xosc is enabled, but may be not running or stable. */
             };
         };
-        using enabled_bits = status_reg::template Bits<EnabledBitField, rp2040::reg_access::read_access>; /**< @brief The EnabledBitField type. */
+        using enabled_bits = status_reg::template Bits<EnabledBitField, rp2040::reg_access::access::read>; /**< @brief The EnabledBitField type. */
 
         /**
          * @brief The freq_range status bits.
@@ -195,7 +195,7 @@ namespace rp2040::system {
                 range_1_15_mhz = 0x00U, /**< @brief The selected freq_range. */
             };
         };
-        using freq_range_bits  = status_reg::template Bits<FreqRangeBitField, rp2040::reg_access::read_access>; /**< @brief The FreqRangeBitField type. */
+        using freq_range_bits  = status_reg::template Bits<FreqRangeBitField, rp2040::reg_access::access::read>; /**< @brief The FreqRangeBitField type. */
     }; //status
 
     /**
@@ -204,7 +204,7 @@ namespace rp2040::system {
      */
     struct dormant {
         constexpr static std::uint32_t addr = xosc_addr + dormant_offset; /**< @brief The address of the dormant register. */
-        using dormant_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::read_write_access, std::uint32_t>; /**< @brief The dormant register type. */
+        using dormant_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::access::read_write, std::uint32_t>; /**< @brief The dormant register type. */
 
         /**
          * @brief The dormant bits.
@@ -224,7 +224,7 @@ namespace rp2040::system {
                 wake = 0x77616b65U, /**< @brief Wakes up the xosc. */
             };
         };
-        using dormant_bits = dormant_reg::template Bits<DormantBitField, rp2040::reg_access::read_write_access>; /**< The DormantBitField type. */
+        using dormant_bits = dormant_reg::template Bits<DormantBitField, rp2040::reg_access::access::read_write>; /**< The DormantBitField type. */
     }; // dormant
 
     /**
@@ -235,7 +235,7 @@ namespace rp2040::system {
      */
     struct startup {
         constexpr static std::uintptr_t addr = xosc_addr + startup_offset; /**< @brief The address of the startup register. */
-        using startup_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::read_write_access, std::uint32_t>; /**< @brief The startup register type. */
+        using startup_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::access::read_write, std::uint32_t>; /**< @brief The startup register type. */
 
         constexpr static startup_reg::RegType default_delay_val = 47U; /**< @brief The default value for the startup delay according to the rp2040 datasheet. */
 
@@ -272,7 +272,7 @@ namespace rp2040::system {
          */
         struct count {
             constexpr static std::uintptr_t addr = xosc_addr + count_offset; /**< @brief The address of the count register. */
-            using count_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::read_write_access, std::uint32_t>; /**< @brief The count register type. */
+            using count_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::access::read_write, std::uint32_t>; /**< @brief The count register type. */
 
             constexpr static count_reg::RegType count_position = 0U; /**< @brief The position of the count bits. */
             constexpr static count_reg::RegType count_mask = (0xFFU << count_position); /**< @brief The mask of the count bits. */

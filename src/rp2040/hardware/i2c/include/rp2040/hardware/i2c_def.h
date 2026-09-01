@@ -7,6 +7,8 @@
 
 #include <cstdint>
 
+#include "rp2040/reg_access.h"
+
 namespace rp2040::hardware::i2c {
     /**
      * @addtogroup rp2040_i2c
@@ -49,7 +51,19 @@ namespace rp2040::hardware::i2c {
     struct I2CRegMap {
         static_assert((base == address::i2c0_base) || (base == address::i2c1_base), "Wrong i2c base address!");
 
+        /**
+         * @brief The I2C control register. (Note: This register is called 'con' in the datasheet.)
+         *
+         * The I2C must be disabled in order to write to this register. Writes while the I2C is enabled have no effect.
+         */
+        struct ctrl {
+            static constexpr std::uintptr_t addr = base + offset::ctrl; /**< @brief The address of the control register. */
+            using ctrl_reg = reg_access::Reg<addr, reg_access::reg_mixed_access, std::uint32_t>; /**< @brief The ctrl register. */
 
+            struct rx_fifo_full_hld_ctrl {
+                
+            };
+        };
     };
 
     /** @} */ // rp2040_i2c

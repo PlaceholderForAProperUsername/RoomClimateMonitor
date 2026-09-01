@@ -160,7 +160,7 @@ namespace rp2040::system::clocks {
          */
         struct ctrl {
             static constexpr std::uintptr_t addr = base_addr + ctrl_offset; /**< @brief The address of the ctrl register of the reference clock control. */
-            using ctrl_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::read_write_access, std::uint32_t>; /**< @brief The control register of the reference clock. */
+            using ctrl_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::access::read_write, std::uint32_t>; /**< @brief The control register of the reference clock. */
 
             /**
              * @brief The auxiliary clock source bits as a BitField.
@@ -240,7 +240,7 @@ namespace rp2040::system::clocks {
          */
         struct div {
             static constexpr std::uintptr_t addr = base_addr + div_offset; /**< @brief The addr of the div register of the reference clock. */
-            using div_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::read_write_access, std::uint32_t>; /**< @brief The div register. */
+            using div_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::access::read_write, std::uint32_t>; /**< @brief The div register. */
 
             /**
              * @brief The integer component of the clock divisor.
@@ -279,7 +279,7 @@ namespace rp2040::system::clocks {
          */
         struct selected {
             static constexpr std::uintptr_t addr = base_addr + selected_offset; /**< @brief The addr of the selected register of the reference clock. */
-            using selected_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::read_access, std::uint32_t>; /**< @brief The selected register. */
+            using selected_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::access::read, std::uint32_t>; /**< @brief The selected register. */
 
             /**
              * @brief The selected bits contain information about the selected clock in the src bits of the ctrl register.
@@ -332,7 +332,7 @@ namespace rp2040::system::clocks {
          */
         struct ctrl {
             static constexpr std::uintptr_t addr = base_addr + ctrl_offset; /**< @brief The address of the ctrl register of the system clock control. */
-            using ctrl_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::read_write_access, std::uint32_t>; /**< @brief The control register of the system clock. */
+            using ctrl_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::access::read_write, std::uint32_t>; /**< @brief The control register of the system clock. */
 
             /**
              * @brief The auxiliary clock source bits as a BitField.
@@ -414,7 +414,7 @@ namespace rp2040::system::clocks {
          */
         struct div {
             static constexpr std::uintptr_t addr = base_addr + div_offset; /**< @brief The address of the div register of the system clock. */
-            using div_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::read_write_access, std::uint32_t>; /**< @brief The div register. */
+            using div_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::access::read_write, std::uint32_t>; /**< @brief The div register. */
 
             /**
              * @brief The integer component of the clock divisor.
@@ -486,7 +486,7 @@ namespace rp2040::system::clocks {
          */
         struct selected {
             static constexpr std::uintptr_t addr = base_addr + selected_offset; /**< @brief The addr of the selected register of the system clock. */
-            using selected_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::read_access, std::uint32_t>; /**< @brief The selected register. */
+            using selected_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::access::read, std::uint32_t>; /**< @brief The selected register. */
 
             /**
              * @brief The selected bits contain information about the selected clock in the src bits of the ctrl register.
@@ -538,7 +538,7 @@ namespace rp2040::system::clocks {
          */
         struct ctrl {
             static constexpr std::uintptr_t addr = base_addr + ctrl_offset; /**< @brief The address of the ctrl register of the peripheral clock control. */
-            using ctrl_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::read_write_access, std::uint32_t>; /**< @brief The control register of the peripheral clock. */
+            using ctrl_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::access::read_write, std::uint32_t>; /**< @brief The control register of the peripheral clock. */
 
 
             /**
