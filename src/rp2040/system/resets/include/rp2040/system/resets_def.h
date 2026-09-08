@@ -90,7 +90,7 @@ namespace rp2040::system {
          */
         struct reset {
             static constexpr std::uint32_t addr = resets_base + reset_offset; /**< @brief Address of the reset register. */
-            using reset_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::access::read_write, std::uint32_t>; /**< @brief The reset register type */
+            using reset_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::access_tag::read_write, std::uint32_t>; /**< @brief The reset register type */
 
 
             /**
@@ -102,6 +102,7 @@ namespace rp2040::system {
             struct ResetBitField {
                 using reg = reset_reg; /**< @brief The register to which the bitfield belongs. */
                 using T = reg::RegType; /**< @brief The type of the register. */
+                using bit_access = reg_access::access_tag::read_write;
 
                 static_assert(static_cast<T>(subsystem) < static_cast<T>(SubsystemBits::NumberOfSubsystems), "Invalid subsystem!");
 
@@ -133,7 +134,7 @@ namespace rp2040::system {
          */
         struct wdsel {
             static constexpr std::uint32_t addr = resets_base + wdsel_offset; /**< @brief The address of the wdsel register. */
-            using wdsel_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::access::read_write, std::uint32_t>; /**< @brief The wdsel register. */
+            using wdsel_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::access_tag::read_write, std::uint32_t>; /**< @brief The wdsel register. */
 
             /**
              * @brief The bits of the watchdog select register.
@@ -144,6 +145,7 @@ namespace rp2040::system {
             struct WDSelBitField {
                 using reg = wdsel_reg; /**< @brief The register to which the bitfield belongs. */
                 using T = reg::RegType; /**< @brief The type of the register. */
+                using bit_access = reg_access::access_tag::read_write;
 
                 static_assert(static_cast<T>(subsystem) < static_cast<T>(SubsystemBits::NumberOfSubsystems), "Invalid subsystem!");
 
@@ -176,7 +178,7 @@ namespace rp2040::system {
          */
         struct reset_done {
             static constexpr std::uint32_t addr = resets_base + reset_done_offset; /**< @brief The address of the reset_done register. */
-            using reset_done_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::access::read, std::uint32_t>; /**< @brief The reset_done register. */
+            using reset_done_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::access_tag::read, std::uint32_t>; /**< @brief The reset_done register. */
 
             /**
              * @brief The bits of the reset_done register.
@@ -187,6 +189,7 @@ namespace rp2040::system {
             struct ResetDoneBitField {
                 using reg = reset_done_reg; /**< @brief The register to which the bitfield belongs. */
                 using T = reg::RegType; /**< @brief The type of the register. */
+                using bit_access = reg_access::access_tag::read;
 
                 static_assert(static_cast<T>(subsystem) < static_cast<T>(SubsystemBits::NumberOfSubsystems), "Invalid subsystem!");
 

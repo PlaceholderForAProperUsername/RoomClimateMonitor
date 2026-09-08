@@ -58,10 +58,44 @@ namespace rp2040::hardware::i2c {
          */
         struct ctrl {
             static constexpr std::uintptr_t addr = base + offset::ctrl; /**< @brief The address of the control register. */
-            using ctrl_reg = reg_access::Reg<addr, reg_access::reg_mixed_access, std::uint32_t>; /**< @brief The ctrl register. */
+            using ctrl_reg = reg_access::Reg<addr, reg_access::access_tag::mixed_access, std::uint32_t>; /**< @brief The ctrl register. */
 
-            struct rx_fifo_full_hld_ctrl {
-                
+            /**
+             * @brief The slave disable bit.
+             */
+            struct ic_slave_disable {
+                /**
+                 * @brief A Bitfield to describe the slave disable bit.
+                 */
+                struct bitfield {
+                    using reg = ctrl_reg; /**< @brief Alias for the register the bitfield belongs to. */
+                    using T = reg::RegType; /**< @brief Alias for the underlying data type of the register. */
+
+                    static constexpr T position = 0x06U; /**< @brief The position of the bitfield in the register. */
+                    static constexpr T mask = (0x01U << position); /**< @brief The mask of the bitfield used in bit operations. */
+
+                    /**
+                     * @brief The slave can either be enabled or disabled.
+                     */
+                    enum class value : T {
+                        slave_enabled = 0x0U,
+                        slave_disabled = 0x1U,
+                    };
+                };
+
+                using value = bitfield::value; /**< @brief The values for the slave disable bit. */
+
+                using bits = ctrl_reg::template Bits<bitfield>; /**< @brief The bits object to control the slave disable bit. */
+            };
+
+            /**
+             * @brief 
+             */
+            struct ic_restart_en {
+                static constexpr ctrl_reg::RegType Pos = 0x05U;
+
+                using bits = ctrl_reg::template Bits<reg_access::BitFieldEnableDisable<ctrl_reg, Pos>>;
+
             };
         };
     };

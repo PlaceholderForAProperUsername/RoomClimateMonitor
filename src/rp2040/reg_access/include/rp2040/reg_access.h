@@ -38,38 +38,10 @@
  */
 
 namespace rp2040::reg_access {
-
-
     /**
-     * @brief Checks the validity of a BitField.
-     *
-     * A BitField represents specific bits of a register. As minimum requirements, the BitField needs the following type
-     * aliases:
-     *  - reg: type alias to the registers
-     *  - T: base data type of the register
-     *
-     * Furthermore, the following variables must be defined:
-     *  - position: position of the first bit in the register
-     *  - mask: Bitmask of the bits contained in the BitField
-     *
-     *  For write access, an enum must be provided @see HasEnumConcept, except for atomic set operation, where the
-     *  bit mask is the value.
-     *
-     * For generic examples, @see BitFieldEnableDisable and @see BitFieldValues
-     *
-     * @tparam BitField The BitField instance to check.
-     * @tparam Reg The register to which the BitField belongs.
-     * @tparam T The base data type of the register.
-     *
-     * @ingroup reg_access
+     * @addtogroup reg_access
+     * @{
      */
-    template <typename BitField, typename Reg, typename T>
-    concept BitFieldConcept =
-            std::is_same_v<Reg, typename BitField::reg> &&
-            std::is_same_v<decltype(BitField::position), const T> &&
-            std::is_same_v<decltype(BitField::mask), const T> &&
-            std::is_enum_v<typename BitField::value> &&
-            std::is_same_v<std::underlying_type_t<typename BitField::value>, T>;
 
     /**
      * @brief Represents a register and provides functions to configure the register.
@@ -77,22 +49,20 @@ namespace rp2040::reg_access {
      * @tparam Address The address of the register.
      * @tparam RegAccess The access specifier for the whole register. @see access_tags
      * @tparam T The data type of the register.
-     *
-     * @ingroup reg_access
      */
-    template <std::uintptr_t Address, typename RegAccess = access::read_write, typename T = std::uint32_t>
+    template <std::uintptr_t Address, typename RegAccess = access_tag::read_write, typename T = std::uint32_t>
     struct Reg {
         using ThisReg = Reg<Address, RegAccess, T>; /**< @brief Alias for the register. */
         using RegType = T; /**< @brief Alias for the underlying type of the register. */
+        using reg_access = RegAccess; /**< @brief Access tag to control register operations. */
 
         /**
          * @brief Represents specific bits of the enclosing register and provides functions to configure the bits of the register.
          *
-         * @tparam BitField The BitField specifying the bits.
-         * @tparam BitsAccess The access specifier for the group of bits.
+         * @tparam BitType The BitType specifying the bits.
          */
-        template <typename BitField, typename BitsAccess = RegAccess>
-        requires BitFieldConcept<BitField, ThisReg, RegType>
+        template <typename BitType>
+        requires BitTypeConcept<BitType, ThisReg, RegType>
         struct Bits {
             /**
              * @brief Sets the bits to the value.
@@ -101,13 +71,13 @@ namespace rp2040::reg_access {
              * @param[in] bits_value The value to be set.
              * @return None
              */
-            template <typename BitsAccess_ = BitsAccess>
-            static std::enable_if_t<std::is_base_of_v<access::read_write, BitsAccess_>, void>
-            set(BitField::value bits_value)
+            template <typename BitsAccess_ = BitType::bit_access>
+            static std::enable_if_t<std::is_base_of_v<access_tag::read_write, BitsAccess_>, void>
+            set(BitType::value bits_value)
             {
                 auto reg_value = read();
-                reg_value &= ~BitField::mask;
-                reg_value |= ((static_cast<T>(bits_value) << BitField::position) & BitField::mask);
+                reg_value &= ~BitType::mask;
+                reg_value |= ((static_cast<T>(bits_value) << BitType::position) & BitType::mask);
                 write(reg_value);
             }
 
@@ -118,13 +88,13 @@ namespace rp2040::reg_access {
              *
              * @tparam BitsAccess_ Access specifier for the bits.
              * @param[in] bits_value The value to be set.
-             * @return
+             * @return None
              */
-            template <typename BitsAccess_ = BitsAccess>
-            static std::enable_if_t<std::is_base_of_v<access::atomic_set, BitsAccess_>, void>
-            set(BitField::value bits_value)
+            template <typename BitsAccess_ = BitType::bit_access>
+            static std::enable_if_t<std::is_base_of_v<access_tag::atomic_set, BitsAccess_>, void>
+            set(BitType::value bits_value)
             {
-                T reg_value = ((static_cast<T>(bits_value) << BitField::position) & BitField::mask);
+                T reg_value = ((static_cast<T>(bits_value) << BitType::position) & BitType::mask);
                 write(reg_value);
             }
 
@@ -136,13 +106,13 @@ namespace rp2040::reg_access {
              * program.
              *
              * @tparam BitsAccess_ Access specifier for the bits.
-             * @return
+             * @return None
              */
-            template <typename BitsAccess_ = BitsAccess>
-            static std::enable_if_t<std::is_base_of_v<access::atomic_set_mask, BitsAccess_>, void>
+            template <typename BitsAccess_ = BitType::bit_access>
+            static std::enable_if_t<std::is_base_of_v<access_tag::atomic_set_mask, BitsAccess_>, void>
             set()
             {
-                T reg_value =  BitField::mask;
+                T reg_value =  BitType::mask;
                 write(reg_value);
             }
 
@@ -152,12 +122,12 @@ namespace rp2040::reg_access {
              * @tparam BitsAccess_ Access specifier for the bits.
              * @return T The unshifted bits.
              */
-            template <typename BitsAccess_ = BitsAccess>
-            static std::enable_if_t<std::is_base_of_v<access::read, BitsAccess_>, T>
+            template <typename BitsAccess_ = BitType::bit_access>
+            static std::enable_if_t<std::is_base_of_v<access_tag::read, BitsAccess_>, T>
             getBits()
             {
                 auto reg_value = read();
-                reg_value &= BitField::mask;
+                reg_value &= BitType::mask;
                 return reg_value;
             }
 
@@ -167,13 +137,13 @@ namespace rp2040::reg_access {
              * @tparam BitsAccess_ Access specifier for the bits.
              * @return T The value of the bits (Bits are shifted to position 0).
              */
-            template <typename BitsAccess_ = BitsAccess>
-            static std::enable_if_t<std::is_base_of_v<access::read, BitsAccess_>, T>
+            template <typename BitsAccess_ = BitType::bit_access>
+            static std::enable_if_t<std::is_base_of_v<access_tag::read, BitsAccess_>, T>
             getValue()
             {
                 auto reg_value = read();
-                reg_value &= BitField::mask;
-                reg_value >>= BitField::position;
+                reg_value &= BitType::mask;
+                reg_value >>= BitType::position;
                 return reg_value;
             }
 
@@ -183,12 +153,12 @@ namespace rp2040::reg_access {
              * @tparam BitsAccess_ Access specifier for the bits.
              * @return None
              */
-            template <typename BitsAccess_ = BitsAccess>
-            static std::enable_if_t<std::is_base_of_v<access::read_write, BitsAccess_>, void>
+            template <typename BitsAccess_ = BitType::bit_access>
+            static std::enable_if_t<std::is_base_of_v<access_tag::read_write, BitsAccess_>, void>
             toggle()
             {
                 auto reg_value = read();
-                reg_value ^= BitField::mask;
+                reg_value ^= BitType::mask;
                 write(reg_value);
             }
 
@@ -200,12 +170,12 @@ namespace rp2040::reg_access {
              * @tparam BitsAccess_ Access specifier for the bits.
              * @return None
              */
-            template <typename BitsAccess_ = BitsAccess>
-            static std::enable_if_t<std::is_base_of_v<access::atomic_xor, BitsAccess_>, void>
+            template <typename BitsAccess_ = BitType::bit_access>
+            static std::enable_if_t<std::is_base_of_v<access_tag::atomic_xor, BitsAccess_>, void>
             toggle()
             {
 
-                T reg_value = BitField::mask;
+                T reg_value = BitType::mask;
                 write(reg_value);
             }
 
@@ -215,12 +185,12 @@ namespace rp2040::reg_access {
              * @tparam BitsAccess_ Access specifier for the bits.
              * @return None
              */
-            template <typename BitsAccess_ = BitsAccess>
-            static std::enable_if_t<std::is_base_of_v<access::read_write, BitsAccess_>, void>
+            template <typename BitsAccess_ = BitType::bit_access>
+            static std::enable_if_t<std::is_base_of_v<access_tag::read_write, BitsAccess_>, void>
             clear()
             {
                 auto reg_value = read();
-                reg_value &= ~BitField::mask;
+                reg_value &= ~BitType::mask;
                 write(reg_value);
             }
 
@@ -233,11 +203,11 @@ namespace rp2040::reg_access {
              * @tparam BitsAccess_ Access specifier for the bits.
              * @return None
              */
-            template <typename BitsAccess_ = BitsAccess>
-            static std::enable_if_t<std::is_base_of_v<access::atomic_clear, BitsAccess_>, void>
+            template <typename BitsAccess_ = BitType::bit_access>
+            static std::enable_if_t<std::is_base_of_v<access_tag::atomic_clear, BitsAccess_>, void>
             clear()
             {
-                T reg_value = BitField::mask;
+                T reg_value = BitType::mask;
                 write(reg_value);
             }
         };
@@ -249,7 +219,7 @@ namespace rp2040::reg_access {
          * @return T The value of the register.
          */
         template <typename RegAccess_ = RegAccess>
-        static std::enable_if_t<std::is_base_of_v<access::read, RegAccess_>, T>
+        static std::enable_if_t<std::is_base_of_v<access_tag::read, RegAccess_>, T>
         read ()
         {
             return *reinterpret_cast<volatile T*>(Address);
@@ -264,7 +234,7 @@ namespace rp2040::reg_access {
          * @return None
          */
         template <typename RegAccess_ = RegAccess>
-        static std::enable_if_t<std::is_base_of_v<access::write, RegAccess_>, void>
+        static std::enable_if_t<std::is_base_of_v<access_tag::write, RegAccess_>, void>
         write(T value)
         {
             *reinterpret_cast<volatile T*>(Address) = value;
@@ -272,29 +242,28 @@ namespace rp2040::reg_access {
     };
 
 
-
-    constexpr unsigned int bitsPerByte = 8U; /**< @brief Constant used in general BitField error checking. */
+    constexpr unsigned int bits_per_byte = 8U; /**< @brief Constant used in general BitType error checking. */
 
     /**
-     * @brief General BitField for a single enable/disable bit.
+     * @brief General BitType for a single enable/disable bit.
      *
-     * @tparam Reg The register to which the BitField belongs. @see Reg
+     * @tparam Reg The register to which the BitType belongs. @see Reg
      * @tparam Pos The position of the bit within the register.
-     *
-     * @ingroup reg_access
+     * @tparam BitAccess The access tag to control the bit operation allowed for the bit.
      */
-    template <typename Reg, std::uint32_t Pos>
-    struct BitFieldEnableDisable {
-        using reg = Reg; /**< @brief Alias for the register the bitfield belongs to. */
+    template <typename Reg, std::uint32_t Pos, typename BitAccess = Reg::reg_access>
+    struct BitTypeEnableDisable {
+        using reg = Reg; /**< @brief Alias for the register the BitType belongs to. */
         using T = reg::RegType; /**< @brief Alias for the underlying data type of the register. */
+        using bit_access = BitAccess; /**< @brief Access tag to control access to bit operations. */
 
-        static_assert(Pos < (sizeof(T) * bitsPerByte), "Pos too large for register data type.");
+        static_assert(Pos < (sizeof(T) * bits_per_byte), "Pos too large for register data type.");
 
-        static constexpr T position = Pos; /**< @brief The position of the bitfield in the register. */
-        static constexpr T mask = (0x1UL << position); /**< @brief The mask of the bitfield used in bit operations. */
+        static constexpr T position = Pos; /**< @brief The position of the BitType in the register. */
+        static constexpr T mask = (0x1UL << position); /**< @brief The mask of the BitType used in bit operations. */
 
         /**
-         * @brief The possible values for this bitfield.
+         * @brief The possible values for this BitType.
          */
         enum class value : T {
             disable = 0,
@@ -303,25 +272,25 @@ namespace rp2040::reg_access {
     };
 
     /**
-     * @brief General BitField for a single high/low bit.
+     * @brief General BitType for a single high/low bit.
      *
-     * @tparam Reg The register to which the BitField belongs. @see Reg
+     * @tparam Reg The register to which the BitType belongs. @see Reg
      * @tparam Pos The position of the bit within the register.
-     *
-     * @ingroup reg_access
+     * @tparam BitAccess The access tag to control the bit operation allowed for the bit.
      */
-    template <typename Reg, std::uint32_t Pos>
-    struct BitFieldHighLow {
-        using reg = Reg; /**< @brief Alias for the register the bitfield belongs to. */
+    template <typename Reg, std::uint32_t Pos, typename BitAccess = Reg::reg_access>
+    struct BitTypeHighLow {
+        using reg = Reg; /**< @brief Alias for the register the BitType belongs to. */
         using T = reg::RegType; /**< @brief Alias for the underlying data type of the register. */
+        using bit_access = BitAccess; /**< @brief Access tag to control access to bit operations. */
 
-        static_assert(Pos < (sizeof(T) * bitsPerByte), "Pos too large for register data type.");
+        static_assert(Pos < (sizeof(T) * bits_per_byte), "Pos too large for register data type.");
 
-        static constexpr T position = Pos; /**< @brief The position of the bitfield in the register. */
-        static constexpr T mask = (0x1UL << position); /**< @brief The mask of the bitfield used in bit operations. */
+        static constexpr T position = Pos; /**< @brief The position of the BitType in the register. */
+        static constexpr T mask = (0x1UL << position); /**< @brief The mask of the BitType used in bit operations. */
 
         /**
-         * @brief The possible values for this bitfield.
+         * @brief The possible values for this BitType.
          */
         enum class value : T {
             low = 0,
@@ -330,34 +299,34 @@ namespace rp2040::reg_access {
     };
 
     /**
-     * @brief General BitField for several bits with continuous values.
+     * @brief General BitType for several bits with continuous values.
      *
-     * @tparam Value The value for the BitField.
-     * @tparam Reg The register to which the BitField belongs. @see Reg
+     * @tparam Value The value for the BitType.
+     * @tparam Reg The register to which the BitType belongs. @see Reg
      * @tparam Mask The unshifted mask of the bits. As an example, for 3 bits the Mask will be 0x07 regardless of position.
      * @tparam Pos The position of the bit within the register.
-     *
-     * @ingroup reg_access
+     * @tparam BitAccess The access tag to control the bit operation allowed for the bit.
      */
-    template <auto Value, typename Reg, std::uint32_t Mask, std::uint32_t Pos>
-    struct BitFieldValues {
-        using reg = Reg; /**< @brief Alias for the register the bitfield belongs to. */
+    template <auto Value, typename Reg, std::uint32_t Mask, std::uint32_t Pos, typename BitAccess = Reg::reg_access>
+    struct BitTypeValues {
+        using reg = Reg; /**< @brief Alias for the register the BitType belongs to. */
         using T = reg::RegType; /**< @brief Alias for the underlying data type of the register. */
+        using bit_access = BitAccess; /**< @brief Access tag to control access to bit operations. */
 
         static_assert(std::is_same_v<T, decltype(Value)>);
-        static_assert(Pos < (sizeof(T) * bitsPerByte), "Pos too large for register data type.");
+        static_assert(Pos < (sizeof(T) * bits_per_byte), "Pos too large for register data type.");
         static_assert(((Mask << Pos) >> Pos) == Mask, "Mask overflows after shifting by Pos.");
 
-        static constexpr T position = Pos; /**< @brief The position of the bitfield in the register. */
-        static constexpr T mask = (Mask << position); /**< @brief The mask of the bitfield used in bit operations. */
+        static constexpr T position = Pos; /**< @brief The position of the BitType in the register. */
+        static constexpr T mask = (Mask << position); /**< @brief The mask of the BitType used in bit operations. */
 
         static_assert(Value <= Mask);
 
         /**
-         * @brief The possible value for this bitfield.
+         * @brief The possible value for this BitType.
          *
-         * Implementation note: Even though this bitfield doesn't necessarily need an enum, it is used to have a unified
-         * interface for the bitfield type.
+         * Implementation note: Even though this BitType doesn't necessarily need an enum, it is used to have a unified
+         * interface for the BitType type.
          */
         enum class value : T {
             val = Value
@@ -365,24 +334,26 @@ namespace rp2040::reg_access {
     };
 
     /**
-     * @brief Specialized BitField for atomic operations where only a single bit needs to be set.
+     * @brief Specialized BitType for atomic operations where only a single bit needs to be set.
      *
-     * @tparam Reg The register to which the BitField belongs. @see Reg
+     * @tparam Reg The register to which the BitType belongs. @see Reg
      * @tparam Pos The position of the bit within the register.
+     * @tparam BitAccess The access tag to control the bit operation allowed for the bit.
      */
-    template <typename Reg, std::uint32_t Pos>
-    struct BitFieldAtomicBitOp {
-        using reg = Reg; /**< @brief Alias for the register the bitfield belongs to. */
+    template <typename Reg, std::uint32_t Pos, typename BitAccess = Reg::reg_access>
+    struct BitTypeAtomicBitOp {
+        using reg = Reg; /**< @brief Alias for the register the BitType belongs to. */
         using T = reg::RegType; /**< @brief Alias for the underlying data type of the register. */
+        using bit_access = BitAccess; /**< @brief Access tag to control access to bit operations. */
 
-        static_assert(Pos < (sizeof(T) * bitsPerByte), "Pos too large for register data type.");
+        static_assert(Pos < (sizeof(T) * bits_per_byte), "Pos too large for register data type.");
 
-        static constexpr T position = Pos; /**< @brief The position of the bitfield in the register. */
-        static constexpr T mask = (0x1UL << position); /**< @brief The mask of the bitfield used in bit operations. */
+        static constexpr T position = Pos; /**< @brief The position of the BitType in the register. */
+        static constexpr T mask = (0x1UL << position); /**< @brief The mask of the BitType used in bit operations. */
 
         /** @brief Empty enum required to make the program compile.
          *
-         * Even though this BitField is intended for the @see set function in @see Regs::Bits without arguments and a concept was used
+         * Even though this BitTypeis intended for the @see set function in @see Regs::Bits without arguments and a concept was used
          * to only select the @see set function without arguments. The compilation would still fail, as the other set functions,
          * which take a BitField::value as an argument, even though those functions would be discarded via concept, required
          * that type to compile. Therefore this dummy enum is needed.
@@ -390,8 +361,8 @@ namespace rp2040::reg_access {
         enum class value : T {};
     };
 
-} // rp2040::reg_access
 
-#include "../../reg_access.tpp"
+    /** @}*/ // reg_access
+} // rp2040::reg_access
 
 #endif //RP2040_REG_ACCESS_H

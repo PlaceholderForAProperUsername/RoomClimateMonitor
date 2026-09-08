@@ -57,7 +57,7 @@ namespace rp2040::system {
      */
     struct ctrl {
         constexpr static std::uintptr_t addr = xosc_addr + ctrl_offset; /**< @brief The address of the ctrl register. */
-        using ctrl_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::access::read_write, std::uint32_t>; /**< @brief The ctrl register. */
+        using ctrl_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::access_tag::read_write, std::uint32_t>; /**< @brief The ctrl register. */
 
         /**
          * @brief The enable bits as a BitField.
@@ -67,6 +67,7 @@ namespace rp2040::system {
         struct EnableBitField {
             using reg = ctrl_reg; /**< @brief The register of which the BitField is part of. */
             using T = reg::RegType; /**< @brief The data type of the register. */
+            using bit_access = reg_access::access_tag::read_write;
 
             static constexpr T position = 12U; /**< @brief The position at which the BitField start in the register. */
             static constexpr T mask = (0xFFFU << position); /**< @brief The mask of the controlled bits. */
@@ -89,6 +90,7 @@ namespace rp2040::system {
         struct FreqRangeBitField {
             using reg = ctrl_reg; /**< @brief The register of which the BitField is part of. */
             using T = reg::RegType; /**< @brief The data type of the register. */
+            using bit_access = reg_access::access_tag::read_write;
 
             static constexpr T position = 0U; /**< @brief The position at which the BitField start in the register. */
             static constexpr T mask = (0xFFFU << position); /**< @brief The mask of the controlled bits. */
@@ -108,7 +110,7 @@ namespace rp2040::system {
      */
     struct status {
         constexpr static std::uint32_t addr = xosc_addr + status_offset; /**< @brief Address of the status register. */
-        using status_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::access::reg_mixed, std::uint32_t>; /**< @brief The status register type. */
+        using status_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::access_tag::mixed_access, std::uint32_t>; /**< @brief The status register type. */
 
         /**
          * @brief The stable bit.
@@ -118,6 +120,7 @@ namespace rp2040::system {
         struct StableBitField {
             using reg = status_reg; /**< @brief The register of which the BitField is part of. */
             using T = reg::RegType; /**< @brief The data type of the register. */
+            using bit_access = reg_access::access_tag::read;
 
             static constexpr T position = 31U; /**< @brief The position at which the BitField start in the register. */
             static constexpr T mask = (0x01U << position); /**< @brief The mask of the controlled bits. */
@@ -130,7 +133,7 @@ namespace rp2040::system {
                 stable = 0x01U, /**< @brief The xosc is running and stable */
             };
         };
-        using stable_bits = status_reg::template Bits<StableBitField, rp2040::reg_access::access::read>; /**< The StableBitField type. */
+        using stable_bits = status_reg::template Bits<StableBitField>; /**< The StableBitField type. */
 
         /**
          * @brief The badwrite bit.
@@ -141,6 +144,7 @@ namespace rp2040::system {
         struct BadWriteBitField {
             using reg = status_reg; /**< @brief The register of which the BitField is part of. */
             using T = reg::RegType; /**< @brief The data type of the register. */
+            using bit_access = reg_access::access_tag::read_write;
 
             static constexpr T position = 24U; /**< @brief The position at which the BitField start in the register. */
             static constexpr T mask = (0x01U << position); /**< @brief The mask of the controlled bits. */
@@ -154,7 +158,7 @@ namespace rp2040::system {
                 clear_bad_write = 0x01U /**< @brief Value to clear the bit. */
             };
         };
-        using bad_write_bits = status_reg::template Bits<BadWriteBitField, rp2040::reg_access::access::read_write>; /**< The BadWriteBitField type. */
+        using bad_write_bits = status_reg::template Bits<BadWriteBitField>; /**< The BadWriteBitField type. */
 
         /**
          * @brief The enabled bit.
@@ -162,6 +166,7 @@ namespace rp2040::system {
         struct EnabledBitField {
             using reg = status_reg; /**< @brief The register of which the BitField is part of. */
             using T = reg::RegType; /**< @brief The data type of the register. */
+            using bit_access = reg_access::access_tag::read;
 
             static constexpr T position = 12U; /**< @brief The position at which the BitField start in the register. */
             static constexpr T mask = (0x01U << position); /**< @brief The mask of the controlled bits. */
@@ -174,7 +179,7 @@ namespace rp2040::system {
                 enabled = 0x01U, /**< @brief The xosc is enabled, but may be not running or stable. */
             };
         };
-        using enabled_bits = status_reg::template Bits<EnabledBitField, rp2040::reg_access::access::read>; /**< @brief The EnabledBitField type. */
+        using enabled_bits = status_reg::template Bits<EnabledBitField>; /**< @brief The EnabledBitField type. */
 
         /**
          * @brief The freq_range status bits.
@@ -184,6 +189,7 @@ namespace rp2040::system {
         struct FreqRangeBitField {
             using reg = status_reg; /**< @brief The register of which the BitField is part of. */
             using T = reg::RegType; /**< @brief The data type of the register. */
+            using bit_access = reg_access::access_tag::read;
 
             static constexpr T position = 0U; /**< @brief The position at which the BitField start in the register. */
             static constexpr T mask = (0x03U << position); /**< @brief The mask of the controlled bits. */
@@ -195,7 +201,7 @@ namespace rp2040::system {
                 range_1_15_mhz = 0x00U, /**< @brief The selected freq_range. */
             };
         };
-        using freq_range_bits  = status_reg::template Bits<FreqRangeBitField, rp2040::reg_access::access::read>; /**< @brief The FreqRangeBitField type. */
+        using freq_range_bits  = status_reg::template Bits<FreqRangeBitField>; /**< @brief The FreqRangeBitField type. */
     }; //status
 
     /**
@@ -204,7 +210,7 @@ namespace rp2040::system {
      */
     struct dormant {
         constexpr static std::uint32_t addr = xosc_addr + dormant_offset; /**< @brief The address of the dormant register. */
-        using dormant_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::access::read_write, std::uint32_t>; /**< @brief The dormant register type. */
+        using dormant_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::access_tag::read_write, std::uint32_t>; /**< @brief The dormant register type. */
 
         /**
          * @brief The dormant bits.
@@ -212,6 +218,7 @@ namespace rp2040::system {
         struct DormantBitField {
             using reg = dormant_reg; /**< @brief The register of which the BitField is part of. */
             using T = reg::RegType; /**< @brief The data type of the register. */
+            using bit_access = reg_access::access_tag::read_write;
 
             static constexpr T position = 0U; /**< @brief The position at which the BitField start in the register. */
             static constexpr T mask = (0xFFFFFFFFU << position); /**< @brief The mask of the controlled bits. */
@@ -224,7 +231,7 @@ namespace rp2040::system {
                 wake = 0x77616b65U, /**< @brief Wakes up the xosc. */
             };
         };
-        using dormant_bits = dormant_reg::template Bits<DormantBitField, rp2040::reg_access::access::read_write>; /**< The DormantBitField type. */
+        using dormant_bits = dormant_reg::template Bits<DormantBitField>; /**< The DormantBitField type. */
     }; // dormant
 
     /**
@@ -235,7 +242,7 @@ namespace rp2040::system {
      */
     struct startup {
         constexpr static std::uintptr_t addr = xosc_addr + startup_offset; /**< @brief The address of the startup register. */
-        using startup_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::access::read_write, std::uint32_t>; /**< @brief The startup register type. */
+        using startup_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::access_tag::read_write, std::uint32_t>; /**< @brief The startup register type. */
 
         constexpr static startup_reg::RegType default_delay_val = 47U; /**< @brief The default value for the startup delay according to the rp2040 datasheet. */
 
@@ -248,7 +255,7 @@ namespace rp2040::system {
          * @tparam delay_value The value for the startup delay multiplied by 256 in cycles.
          */
         template <auto delay_value = default_delay_val>
-        using DelayBitField = rp2040::reg_access::BitFieldValues<delay_value, startup_reg, delay_mask, delay_pos>;
+        using DelayBitField = rp2040::reg_access::BitTypeValues<delay_value, startup_reg, delay_mask, delay_pos>;
 
         /**
          * @brief The DelayBitField type.
@@ -260,7 +267,7 @@ namespace rp2040::system {
 
         constexpr static startup_reg::RegType x4_pos = 20U; /**< @brief The position of the x4 bit. */
 
-        using X4BitField = rp2040::reg_access::BitFieldEnableDisable<startup_reg, x4_pos>; /**< @brief The BitField of the x4 bit. */
+        using X4BitField = rp2040::reg_access::BitTypeEnableDisable<startup_reg, x4_pos>; /**< @brief The BitField of the x4 bit. */
 
         using x4_bits = startup_reg::template Bits<X4BitField>; /**< @brief The X4BitField type.*/
     }; // startup
@@ -272,7 +279,7 @@ namespace rp2040::system {
          */
         struct count {
             constexpr static std::uintptr_t addr = xosc_addr + count_offset; /**< @brief The address of the count register. */
-            using count_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::access::read_write, std::uint32_t>; /**< @brief The count register type. */
+            using count_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::access_tag::read_write, std::uint32_t>; /**< @brief The count register type. */
 
             constexpr static count_reg::RegType count_position = 0U; /**< @brief The position of the count bits. */
             constexpr static count_reg::RegType count_mask = (0xFFU << count_position); /**< @brief The mask of the count bits. */
@@ -283,7 +290,7 @@ namespace rp2040::system {
              * @tparam count_value The start value for the counter.
              */
             template <auto count_value>
-            using CountBitField = rp2040::reg_access::BitFieldValues<count_value, count_reg, count_mask, count_position>;
+            using CountBitField = rp2040::reg_access::BitTypeValues<count_value, count_reg, count_mask, count_position>;
 
             /**
              * @brief The CountBitField type.
