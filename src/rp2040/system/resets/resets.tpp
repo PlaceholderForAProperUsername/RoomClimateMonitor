@@ -28,47 +28,44 @@
 
 #include "include/rp2040/system/resets.h"
 
-namespace rp2040::system {
+namespace rp2040::system::resets {
     /**
      * @addtogroup rp2040_resets
      * @{
      */
 
     template <std::uintptr_t resets_addr>
-    Resets_Type<resets_addr>& Resets_Type<resets_addr>::getInstance() {
-        static Resets_Type<resets_addr> instance;
+    ResetsType<resets_addr>& ResetsType<resets_addr>::get_instance() {
+        static ResetsType<resets_addr> instance;
         return instance;
     }
 
     template <std::uintptr_t resets_addr>
-    template <SubsystemBits subsystem>
-    void Resets_Type<resets_addr>::enable() {
-        using T = reset_r::reset_reg::RegType;
-        static_assert(static_cast<T>(subsystem) < static_cast<T>(SubsystemBits::NumberOfSubsystems), "Invalid subsystem");
+    template <Subsystems subsystem>
+    void ResetsType<resets_addr>::enable() {
+        static_assert(subsystem < Subsystems::NumberOfSubsystems, "Invalid template parameter subsystem in ResetsType::enable()!");
 
-        using reset_bits_t = reset_r::template reset_bits<subsystem>;
-        using reset_value_t = reset_r::template ResetBitField<subsystem>::value;
+        using reset_bits_t = reset_r::reset_reg::template Bits<typename reset_r::template ResetBitType<subsystem>>;
+        using reset_value_t = reset_r::template ResetBitType<subsystem>::value;
 
         reset_bits_t::set(reset_value_t::enable);
     }
 
     template <std::uintptr_t resets_addr>
-    template <SubsystemBits subsystem>
-    void Resets_Type<resets_addr>::disable() {
-        using T = reset_r::reset_reg::RegType;
-        static_assert(static_cast<T>(subsystem) < static_cast<T>(SubsystemBits::NumberOfSubsystems), "Invalid subsystem");
+    template <Subsystems subsystem>
+    void ResetsType<resets_addr>::disable() {
+        static_assert(subsystem < Subsystems::NumberOfSubsystems, "Invalid template parameter subsystem in ResetsType::disable()!");
 
-        using reset_bits_t = reset_r::template reset_bits<subsystem>;
-        using reset_value_t = reset_r::template ResetBitField<subsystem>::value;
+        using reset_bits_t = reset_r::reset_reg::template Bits<typename reset_r::template ResetBitType<subsystem>>;
+        using reset_value_t = reset_r::template ResetBitType<subsystem>::value;
 
         reset_bits_t::set(reset_value_t::disable);
     }
 
     template <std::uintptr_t resets_addr>
-    template <SubsystemBits subsystem>
-    void Resets_Type<resets_addr>::reset() {
-        using T = reset_r::reset_reg::RegType;
-        static_assert(static_cast<T>(subsystem) < static_cast<T>(SubsystemBits::NumberOfSubsystems), "Invalid subsystem");
+    template <Subsystems subsystem>
+    void ResetsType<resets_addr>::reset() {
+        static_assert(subsystem < Subsystems::NumberOfSubsystems, "Invalid template parameter subsystem in ResetsType::reset()!");
 
         disable<subsystem>();
 
@@ -76,13 +73,13 @@ namespace rp2040::system {
     }
 
     template <std::uintptr_t resets_addr>
-    template <SubsystemBits subsystem>
-    bool Resets_Type<resets_addr>::isEnabled() {
-        using T = reset_done_r::reset_done_reg::RegType;
-        static_assert(static_cast<T>(subsystem) < static_cast<T>(SubsystemBits::NumberOfSubsystems), "Invalid subsystem");
+    template <Subsystems subsystem>
+    bool ResetsType<resets_addr>::is_enabled() {
+        static_assert(subsystem < Subsystems::NumberOfSubsystems, "Invalid template parameter subsystem in ResetsType::is_enabled()!");
 
-        using reset_done_bits_t = reset_done_r::template reset_done_bits<subsystem>;
-        using reset_done_value_t = reset_done_r::template ResetDoneBitField<subsystem>::value;
+        using reset_done_bits_t = reset_done_r::reset_done_reg::template Bits<typename reset_done_r::template ResetDoneBitType<subsystem>>;
+        using reset_done_value_t = reset_done_r::template ResetDoneBitType<subsystem>::value;
+        using T = reset_done_r::reset_done_reg::RegType;
 
         return reset_done_bits_t::getValue() == static_cast<T>(reset_done_value_t::enabled);
     }

@@ -29,7 +29,7 @@
 
 #include "resets_def.h"
 
-namespace rp2040::system {
+namespace rp2040::system::resets {
     /**
     * @addtogroup rp2040_resets
     * @{
@@ -41,13 +41,8 @@ namespace rp2040::system {
      * @tparam resets_addr The address of the resets controller.
      */
     template<std::uintptr_t resets_addr>
-    class Resets_Type {
-        static_assert(resets_addr == resets_base, "The resets address must be a valid address");
-
-        using resets_reg = Resets_RegMapType<resets_addr>; /**< @brief The registers of the reset controller */
-        using reset_r = resets_reg::reset; /**< @brief The reset register. */
-        using wdsel_r = resets_reg::wdsel; /**< @brief The watchdog select regiser. */
-        using reset_done_r = resets_reg::reset_done; /**< @brief The reset done register. */
+    class ResetsType {
+        static_assert(resets_addr == address::resets_base, "The resets address must be a valid address");
 
     public:
         /**
@@ -55,14 +50,14 @@ namespace rp2040::system {
          *
          * @return Resets_Type& The resets instance.
          */
-        static Resets_Type& getInstance();
+        static ResetsType& get_instance();
 
         /**
          * @brief Enables a subsystem.
          *
          * @tparam subsystem The subsystem to be enabled.
          */
-        template <SubsystemBits subsystem>
+        template <Subsystems subsystem>
         void enable();
 
         /**
@@ -70,7 +65,7 @@ namespace rp2040::system {
          *
          * @tparam subsystem The subsystem to be disabled.
          */
-        template <SubsystemBits subsystem>
+        template <Subsystems subsystem>
         void disable();
 
         /**
@@ -78,7 +73,7 @@ namespace rp2040::system {
          *
          * @tparam subsystem The subsystem to be reset.
          */
-        template <SubsystemBits subsystem>
+        template <Subsystems subsystem>
         void reset();
 
         /**
@@ -89,14 +84,19 @@ namespace rp2040::system {
          * @retval true The subsystem is enabled and running.
          * @retval false The subsystem is not running.
          */
-        template <SubsystemBits subsystem>
-        bool isEnabled();
+        template <Subsystems subsystem>
+        bool is_enabled();
 
     private:
-        Resets_Type() = default;
+        using resets_reg = ResetsRegMapType<resets_addr>; /**< @brief The registers of the reset controller */
+        using reset_r = resets_reg::Reset; /**< @brief The reset register. */
+        using wdsel_r = resets_reg::WDSel; /**< @brief The watchdog select regiser. */
+        using reset_done_r = resets_reg::ResetDone; /**< @brief The reset done register. */
+
+        ResetsType() = default;
     };
 
-    using Resets = Resets_Type<resets_base>; /**< @brief The resets controller */
+    using Resets = ResetsType<address::resets_base>; /**< @brief The resets controller */
 
     /** @} */ // rp2040_resets
 } // rp2040::system

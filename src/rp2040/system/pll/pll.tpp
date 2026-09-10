@@ -23,9 +23,9 @@ namespace rp2040::system::pll {
             return;
         }
         if constexpr (pll_addr == pll_sys_base) {
-            Resets::getInstance().enable<SubsystemBits::PLL_SYS>();
+            resets::Resets::get_instance().enable<resets::Subsystems::PLL_SYS>();
         } else if constexpr (pll_addr == pll_usb_base) {
-            Resets::getInstance().enable<SubsystemBits::PLL_USB>();
+            resets::Resets::get_instance().enable<resets::Subsystems::PLL_USB>();
         }
         this->m_flags.set(static_cast<std::uint32_t>(Flags::isInitialized));
         this->m_frequency_hz = 0;
@@ -37,9 +37,9 @@ namespace rp2040::system::pll {
             return;
         }
         if constexpr (pll_addr == pll_sys_base) {
-            Resets::getInstance().disable<SubsystemBits::PLL_SYS>();
+            resets::Resets::get_instance().disable<resets::Subsystems::PLL_SYS>();
         } else if constexpr (pll_addr == pll_usb_base) {
-            Resets::getInstance().disable<SubsystemBits::PLL_USB>();
+            resets::Resets::get_instance().disable<resets::Subsystems::PLL_USB>();
         }
         this->m_flags.reset(static_cast<std::uint32_t>(Flags::isInitialized));
         this->m_frequency_hz = 0;
@@ -77,11 +77,11 @@ namespace rp2040::system::pll {
         // If the PLL is already running with a different frequency, reset the PLL
         if (cs_r::lock_bits::getValue() == static_cast<cs_r::cs_reg::RegType>(cs_r::LockBitField::value::locked)) {
             if constexpr (pll_addr == pll_sys_base) {
-                Resets::getInstance().reset<SubsystemBits::PLL_SYS>();
-                while (!Resets::getInstance().isEnabled<SubsystemBits::PLL_SYS>()) {}
+                resets::Resets::get_instance().reset<resets::Subsystems::PLL_SYS>();
+                while (!resets::Resets::get_instance().is_enabled<resets::Subsystems::PLL_SYS>()) {}
             } else if constexpr (pll_addr == pll_usb_base) {
-                Resets::getInstance().reset<SubsystemBits::PLL_USB>();
-                while (!Resets::getInstance().isEnabled<SubsystemBits::PLL_USB>()) {}
+                resets::Resets::get_instance().reset<resets::Subsystems::PLL_USB>();
+                while (!resets::Resets::get_instance().is_enabled<resets::Subsystems::PLL_USB>()) {}
             }
         }
 

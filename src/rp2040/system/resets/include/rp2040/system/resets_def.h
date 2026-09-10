@@ -29,18 +29,25 @@
 
 #include "rp2040/reg_access.h"
 
-namespace rp2040::system {
+namespace rp2040::system::resets {
     /**
      * @addtogroup rp2040_resets
      * @{
      */
 
-    constexpr std::uintptr_t resets_base = 0x4000c000; /**< @brief The base address of the reset controller. */
+    /**
+     * @brief The addresses for the resets module.
+     */
+    namespace address {
+        constexpr std::uintptr_t resets_base = 0x4000c000; /**< @brief The base address of the reset controller. */
+    }
 
     /**
      * @brief The subsystems controllable by the reset controller.
+     *
+     * The value corresponds to the bit position in the registers.
      */
-    enum class SubsystemBits: std::uint32_t {
+    enum class Subsystems : std::uint32_t {
         ADC = 0U,
         BUSCTRL = 1U,
         DMA = 2U,
@@ -75,12 +82,19 @@ namespace rp2040::system {
      * @tparam resets_addr The address of the resets controller.
      */
     template <std::uintptr_t resets_addr>
-    struct Resets_RegMapType {
-        static_assert(resets_addr == resets_base, "The resets address must be a valid address");
+    struct ResetsRegMapType {
+        static_assert(resets_addr == address::resets_base, "The resets address must be a valid address");
 
-        static constexpr std::uint32_t reset_offset = 0x00U; /**< @brief The offset for the reset register. */
-        static constexpr std::uint32_t wdsel_offset = 0x04U; /**< @brief The offset for the watchdog select (wdsel) register. */
-        static constexpr std::uint32_t reset_done_offset = 0x08U; /**< @brief The offset for the reset done register. */
+        /**
+         * @brief The registers of the resets module.
+         *
+         * The value is the offset value from the base address of the specific register.
+         */
+        struct Registers {
+            static constexpr std::uint32_t reset = 0x00U; /**< @brief The offset for the reset register. */
+            static constexpr std::uint32_t wdsel = 0x04U; /**< @brief The offset for the watchdog select (wdsel) register. */
+            static constexpr std::uint32_t reset_done = 0x08U; /**< @brief The offset for the reset done register. */
+        };
 
         /**
          * @brief The reset register of the reset controller.
@@ -88,23 +102,23 @@ namespace rp2040::system {
          * If a bit is set, the subsystem is held in reset. To use the subsystem, the reset must be deasserted by setting
          * the bit to 0.
          */
-        struct reset {
-            static constexpr std::uint32_t addr = resets_base + reset_offset; /**< @brief Address of the reset register. */
-            using reset_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::access_tag::read_write, std::uint32_t>; /**< @brief The reset register type */
+        struct Reset {
+            static constexpr std::uint32_t addr = resets_addr + Registers::reset; /**< @brief Address of the reset register. */
+            using reset_reg = reg_access::Reg<addr, reg_access::access_tag::read_write, std::uint32_t>; /**< @brief The reset register type */
 
 
             /**
-             * @brief The BitField representing the bits of the reset register.
+             * @brief The BitType representing the bits of the reset register.
              *
              * @tparam subsystem The subsystem to be controlled.
              */
-            template <SubsystemBits subsystem>
-            struct ResetBitField {
-                using reg = reset_reg; /**< @brief The register to which the bitfield belongs. */
+            template <Subsystems subsystem>
+            struct ResetBitType {
+                using reg = reset_reg; /**< @brief The register to which the bit belongs. */
                 using T = reg::RegType; /**< @brief The type of the register. */
-                using bit_access = reg_access::access_tag::read_write;
+                using bit_access = reg_access::access_tag::read_write; /**< @brief Access specifier of the specific bit. */
 
-                static_assert(static_cast<T>(subsystem) < static_cast<T>(SubsystemBits::NumberOfSubsystems), "Invalid subsystem!");
+                static_assert(subsystem < Subsystems::NumberOfSubsystems, "Invalid subsystem for ResetBitType!");
 
                 static constexpr T position = static_cast<T>(subsystem); /**< @brief The position of the bits in the register */
                 static constexpr T mask = (0x01U << position); /**< @brief The mask of the affected bits. */
@@ -117,14 +131,6 @@ namespace rp2040::system {
                     disable = 1U, /**< @brief Put the subsystem in reset and thus disable it. */
                 };
             };
-
-            /**
-             * @brief The ResetsBitField type.
-             *
-             * @tparam subsystem The subsystem to be controlled.
-             */
-            template <SubsystemBits subsystem>
-            using reset_bits = reset_reg::Bits<ResetBitField<subsystem>>;
         };
 
         /**
@@ -132,22 +138,22 @@ namespace rp2040::system {
          *
          * If a bit is set and the watchdog fires, the subsystem will reset.
          */
-        struct wdsel {
-            static constexpr std::uint32_t addr = resets_base + wdsel_offset; /**< @brief The address of the wdsel register. */
-            using wdsel_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::access_tag::read_write, std::uint32_t>; /**< @brief The wdsel register. */
+        struct WDSel {
+            static constexpr std::uint32_t addr = resets_addr + Registers::wdsel; /**< @brief The address of the wdsel register. */
+            using wdsel_reg = reg_access::Reg<addr, reg_access::access_tag::read_write, std::uint32_t>; /**< @brief The wdsel register. */
 
             /**
              * @brief The bits of the watchdog select register.
              *
              * @tparam subsystem The subsystem to be selected.
              */
-            template <SubsystemBits subsystem>
-            struct WDSelBitField {
-                using reg = wdsel_reg; /**< @brief The register to which the bitfield belongs. */
+            template <Subsystems subsystem>
+            struct WDSelBitType {
+                using reg = wdsel_reg; /**< @brief The register to which the bits belongs. */
                 using T = reg::RegType; /**< @brief The type of the register. */
-                using bit_access = reg_access::access_tag::read_write;
+                using bit_access = reg_access::access_tag::read_write; /**< @brief Access specifier of the specific bit. */
 
-                static_assert(static_cast<T>(subsystem) < static_cast<T>(SubsystemBits::NumberOfSubsystems), "Invalid subsystem!");
+                static_assert(subsystem < Subsystems::NumberOfSubsystems, "Invalid subsystem for WDSelBitType!");
 
                 static constexpr T position = static_cast<T>(subsystem); /**< @brief The position of the bits in the register */
                 static constexpr T mask = (0x01U << position); /**< @brief The mask of the affected bits. */
@@ -160,38 +166,30 @@ namespace rp2040::system {
                     enable = 1U, /**< @brief The subsystem will be put in reset when the watchdog fires */
                 };
             };
-
-            /**
-             * @brief The watchdog select BitField type.
-             *
-             * @tparam subsystem The subsystem to be selected.
-             */
-            template <SubsystemBits subsystem>
-            using wdsel_bits = wdsel_reg::Bits<WDSelBitField<subsystem>>;
         };
 
         /**
          * @brief The reset_done register.
          *
-         * If a bit is set for a subsystem, the reset for that subsystem is deasserted, meaning the registers are ready to
-         * be accessed.
+         * If a bit is set for a subsystem, the reset for that subsystem is deasserted, meaning the registers of the subsystems
+         * are ready to be accessed.
          */
-        struct reset_done {
-            static constexpr std::uint32_t addr = resets_base + reset_done_offset; /**< @brief The address of the reset_done register. */
-            using reset_done_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::access_tag::read, std::uint32_t>; /**< @brief The reset_done register. */
+        struct ResetDone {
+            static constexpr std::uint32_t addr = resets_addr + Registers::reset_done; /**< @brief The address of the reset_done register. */
+            using reset_done_reg = reg_access::Reg<addr, reg_access::access_tag::read, std::uint32_t>; /**< @brief The reset_done register. */
 
             /**
              * @brief The bits of the reset_done register.
              *
              * @tparam subsystem The subsystem whose status is to be checked.
              */
-            template <SubsystemBits subsystem>
-            struct ResetDoneBitField {
+            template <Subsystems subsystem>
+            struct ResetDoneBitType {
                 using reg = reset_done_reg; /**< @brief The register to which the bitfield belongs. */
                 using T = reg::RegType; /**< @brief The type of the register. */
-                using bit_access = reg_access::access_tag::read;
+                using bit_access = reg_access::access_tag::read; /**< @brief Access specifier of the specific bit. */
 
-                static_assert(static_cast<T>(subsystem) < static_cast<T>(SubsystemBits::NumberOfSubsystems), "Invalid subsystem!");
+                static_assert(subsystem < Subsystems::NumberOfSubsystems, "Invalid subsystem!");
 
                 static constexpr T position = static_cast<T>(subsystem); /**< @brief The position of the bits in the register */
                 static constexpr T mask = (0x01U << position); /**< @brief The mask of the affected bits. */
@@ -204,19 +202,11 @@ namespace rp2040::system {
                     enabled = 1U /**< @brief The subsystem is out of reset and thus enabled. */
                 };
             };
-
-            /**
-             * @brief The reset_done Bits type.
-             *
-             * @tparam subsystem The subsystem whose status is to be checked.
-             */
-            template <SubsystemBits subsystem>
-            using reset_done_bits = reset_done_reg::Bits<ResetDoneBitField<subsystem>>;
         };
     };
 
     /** @}*/ // rp2040_reset
-}
+} // rp2040::system::resets
 
 
 #endif // RP2040_SYSTEM_RESETS_DEF_H
