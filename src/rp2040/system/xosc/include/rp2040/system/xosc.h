@@ -32,7 +32,7 @@
 #include "xosc_def.h"
 #include "status.h"
 
-namespace rp2040::system {
+namespace rp2040::system::xosc {
     /**
      * @addtogroup rp2040_xosc
      * @{
@@ -44,15 +44,8 @@ namespace rp2040::system {
      * @tparam xosc_addr The address of the XOSC.
      */
     template<std::uintptr_t xosc_addr>
-    class XOSC_Type {
-        static_assert(xosc_addr == xosc_base, "Template parameter 'xosc_addr' must be a valid xosc address");
-
-        using xosc_regs = XOSC_RegMapType<xosc_addr>; /**< @brief The register map. */
-        using ctrl_r = xosc_regs::ctrl; /**< @brief Alias for the ctrl register. */
-        using status_r = xosc_regs::status; /**< @brief Alias for the status register. */
-        using dormant_r = xosc_regs::dormant; /**< @brief Alias for the dormant register. */
-        using startup_r = xosc_regs::startup; /**< @brief Alias for the startup register. */
-        using count_r = xosc_regs::count; /**< @brief Alias for the count register. */
+    class XoscType {
+        static_assert(xosc_addr == address::xosc_base, "Template parameter 'xosc_addr' must be a valid xosc address");
 
     public:
         /**
@@ -60,7 +53,7 @@ namespace rp2040::system {
          *
          * @return XOSC& The instance of the XOSC object.
          */
-        static XOSC_Type& getInstance();
+        static XoscType& get_instance();
 
         /**
          * @brief Initializes the XOSC.
@@ -111,10 +104,17 @@ namespace rp2040::system {
          * @retval ERROR_INIT The frequency is not initialized. @see init
          * @retval ERROR_RESOURCE The XOSC is paused and thus unavailable. @see wake
          */
-        std::expected<unsigned int, status::Status> getFrequency();
+        std::expected<unsigned int, status::Status> get_frequency();
 
     private:
-        XOSC_Type() : m_flags(0) {};
+        using xosc_regs = XoscRegMapType<xosc_addr>; /**< @brief The register map. */
+        using ctrl_r = xosc_regs::Ctrl; /**< @brief Alias for the ctrl register. */
+        using status_r = xosc_regs::Status; /**< @brief Alias for the status register. */
+        using dormant_r = xosc_regs::Dormant; /**< @brief Alias for the dormant register. */
+        using startup_r = xosc_regs::Startup; /**< @brief Alias for the startup register. */
+        using count_r = xosc_regs::Count; /**< @brief Alias for the count register. */
+
+        XoscType() : m_flags(0) {};
 
 
         /**
@@ -123,17 +123,17 @@ namespace rp2040::system {
          * The value correspond to the bit position in @ref m_flags
          */
         enum class Flags : std::uint32_t {
-            IsEnabled = 0, /**< @brief Flag to indicate if the XOSC is enabled. @see init @see deinit */
-            IsPaused, /**< @brief Flag to indicate if the XOSC is paused. @see pause @see wake */
-            NumberOfFlags /**< @brief Helper entry to get the number of flags. */
+            is_enabled = 0, /**< @brief Flag to indicate if the XOSC is enabled. @see init @see deinit */
+            is_paused, /**< @brief Flag to indicate if the XOSC is paused. @see pause @see wake */
+            number_of_flags /**< @brief Helper entry to get the number of flags. */
         };
 
-        std::bitset<static_cast<std::size_t>(Flags::NumberOfFlags)> m_flags; /**< @brief The status flags of the XOSC. @see Flags */
+        std::bitset<static_cast<std::size_t>(Flags::number_of_flags)> m_flags; /**< @brief The status flags of the XOSC. @see Flags */
 
         static constexpr unsigned int m_frequency_hz = 12'000'000U; /**< @brief The frequency of the RP2040's XOSC. */
     };
 
-    using XOSC = XOSC_Type<xosc_base>; /**< @brief Alias for the XOSC. */
+    using XOSC = XoscType<address::xosc_base>; /**< @brief Alias for the XOSC. */
 
     /** @}*/ // rp2040_xosc
 }

@@ -27,67 +27,77 @@
 
 #include "include/rp2040/system/xosc.h"
 
-namespace rp2040::system {
+namespace rp2040::system::xosc {
     template<std::uintptr_t xosc_addr>
-    XOSC_Type<xosc_addr>& XOSC_Type<xosc_addr>::getInstance() {
-        static XOSC_Type<xosc_addr> inst;
-        return inst;
+    XoscType<xosc_addr>& XoscType<xosc_addr>::get_instance() {
+        static XoscType<xosc_addr> instance;
+        return instance;
     }
 
     template<std::uintptr_t xosc_addr>
-    void XOSC_Type<xosc_addr>::init() {
-        if (this->m_flags.test(static_cast<std::uint32_t>(Flags::IsEnabled))) {
+    void XoscType<xosc_addr>::init() {
+        if (this->m_flags.test(static_cast<std::uint32_t>(Flags::is_enabled))) {
             return;
         }
-        ctrl_r::freq_range_bits::set(ctrl_r::FreqRangeBitField::value::range_1_15_mhz);
+        using freq_range_bits_t = ctrl_r::ctrl_reg::template Bits<typename ctrl_r::FreqRangeBitType>;
+        using freq_range_value_t = ctrl_r::FreqRangeBitType::value;
+        freq_range_bits_t::set(freq_range_value_t::range_1_15_mhz);
 
-        startup_r::template delay_bits<>::set(startup_r::template DelayBitField<>::value::val);
+        using delay_bits_t = startup_r::startup_reg::template Bits<typename startup_r::template DelayBitType<startup_r::default_delay_val>>;
+        using delay_value_t = startup_r::template DelayBitType<startup_r::default_delay_val>::value;
+        delay_bits_t::set(delay_value_t::val);
 
-        ctrl_r::enable_bits::set(ctrl_r::EnableBitField::value::enable);
+        using enable_bits_t = ctrl_r::ctrl_reg::template Bits<typename ctrl_r::EnableBitType>;
+        using enable_value_t = ctrl_r::EnableBitType::value;
+        enable_bits_t::set(enable_value_t::enable);
 
         /* Wait until the crystal oscillator is running and stable */
-        while (!status_r::enabled_bits::getBits()) {}
+        using enabled_bits_t = status_r::status_reg::template Bits<typename status_r::EnabledBitType>;
+        using enabled_value_t = status_r::EnabledBitType::value;
+        while (enabled_bits_t::getValue() != static_cast<status_r::status_reg::RegType>(enabled_value_t::enabled)) {}
 
-        this->m_flags.set(static_cast<std::uint32_t>(Flags::IsEnabled));
+        this->m_flags.set(static_cast<std::uint32_t>(Flags::is_enabled));
     }
 
     template<std::uintptr_t xosc_addr>
-    void XOSC_Type<xosc_addr>::deinit() {
-        if (!this->m_flags.test(static_cast<std::uint32_t>(Flags::IsEnabled))) {
-            return;
-        }
+    void XoscType<xosc_addr>::deinit() {
+        using enable_bits_t = ctrl_r::ctrl_reg::template Bits<typename ctrl_r::EnableBitType>;
+        using enable_value_t = ctrl_r::EnableBitType::value;
+        enable_bits_t::set(enable_value_t::disable);
 
-        ctrl_r::enable_bits::set(ctrl_r::EnableBitField::value::disable);
-
-        this->m_flags.reset(static_cast<std::uint32_t>(Flags::IsEnabled));
+        this->m_flags.reset(static_cast<std::uint32_t>(Flags::is_enabled));
     }
 
     template<std::uintptr_t xosc_addr>
-    void XOSC_Type<xosc_addr>::pause() {
-        if (this->m_flags.test(static_cast<std::uint32_t>(Flags::IsPaused))) {
+    void XoscType<xosc_addr>::pause() {
+        if (this->m_flags.test(static_cast<std::uint32_t>(Flags::is_paused))) {
             return;
         }
-        dormant_r::dormant_bits::set(dormant_r::dormant_bits::value::pause);
+        using dormant_bits_t = dormant_r::dormant_reg::template Bits<typename dormant_r::DormantBitType>;
+        using dormant_value_t = dormant_r::DormantBitType::value;
+        dormant_bits_t::set(dormant_value_t::pause);
 
-        this->m_flags.set(static_cast<std::uint32_t>(Flags::IsPaused));
+        this->m_flags.set(static_cast<std::uint32_t>(Flags::is_paused));
     }
 
     template<std::uintptr_t xosc_addr>
-    void XOSC_Type<xosc_addr>::wake() {
-        if (!this->m_flags.test(static_cast<std::uint32_t>(Flags::IsPaused))) {
+    void XoscType<xosc_addr>::wake() {
+        if (!this->m_flags.test(static_cast<std::uint32_t>(Flags::is_paused))) {
             return;
         }
-        dormant_r::dormant_bits::set(dormant_r::dormant_bits::value::pause);
+        using dormant_bits_t = dormant_r::dormant_reg::template Bits<typename dormant_r::DormantBitType>;
+        using dormant_value_t = dormant_r::DormantBitType::value;
+        dormant_bits_t::set(dormant_value_t::wake);
 
-        this->m_flags.reset(static_cast<std::uint32_t>(Flags::IsPaused));
+        this->m_flags.reset(static_cast<std::uint32_t>(Flags::is_paused));
     }
 
     template <std::uintptr_t xosc_addr>
-    std::expected<unsigned int, status::Status> XOSC_Type<xosc_addr>::getFrequency() {
-        if (!this->m_flags.test(static_cast<std::uint32_t>(Flags::IsEnabled))) {
+    std::expected<unsigned int, status::Status> XoscType<xosc_addr>::get_frequency() {
+        if (!this->m_flags.test(static_cast<std::uint32_t>(Flags::is_enabled))) {
             return std::unexpected(status::Status::ERROR_INIT);
         }
-        if (this->m_flags.test(static_cast<std::uint32_t>(Flags::isPaused))) {
+        if (this->m_flags.test(static_cast<std::uint32_t>(Flags::is_paused))) {
             return std::unexpected(status::Status::ERROR_RESOURCE);
         }
 

@@ -29,7 +29,10 @@
 #include "rp2040/system/pll.h"
 
 int config_system() {
-    rp2040::system::XOSC::getInstance().init();
+    constexpr rp2040::system::clocks::SysClockConfig sysRoscConf {rp2040::system::clocks::SysClock_DefType::ClockSrc::ROSC, 6'000'000};
+    rp2040::system::clocks::SysClock::getInstance().configureClock<sysRoscConf>();
+    rp2040::system::xosc::XOSC::get_instance().deinit();
+    rp2040::system::xosc::XOSC::get_instance().init();
     constexpr rp2040::system::clocks::SysClockConfig sysXoscConf {rp2040::system::clocks::SysClock_DefType::ClockSrc::XOSC, 12'000'000};
     rp2040::system::clocks::SysClock::getInstance().configureClock<sysXoscConf>();
     rp2040::system::pll::PLL_Sys::getInstance().init();
