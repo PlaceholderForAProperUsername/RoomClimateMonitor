@@ -42,7 +42,7 @@ namespace rp2040::system::resets {
      */
     template<std::uintptr_t resets_addr>
     class ResetsType {
-        static_assert(resets_addr == address::resets_base, "The resets address must be a valid address");
+        static_assert(resets_addr == address::base::resets, "The resets address must be a valid address");
 
     public:
         /**
@@ -96,7 +96,7 @@ namespace rp2040::system::resets {
         ResetsType() = default;
     };
 
-    using Resets = ResetsType<address::resets_base>; /**< @brief The resets controller */
+    using Resets = ResetsType<address::base::resets>; /**< @brief The resets controller */
 
     /** @} */ // rp2040_resets
 } // rp2040::system

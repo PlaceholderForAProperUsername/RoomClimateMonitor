@@ -36,10 +36,17 @@ namespace rp2040::system::resets {
      */
 
     /**
-     * @brief The addresses for the resets module.
+     * @brief The base addresses and register offsets for the resets module.
      */
     namespace address {
-        constexpr std::uintptr_t resets_base = 0x4000c000; /**< @brief The base address of the reset controller. */
+        namespace base {
+            constexpr std::uintptr_t resets = 0x4000c000; /**< @brief The base address of the reset controller. */
+        }
+        namespace offsets {
+            constexpr std::uint32_t reset = 0x00U; /**< @brief The offset for the reset register. */
+            constexpr std::uint32_t wdsel = 0x04U; /**< @brief The offset for the watchdog select (wdsel) register. */
+            constexpr std::uint32_t reset_done = 0x08U; /**< @brief The offset for the reset done register. */
+        }
     }
 
     /**
@@ -83,18 +90,7 @@ namespace rp2040::system::resets {
      */
     template <std::uintptr_t resets_addr>
     struct ResetsRegMapType {
-        static_assert(resets_addr == address::resets_base, "The resets address must be a valid address");
-
-        /**
-         * @brief The registers of the resets module.
-         *
-         * The value is the offset value from the base address of the specific register.
-         */
-        struct Registers {
-            static constexpr std::uint32_t reset = 0x00U; /**< @brief The offset for the reset register. */
-            static constexpr std::uint32_t wdsel = 0x04U; /**< @brief The offset for the watchdog select (wdsel) register. */
-            static constexpr std::uint32_t reset_done = 0x08U; /**< @brief The offset for the reset done register. */
-        };
+        static_assert(resets_addr == address::base::resets, "The resets address must be a valid address");
 
         /**
          * @brief The reset register of the reset controller.
@@ -103,7 +99,7 @@ namespace rp2040::system::resets {
          * the bit to 0.
          */
         struct Reset {
-            static constexpr std::uint32_t addr = resets_addr + Registers::reset; /**< @brief Address of the reset register. */
+            static constexpr std::uint32_t addr = resets_addr + address::offsets::reset; /**< @brief Address of the reset register. */
             using reset_reg = reg_access::Reg<addr, reg_access::access_tag::read_write, std::uint32_t>; /**< @brief The reset register type */
 
 
@@ -139,7 +135,7 @@ namespace rp2040::system::resets {
          * If a bit is set and the watchdog fires, the subsystem will reset.
          */
         struct WDSel {
-            static constexpr std::uint32_t addr = resets_addr + Registers::wdsel; /**< @brief The address of the wdsel register. */
+            static constexpr std::uint32_t addr = resets_addr + address::offsets::wdsel; /**< @brief The address of the wdsel register. */
             using wdsel_reg = reg_access::Reg<addr, reg_access::access_tag::read_write, std::uint32_t>; /**< @brief The wdsel register. */
 
             /**
@@ -175,7 +171,7 @@ namespace rp2040::system::resets {
          * are ready to be accessed.
          */
         struct ResetDone {
-            static constexpr std::uint32_t addr = resets_addr + Registers::reset_done; /**< @brief The address of the reset_done register. */
+            static constexpr std::uint32_t addr = resets_addr + address::offsets::reset_done; /**< @brief The address of the reset_done register. */
             using reset_done_reg = reg_access::Reg<addr, reg_access::access_tag::read, std::uint32_t>; /**< @brief The reset_done register. */
 
             /**
