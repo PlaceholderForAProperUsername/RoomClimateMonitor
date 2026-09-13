@@ -45,7 +45,7 @@ namespace rp2040::system::xosc {
      */
     template<std::uintptr_t xosc_addr>
     class XoscType {
-        static_assert(xosc_addr == address::base::xosc, "Template parameter 'xosc_addr' must be a valid xosc address");
+        static_assert(xosc_addr == address::xosc, "Template parameter 'xosc_addr' must be a valid xosc address");
 
     public:
         /**
@@ -133,7 +133,7 @@ namespace rp2040::system::xosc {
         static constexpr unsigned int m_frequency_hz = 12'000'000U; /**< @brief The frequency of the RP2040's XOSC. */
     };
 
-    using XOSC = XoscType<address::base::xosc>; /**< @brief Alias for the XOSC. */
+    using XOSC = XoscType<address::xosc>; /**< @brief Alias for the XOSC. */
 
     /** @}*/ // rp2040_xosc
 }
