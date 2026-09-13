@@ -36,10 +36,19 @@ namespace rp2040::system::xosc {
      */
 
     /**
-     * @brief The addresses of the xosc module.
+     * @brief The addresses and register offsets of the xosc module.
      */
     namespace address {
-        constexpr std::uintptr_t xosc_base = 0x40024000; /**< @brief Base address of the xosc. */
+        namespace base {
+            constexpr std::uintptr_t xosc = 0x40024000; /**< @brief Base address of the xosc. */
+        }
+        namespace offsets {
+            constexpr std::uint32_t ctrl = 0x00; /**< @brief Offset of the ctrl register from the base address. */
+            constexpr std::uint32_t status = 0x04; /**< @brief Offset of the status register from the base address.  */
+            constexpr std::uint32_t dormant = 0x08; /**< @brief Offset of the dormant register from the base address.  */
+            constexpr std::uint32_t startup = 0x0c; /**< @brief Offset of the startup register from the base address. */
+            constexpr std::uint32_t count = 0x1C; /**< @brief Offset of the count register from the base address. */
+        }
     }
 
     /**
@@ -49,23 +58,13 @@ namespace rp2040::system::xosc {
      */
     template<std::uintptr_t xosc_addr>
     struct XoscRegMapType {
-        static_assert(xosc_addr == address::xosc_base, "Template parameter 'xosc_addr' must be a valid xosc address");
+        static_assert(xosc_addr == address::base::xosc, "Template parameter 'xosc_addr' must be a valid xosc address");
 
-        /**
-         * @brief The register offsets of the xosc module.
-         */
-        struct Offsets {
-            static constexpr std::uint32_t ctrl = 0x00; /**< @brief Offset of the ctrl register from the base address. */
-            static constexpr std::uint32_t status = 0x04; /**< @brief Offset of the status register from the base address.  */
-            static constexpr std::uint32_t dormant = 0x08; /**< @brief Offset of the dormant register from the base address.  */
-            static constexpr std::uint32_t startup = 0x0c; /**< @brief Offset of the startup register from the base address. */
-            static constexpr std::uint32_t count = 0x1C; /**< @brief Offset of the count register from the base address. */
-        };
     /**
      * @brief The xosc's ctrl register.
      */
     struct Ctrl {
-        static constexpr std::uintptr_t addr = xosc_addr + Offsets::ctrl; /**< @brief The address of the ctrl register. */
+        static constexpr std::uintptr_t addr = xosc_addr + address::offsets::ctrl; /**< @brief The address of the ctrl register. */
         using ctrl_reg = reg_access::Reg<addr, reg_access::access_tag::read_write, std::uint32_t>; /**< @brief The ctrl register. */
 
         /**
@@ -116,7 +115,7 @@ namespace rp2040::system::xosc {
      * @brief The status register.
      */
     struct Status {
-        static constexpr std::uint32_t addr = xosc_addr + Offsets::status; /**< @brief Address of the status register. */
+        static constexpr std::uint32_t addr = xosc_addr + address::offsets::status; /**< @brief Address of the status register. */
         using status_reg = reg_access::Reg<addr, reg_access::access_tag::mixed_access, std::uint32_t>; /**< @brief The status register type. */
 
         /**
@@ -212,7 +211,7 @@ namespace rp2040::system::xosc {
      * before selecting dormant mode.
      */
     struct Dormant {
-        static constexpr std::uint32_t addr = xosc_addr + Offsets::dormant; /**< @brief The address of the dormant register. */
+        static constexpr std::uint32_t addr = xosc_addr + address::offsets::dormant; /**< @brief The address of the dormant register. */
         using dormant_reg = reg_access::Reg<addr, reg_access::access_tag::read_write, std::uint32_t>; /**< @brief The dormant register type. */
 
         /**
@@ -243,7 +242,7 @@ namespace rp2040::system::xosc {
      * enabled with the x4 bit.
      */
     struct Startup {
-        static constexpr std::uintptr_t addr = xosc_addr + Offsets::startup; /**< @brief The address of the startup register. */
+        static constexpr std::uintptr_t addr = xosc_addr + address::offsets::startup; /**< @brief The address of the startup register. */
         using startup_reg = reg_access::Reg<addr, reg_access::access_tag::read_write, std::uint32_t>; /**< @brief The startup register type. */
 
         static constexpr startup_reg::RegType default_delay_val = 47U; /**< @brief The default value for the startup delay according to the rp2040 datasheet. */
@@ -269,7 +268,7 @@ namespace rp2040::system::xosc {
          * Provided a count-down timer running as the xosc frequency.
          */
         struct Count {
-            static constexpr std::uintptr_t addr = xosc_addr + Offsets::count; /**< @brief The address of the count register. */
+            static constexpr std::uintptr_t addr = xosc_addr + address::offsets::count; /**< @brief The address of the count register. */
             using count_reg = reg_access::Reg<addr, reg_access::access_tag::read_write, std::uint32_t>; /**< @brief The count register type. */
 
             static constexpr count_reg::RegType count_position = 0U; /**< @brief The position of the count bits. */
