@@ -39,31 +39,21 @@ namespace rp2040::system::xosc {
         if (this->m_flags.test(static_cast<std::uint32_t>(Flags::is_enabled))) {
             return;
         }
-        using freq_range_bits_t = ctrl_r::ctrl_reg::template Bits<typename ctrl_r::FreqRangeBitType>;
-        using freq_range_value_t = ctrl_r::FreqRangeBitType::value;
-        freq_range_bits_t::set(freq_range_value_t::range_1_15_mhz);
+        ctrl_r::FreqRange::Bits::set(ctrl_r::FreqRange::Value::range_1_15_mhz);
 
-        using delay_bits_t = startup_r::startup_reg::template Bits<typename startup_r::template DelayBitType<startup_r::default_delay_val>>;
-        using delay_value_t = startup_r::template DelayBitType<startup_r::default_delay_val>::value;
-        delay_bits_t::set(delay_value_t::val);
+        startup_r::template Delay<>::Bits::set(startup_r::template Delay<>::Value::val);
 
-        using enable_bits_t = ctrl_r::ctrl_reg::template Bits<typename ctrl_r::EnableBitType>;
-        using enable_value_t = ctrl_r::EnableBitType::value;
-        enable_bits_t::set(enable_value_t::enable);
+        ctrl_r::Enable::Bits::set(ctrl_r::Enable::Value::enable);
 
         /* Wait until the crystal oscillator is running and stable */
-        using enabled_bits_t = status_r::status_reg::template Bits<typename status_r::EnabledBitType>;
-        using enabled_value_t = status_r::EnabledBitType::value;
-        while (enabled_bits_t::getValue() != static_cast<status_r::status_reg::RegType>(enabled_value_t::enabled)) {}
+        while (status_r::Enabled::Bits::getValue() != static_cast<status_r::status_reg::RegType>(status_r::Enabled::Value::enabled)) {}
 
         this->m_flags.set(static_cast<std::uint32_t>(Flags::is_enabled));
     }
 
     template<std::uintptr_t xosc_addr>
     void XoscType<xosc_addr>::deinit() {
-        using enable_bits_t = ctrl_r::ctrl_reg::template Bits<typename ctrl_r::EnableBitType>;
-        using enable_value_t = ctrl_r::EnableBitType::value;
-        enable_bits_t::set(enable_value_t::disable);
+        ctrl_r::Enable::Bits::set(ctrl_r::Enable::Value::disable);
 
         this->m_flags.reset(static_cast<std::uint32_t>(Flags::is_enabled));
     }
@@ -73,9 +63,7 @@ namespace rp2040::system::xosc {
         if (this->m_flags.test(static_cast<std::uint32_t>(Flags::is_paused))) {
             return;
         }
-        using dormant_bits_t = dormant_r::dormant_reg::template Bits<typename dormant_r::DormantBitType>;
-        using dormant_value_t = dormant_r::DormantBitType::value;
-        dormant_bits_t::set(dormant_value_t::pause);
+        dormant_r::DormantWake::Bits::set(ctrl_r::DormantWake::Value::pause);
 
         this->m_flags.set(static_cast<std::uint32_t>(Flags::is_paused));
     }
@@ -85,9 +73,7 @@ namespace rp2040::system::xosc {
         if (!this->m_flags.test(static_cast<std::uint32_t>(Flags::is_paused))) {
             return;
         }
-        using dormant_bits_t = dormant_r::dormant_reg::template Bits<typename dormant_r::DormantBitType>;
-        using dormant_value_t = dormant_r::DormantBitType::value;
-        dormant_bits_t::set(dormant_value_t::wake);
+        dormant_r::DormantWake::Bits::set(ctrl_r::DormantWake::Value::wake);
 
         this->m_flags.reset(static_cast<std::uint32_t>(Flags::is_paused));
     }

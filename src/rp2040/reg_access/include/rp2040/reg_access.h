@@ -61,7 +61,7 @@ namespace rp2040::reg_access {
          *
          * @tparam BitType The BitType specifying the bits.
          */
-        template <typename BitType>
+        template <typename BitType, typename BitsAccess_ = reg_access>
         requires BitTypeConcept<BitType, ThisReg, RegType>
         struct Bits {
             /**
@@ -71,8 +71,8 @@ namespace rp2040::reg_access {
              * @param[in] bits_value The value to be set.
              * @return None
              */
-            template <typename BitsAccess_ = BitType::bit_access>
-            static std::enable_if_t<std::is_base_of_v<access_tag::read_write, BitsAccess_>, void>
+            template <typename BitsAccess = BitsAccess_>
+            static std::enable_if_t<std::is_base_of_v<access_tag::read_write, BitsAccess>, void>
             set(BitType::value bits_value)
             {
                 auto reg_value = read();
@@ -90,8 +90,8 @@ namespace rp2040::reg_access {
              * @param[in] bits_value The value to be set.
              * @return None
              */
-            template <typename BitsAccess_ = BitType::bit_access>
-            static std::enable_if_t<std::is_base_of_v<access_tag::atomic_set, BitsAccess_>, void>
+            template <typename BitsAccess = BitsAccess_>
+            static std::enable_if_t<std::is_base_of_v<access_tag::atomic_set, BitsAccess>, void>
             set(BitType::value bits_value)
             {
                 T reg_value = ((static_cast<T>(bits_value) << BitType::position) & BitType::mask);
@@ -108,8 +108,8 @@ namespace rp2040::reg_access {
              * @tparam BitsAccess_ Access specifier for the bits.
              * @return None
              */
-            template <typename BitsAccess_ = BitType::bit_access>
-            static std::enable_if_t<std::is_base_of_v<access_tag::atomic_set_mask, BitsAccess_>, void>
+            template <typename BitsAccess = BitsAccess_>
+            static std::enable_if_t<std::is_base_of_v<access_tag::atomic_set_mask, BitsAccess>, void>
             set()
             {
                 T reg_value =  BitType::mask;
@@ -122,8 +122,8 @@ namespace rp2040::reg_access {
              * @tparam BitsAccess_ Access specifier for the bits.
              * @return T The unshifted bits.
              */
-            template <typename BitsAccess_ = BitType::bit_access>
-            static std::enable_if_t<std::is_base_of_v<access_tag::read, BitsAccess_>, T>
+            template <typename BitsAccess = BitsAccess_>
+            static std::enable_if_t<std::is_base_of_v<access_tag::read, BitsAccess>, T>
             getBits()
             {
                 auto reg_value = read();
@@ -137,8 +137,8 @@ namespace rp2040::reg_access {
              * @tparam BitsAccess_ Access specifier for the bits.
              * @return T The value of the bits (Bits are shifted to position 0).
              */
-            template <typename BitsAccess_ = BitType::bit_access>
-            static std::enable_if_t<std::is_base_of_v<access_tag::read, BitsAccess_>, T>
+            template <typename BitsAccess = BitsAccess_>
+            static std::enable_if_t<std::is_base_of_v<access_tag::read, BitsAccess>, T>
             getValue()
             {
                 auto reg_value = read();
@@ -153,8 +153,8 @@ namespace rp2040::reg_access {
              * @tparam BitsAccess_ Access specifier for the bits.
              * @return None
              */
-            template <typename BitsAccess_ = BitType::bit_access>
-            static std::enable_if_t<std::is_base_of_v<access_tag::read_write, BitsAccess_>, void>
+            template <typename BitsAccess = BitsAccess_>
+            static std::enable_if_t<std::is_base_of_v<access_tag::read_write, BitsAccess>, void>
             toggle()
             {
                 auto reg_value = read();
@@ -170,8 +170,8 @@ namespace rp2040::reg_access {
              * @tparam BitsAccess_ Access specifier for the bits.
              * @return None
              */
-            template <typename BitsAccess_ = BitType::bit_access>
-            static std::enable_if_t<std::is_base_of_v<access_tag::atomic_xor, BitsAccess_>, void>
+            template <typename BitsAccess = BitsAccess_>
+            static std::enable_if_t<std::is_base_of_v<access_tag::atomic_xor, BitsAccess>, void>
             toggle()
             {
 
@@ -185,8 +185,8 @@ namespace rp2040::reg_access {
              * @tparam BitsAccess_ Access specifier for the bits.
              * @return None
              */
-            template <typename BitsAccess_ = BitType::bit_access>
-            static std::enable_if_t<std::is_base_of_v<access_tag::read_write, BitsAccess_>, void>
+            template <typename BitsAccess = BitsAccess_>
+            static std::enable_if_t<std::is_base_of_v<access_tag::read_write, BitsAccess>, void>
             clear()
             {
                 auto reg_value = read();
@@ -203,8 +203,8 @@ namespace rp2040::reg_access {
              * @tparam BitsAccess_ Access specifier for the bits.
              * @return None
              */
-            template <typename BitsAccess_ = BitType::bit_access>
-            static std::enable_if_t<std::is_base_of_v<access_tag::atomic_clear, BitsAccess_>, void>
+            template <typename BitsAccess = BitsAccess_>
+            static std::enable_if_t<std::is_base_of_v<access_tag::atomic_clear, BitsAccess>, void>
             clear()
             {
                 T reg_value = BitType::mask;
@@ -220,7 +220,7 @@ namespace rp2040::reg_access {
          */
         template <typename RegAccess_ = RegAccess>
         static std::enable_if_t<std::is_base_of_v<access_tag::read, RegAccess_>, T>
-        read ()
+        read()
         {
             return *reinterpret_cast<volatile T*>(Address);
         }

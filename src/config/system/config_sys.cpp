@@ -29,23 +29,24 @@
 #include "rp2040/system/pll.h"
 
 int config_system() {
-    constexpr rp2040::system::clocks::SysClockConfig sysRoscConf {rp2040::system::clocks::SysClock_DefType::ClockSrc::ROSC, 6'000'000};
-    rp2040::system::clocks::SysClock::getInstance().configureClock<sysRoscConf>();
-    rp2040::system::xosc::XOSC::get_instance().deinit();
+    constexpr rp2040::system::clocks::SysClockConfig sys_rosc_conf {rp2040::system::clocks::SysClock_DefType::ClockSrc::ROSC, 6'000'000};
+    rp2040::system::clocks::SysClock::getInstance().configureClock<sys_rosc_conf>();
+
     rp2040::system::xosc::XOSC::get_instance().init();
-    constexpr rp2040::system::clocks::SysClockConfig sysXoscConf {rp2040::system::clocks::SysClock_DefType::ClockSrc::XOSC, 12'000'000};
-    rp2040::system::clocks::SysClock::getInstance().configureClock<sysXoscConf>();
-    rp2040::system::pll::PLL_Sys::getInstance().init();
-    constexpr rp2040::system::pll::PLL_ConfigType config {};
-    if (!rp2040::system::pll::PLL_Sys::getInstance().setFrequency<config>().has_value()) {
+    // setting the xosc temporarily as the system clock is to prevent a hung up after soft reset where the system clock is still configured to use the pll and configuring the pll causes the pll to stop.
+    constexpr rp2040::system::clocks::SysClockConfig sys_xosc_conf {rp2040::system::clocks::SysClock_DefType::ClockSrc::XOSC, 12'000'000};
+    rp2040::system::clocks::SysClock::getInstance().configureClock<sys_xosc_conf>();
+    constexpr rp2040::system::clocks::RefClockConfig ref_conf {rp2040::system::clocks::RefClock_DefType::ClockSrc::XOSC, 12'000'000};
+    rp2040::system::clocks::RefClock::getInstance().configureClock<ref_conf>();
+
+    rp2040::system::pll::PllSys::get_instance().init();
+    constexpr rp2040::system::pll::PllConfigType config {1U, 6U, 2U, 125U};
+    if (!rp2040::system::pll::PllSys::get_instance().set_frequency<config>().has_value()) {
         return -1;
     }
-    constexpr rp2040::system::clocks::RefClockConfig refConf {rp2040::system::clocks::RefClock_DefType::ClockSrc::XOSC, 12'000'000};
-    rp2040::system::clocks::RefClock::getInstance().configureClock<refConf>();
-    constexpr rp2040::system::clocks::SysClockConfig sysConf {rp2040::system::clocks::SysClock_DefType::ClockSrc::PLL_SYS, 125'000'000};
-    rp2040::system::clocks::SysClock::getInstance().configureClock<sysConf>();
-    constexpr rp2040::system::clocks::PeriClockConfig periConf {rp2040::system::clocks::PeriClock_DefType::ClockSrc::CLK_SYS, 125'000'000};
-    rp2040::system::clocks::PeriClock::getInstance().configureClock<periConf>();
-
+    constexpr rp2040::system::clocks::SysClockConfig sys_pll_conf {rp2040::system::clocks::SysClock_DefType::ClockSrc::PLL_SYS, 125'000'000};
+    rp2040::system::clocks::SysClock::getInstance().configureClock<sys_pll_conf>();
+    constexpr rp2040::system::clocks::PeriClockConfig peri_conf {rp2040::system::clocks::PeriClock_DefType::ClockSrc::CLK_SYS, 125'000'000};
+    rp2040::system::clocks::PeriClock::getInstance().configureClock<peri_conf>();
     return 0;
 }

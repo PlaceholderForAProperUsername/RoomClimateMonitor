@@ -65,47 +65,77 @@ namespace rp2040::system::xosc {
         using ctrl_reg = reg_access::Reg<addr, reg_access::access_tag::read_write, std::uint32_t>; /**< @brief The ctrl register. */
 
         /**
-         * @brief The enable bits.
+         * @brief The enable bits of the ctrl register.
          *
-         * The enable bits start or stop the xosc.
+         * These bits are used to enable or disable the crystal oscillator (XOSC).
          */
-        struct EnableBitType {
-            using reg = ctrl_reg; /**< @brief The register of which the bits belong. */
-            using T = reg::RegType; /**< @brief The data type of the register. */
-            using bit_access = reg_access::access_tag::read_write; /**< @brief Access specifier of the specific bit. */
+        struct Enable {
+            /**
+             * @brief The description of the enable bits.
+             */
+            struct BitType {
+                using reg = ctrl_reg; /**< @brief The register of which the bits belong. */
+                using T = reg::RegType; /**< @brief The data type of the register. */
+                using bit_access = reg_access::access_tag::read_write; /**< @brief Access specifier of the specific bit. */
 
-            static constexpr T position = 12U; /**< @brief The position of the bits in the register. */
-            static constexpr T mask = (0xFFFU << position); /**< @brief The mask of the controlled bits. */
+                static constexpr T position = 12U; /**< @brief The position of the bits in the register. */
+                static constexpr T mask = (0xFFFU << position); /**< @brief The mask of the controlled bits. */
+
+                /**
+                 * @brief The valid values of the enable bits.
+                 */
+                enum class value : T {
+                    enable = 0xfabU, /**< @brief Enables the xosc */
+                    disable = 0xd1eU, /**< @brief Disables the xosc */
+                };
+            };
 
             /**
-             * @brief The valid values of the enable bits.
+             * @brief The object to control the enable bits.
              */
-            enum class value : T {
-                enable = 0xfabU, /**< @brief Enables the xosc */
-                disable = 0xd1eU, /**< @brief Disables the xosc */
-            };
+            using Bits = ctrl_reg::template Bits<BitType>;
+            /**
+             * @brief The values of the enable bits.
+             */
+            using Value = BitType::value;
         };
 
         /**
-         * @brief The freq_range bits.
+         * @brief The frequency range bits of the ctrl register.
          *
-         * Sets the frequency range of the XOSC. Currently, there is only one option, making this BitType optional.
+         * As there is only one frequency range supported, these bits can be ignored, as the only value is the reset value.
+         * These bits are only included for completion sake.
          */
-        struct FreqRangeBitType {
-            using reg = ctrl_reg; /**< @brief The register of which the bits belong. */
-            using T = reg::RegType; /**< @brief The data type of the register. */
-            using bit_access = reg_access::access_tag::read_write; /**< @brief Access specifier of the specific bit. */
+        struct FreqRange {
+            /**
+             * @brief Description of the FreqRange bits.
+             */
+            struct BitType {
+                using reg = ctrl_reg; /**< @brief The register of which the bits belong. */
+                using T = reg::RegType; /**< @brief The data type of the register. */
+                using bit_access = reg_access::access_tag::read_write; /**< @brief Access specifier of the specific bit. */
 
-            static constexpr T position = 0U; /**< @brief The position of the bits in the register. */
-            static constexpr T mask = (0xFFFU << position); /**< @brief The mask of the controlled bits. */
+                static constexpr T position = 0U; /**< @brief The position of the bits in the register. */
+                static constexpr T mask = (0xFFFU << position); /**< @brief The mask of the controlled bits. */
+
+                /**
+                 * @brief The valid values of the freq_range bits.
+                 */
+                enum class value : T {
+                    range_1_15_mhz = 0xaa0U, /**< @brief Sets the frequency range for the xosc. */
+                };
+            };
 
             /**
-             * @brief The valid values of the freq_range bits.
+             * @brief The object to control the FreqRange bits.
              */
-            enum class value : T {
-                range_1_15_mhz = 0xaa0U, /**< @brief Sets the frequency range for the xosc. */
-            };
+            using Bits = ctrl_reg::template Bits<BitType>;
+            /**
+             * @brief The values of the FreqRange bits.
+             */
+            using Value = BitType::value;
         };
+
     }; // Ctrl
 
     /**
@@ -116,90 +146,148 @@ namespace rp2040::system::xosc {
         using status_reg = reg_access::Reg<addr, reg_access::access_tag::mixed_access, std::uint32_t>; /**< @brief The status register type. */
 
         /**
-         * @brief The stable bit.
+         * @brief The stable bit of the status register.
          *
-         * The stable bit indicates if the xosc is running and stable or not.
+         * This bit indicates if the XOSC is running and stable or not.
          */
-        struct StableBitType {
-            using reg = status_reg; /**< @brief The register of which the bits belong. */
-            using T = reg::RegType; /**< @brief The data type of the register. */
-            using bit_access = reg_access::access_tag::read; /**< @brief Access specifier of the specific bit. */
+        struct Stable {
+            /**
+             * @brief The description of the stable bit.
+             */
+            struct BitType {
+                using reg = status_reg; /**< @brief The register of which the bits belong. */
+                using T = reg::RegType; /**< @brief The data type of the register. */
+                using bit_access = reg_access::access_tag::read; /**< @brief Access specifier of the specific bit. */
 
-            static constexpr T position = 31U; /**< @brief The position of the bits in the register. */
-            static constexpr T mask = (0x01U << position); /**< @brief The mask of the controlled bits. */
+                static constexpr T position = 31U; /**< @brief The position of the bits in the register. */
+                static constexpr T mask = (0x01U << position); /**< @brief The mask of the controlled bits. */
 
+                /**
+                 * @brief The values of the stable bit.
+                 */
+                enum class value : T {
+                    not_stable = 0x00U, /**< @brief The xosc is either not running or not stable. */
+                    stable = 0x01U, /**< @brief The xosc is running and stable */
+                };
+            };
+
+            /**
+             * @brief The object to control the stable bit.
+             */
+            using Bits = status_reg::template Bits<BitType, reg_access::access_tag::read>;
             /**
              * @brief The values of the stable bit.
              */
-            enum class value : T {
-                not_stable = 0x00U, /**< @brief The xosc is either not running or not stable. */
-                stable = 0x01U, /**< @brief The xosc is running and stable */
-            };
+            using Value = BitType::value;
         };
 
         /**
-         * @brief The badwrite bit.
+         * @brief The BadWrite bit of the status register.
          *
-         * This is bit is set if an invalid value has been written to enable or freq_range of the ctrl register or to the
-         * dormant register.
+         * This bit indicates if an invalid value has been written to either Enable/FreqRange bits from the ctrl register or
+         * to the dormant register. This bit is cleared by writing a value to it.
          */
-        struct BadWriteBitType {
-            using reg = status_reg; /**< @brief The register of which the bits belong. */
-            using T = reg::RegType; /**< @brief The data type of the register. */
-            using bit_access = reg_access::access_tag::write_clear; /**< @brief Access specifier of the specific bit. */
+        struct BadWrite {
+            /**
+             * @brief The description of the BadWrite bit of the status register.
+             */
+            struct BitType {
+                using reg = status_reg; /**< @brief The register of which the bits belong. */
+                using T = reg::RegType; /**< @brief The data type of the register. */
+                using bit_access = reg_access::access_tag::write_clear; /**< @brief Access specifier of the specific bit. */
 
-            static constexpr T position = 24U; /**< @brief The position of the bits in the register. */
-            static constexpr T mask = (0x01U << position); /**< @brief The mask of the controlled bits. */
+                static constexpr T position = 24U; /**< @brief The position of the bits in the register. */
+                static constexpr T mask = (0x01U << position); /**< @brief The mask of the controlled bits. */
+
+                /**
+                 * @brief The values of the badwrite bit.
+                 */
+                enum class value : T {
+                    no_bad_write = 0x00U, /**< @brief No invalid value has been written. */
+                    bad_write = 0x01U, /**< @brief An invalid value has been written. */
+                    clear_bad_write = 0x01U /**< @brief Value to clear the bit. */
+                };
+            };
 
             /**
-             * @brief The values of the badwrite bit.
+             * @brief The object to control the BadWrite bit.
              */
-            enum class value : T {
-                no_bad_write = 0x00U, /**< @brief No invalid value has been written. */
-                bad_write = 0x01U, /**< @brief An invalid value has been written. */
-                clear_bad_write = 0x01U /**< @brief Value to clear the bit. */
-            };
+            using Bits = status_reg::template Bits<BitType, reg_access::access_tag::write_clear>;
+            /**
+             * @brief The values of the BadWrite bit.
+             */
+            using Value = BitType::value;
         };
 
         /**
-         * @brief The enabled bit.
+         * @brief The enabled bit of the status register.
+         *
+         * This bit only indicates if the enable bit has been set, not if the XOSC is running and stable @see Stable.
          */
-        struct EnabledBitType{
-            using reg = status_reg; /**< @brief The register of which the bits belong. */
-            using T = reg::RegType; /**< @brief The data type of the register. */
-            using bit_access = reg_access::access_tag::read; /**< @brief Access specifier of the specific bit. */
+        struct Enabled {
+            /**
+             * @brief The description of the enabled bit.
+             */
+            struct BitType{
+                using reg = status_reg; /**< @brief The register of which the bits belong. */
+                using T = reg::RegType; /**< @brief The data type of the register. */
+                using bit_access = reg_access::access_tag::read; /**< @brief Access specifier of the specific bit. */
 
-            static constexpr T position = 12U; /**< @brief The position of the bits in the register. */
-            static constexpr T mask = (0x01U << position); /**< @brief The mask of the controlled bits. */
+                static constexpr T position = 12U; /**< @brief The position of the bits in the register. */
+                static constexpr T mask = (0x01U << position); /**< @brief The mask of the controlled bits. */
 
+                /**
+                 * @brief The values of the enabled bit.
+                 */
+                enum class value : T {
+                    disabled = 0x00U, /**< @brief The xosc is disabled. */
+                    enabled = 0x01U, /**< @brief The xosc is enabled, but may be not running or stable. */
+                };
+            };
+
+            /**
+             * @brief The object to control the enabled bit.
+             */
+            using Bits = status_reg::template Bits<BitType, reg_access::access_tag::read>;
             /**
              * @brief The values of the enabled bit.
              */
-            enum class value : T {
-                disabled = 0x00U, /**< @brief The xosc is disabled. */
-                enabled = 0x01U, /**< @brief The xosc is enabled, but may be not running or stable. */
-            };
+            using Value = BitType::value;
         };
 
         /**
-         * @brief The freq_range status bits.
+         * @brief The FreqRange bits of the status register.
          *
-         * As there is only one frequency range supported, these bits are currently not needed.
+         * These bits show which frequency range was selected.
          */
-        struct FreqRangeBitType{
-            using reg = status_reg; /**< @brief The register of which the bits belong. */
-            using T = reg::RegType; /**< @brief The data type of the register. */
-            using bit_access = reg_access::access_tag::read; /**< @brief Access specifier of the specific bit. */
+        struct FreqRange {
+            /**
+             * @brief The description of the FreqRange bits.
+             */
+            struct BitType{
+                using reg = status_reg; /**< @brief The register of which the bits belong. */
+                using T = reg::RegType; /**< @brief The data type of the register. */
+                using bit_access = reg_access::access_tag::read; /**< @brief Access specifier of the specific bit. */
 
-            static constexpr T position = 0U; /**< @brief The position of the bits in the register. */
-            static constexpr T mask = (0x03U << position); /**< @brief The mask of the controlled bits. */
+                static constexpr T position = 0U; /**< @brief The position of the bits in the register. */
+                static constexpr T mask = (0x03U << position); /**< @brief The mask of the controlled bits. */
+
+                /**
+                 * @brief The values of the FreqRange bits.
+                 */
+                enum class value : T {
+                    range_1_15_mhz = 0x00U, /**< @brief The selected FreqRange. */
+                };
+            };
 
             /**
-             * @brief The values of the freq_range bits.
+             * @brief The object to control the FreqRange bits.
              */
-            enum class value : T {
-                range_1_15_mhz = 0x00U, /**< @brief The selected freq_range. */
-            };
+            using Bits = status_reg::template Bits<BitType, reg_access::access_tag::read>;
+            /**
+             * @brief The values of the FreqRange bits.
+             */
+            using Value = BitType::value;
         };
     }; // Status
 
@@ -212,23 +300,37 @@ namespace rp2040::system::xosc {
         using dormant_reg = reg_access::Reg<addr, reg_access::access_tag::read_write, std::uint32_t>; /**< @brief The dormant register type. */
 
         /**
-         * @brief The dormant bits.
+         * @brief The DormantWake bits of the dormant register.
          */
-        struct DormantBitType {
-            using reg = dormant_reg; /**< @brief The register of which the bits belong. */
-            using T = reg::RegType; /**< @brief The data type of the register. */
-            using bit_access = reg_access::access_tag::read_write; /**< @brief Access specifier of the specific bit. */
+        struct DormantWake {
+            /**
+             * @brief The description of the DormantWake bits.
+             */
+            struct BitType {
+                using reg = dormant_reg; /**< @brief The register of which the bits belong. */
+                using T = reg::RegType; /**< @brief The data type of the register. */
+                using bit_access = reg_access::access_tag::read_write; /**< @brief Access specifier of the specific bit. */
 
-            static constexpr T position = 0U; /**< @brief The position of the bits in the register. */
-            static constexpr T mask = (0xFFFFFFFFU << position); /**< @brief The mask of the controlled bits. */
+                static constexpr T position = 0U; /**< @brief The position of the bits in the register. */
+                static constexpr T mask = (0xFFFFFFFFU << position); /**< @brief The mask of the controlled bits. */
+
+                /**
+                 * @brief The values of the dormant bits.
+                 */
+                enum class value : T {
+                    dormant = 0x636f6d61U, /**< @brief Pauses the xosc. */
+                    wake = 0x77616b65U, /**< @brief Wakes up the xosc. */
+                };
+            };
 
             /**
-             * @brief The values of the dormant bits.
+             * @brief The object to control the DormantWake bits.
              */
-            enum class value : T {
-                dormant = 0x636f6d61U, /**< @brief Pauses the xosc. */
-                wake = 0x77616b65U, /**< @brief Wakes up the xosc. */
-            };
+            using Bits = dormant_reg::template Bits<BitType>;
+            /**
+             * @brief The values of the DormantWake bits.
+             */
+            using Value = BitType::value;
         };
     }; // dormant
 
@@ -244,19 +346,51 @@ namespace rp2040::system::xosc {
 
         static constexpr startup_reg::RegType default_delay_val = 47U; /**< @brief The default value for the startup delay according to the rp2040 datasheet. */
 
-        static constexpr startup_reg::RegType delay_mask = 0x3FFFU; /**< @brief The mask for the delay bits. */
-        static constexpr startup_reg::RegType delay_pos = 0U; /**< @brief The position of the delay bits. */
         /**
-         * @brief The delay bits.
+         * @brief The Delay bits of the startup register.
          *
-         * @tparam delay_value The value for the startup delay multiplied by 256 in cycles.
+         * @tparam delay_value The delay value multiplied by 256 is the number of cycles between enabling the XOSC until
+         * the XOSC is considered stable and running.
          */
         template <auto delay_value = default_delay_val>
-        using DelayBitType = reg_access::BitTypeValues<delay_value, startup_reg, delay_mask, delay_pos>;
+        struct Delay {
+            static constexpr startup_reg::RegType delay_mask = 0x3FFFU; /**< @brief The mask for the delay bits. */
+            static constexpr startup_reg::RegType delay_pos = 0U; /**< @brief The position of the delay bits. */
+            /**
+             * @brief The description of the delay bits.
+             */
+            using BitType = reg_access::BitTypeValues<delay_value, startup_reg, delay_mask, delay_pos>;
 
+            /**
+             * @brief The object to control the delay bits.
+             */
+            using Bits = startup_reg::template Bits<BitType>;
+            /**
+             * @brief The value of the delay bits.
+             */
+            using Value = BitType::value;
+        };
 
-        static constexpr startup_reg::RegType x4_pos = 20U; /**< @brief The position of the x4 bit. */
-        using X4BitType = reg_access::BitTypeEnableDisable<startup_reg, x4_pos>; /**< @brief The x4 bits. */
+        /**
+         * @brief The X4 bits of the startup register.
+         *
+         * If this bit is enabled, the delay value is further multiplied by a factor of 4.
+         */
+        struct X4 {
+            static constexpr startup_reg::RegType x4_pos = 20U; /**< @brief The position of the x4 bit. */
+            /**
+             * @brief The description of the X4 bit.
+             */
+            using BitType = reg_access::BitTypeEnableDisable<startup_reg, x4_pos>;
+            /**
+             * @brief The object to control the X4 bit.
+             */
+            using Bits = startup_reg::template Bits<BitType>;
+            /**
+             * @brief The values of the X4 bit.
+             */
+            using Value = BitType::value;
+        };
     }; // Startup
 
         /**
@@ -268,16 +402,22 @@ namespace rp2040::system::xosc {
             static constexpr std::uintptr_t addr = xosc_addr + count_offset; /**< @brief The address of the count register. */
             using count_reg = reg_access::Reg<addr, reg_access::access_tag::read_write, std::uint32_t>; /**< @brief The count register type. */
 
-            static constexpr count_reg::RegType count_position = 0U; /**< @brief The position of the count bits. */
-            static constexpr count_reg::RegType count_mask = (0xFFU << count_position); /**< @brief The mask of the count bits. */
-
             /**
-             * @brief The BitField for the count bits.
+             * @brief The CountDown bits of the Count register.
              *
-             * @tparam count_value The start value for the counter.
+             * Counts down the value written to this bits at the XOSC frequency.
+             *
+             * @tparam count_value The value from which the counter starts.
              */
             template <auto count_value>
-            using CountBitType = reg_access::BitTypeValues<count_value, count_reg, count_mask, count_position>;
+            struct CountDown {
+                static constexpr count_reg::RegType count_position = 0U; /**< @brief The position of the count bits. */
+                static constexpr count_reg::RegType count_mask = (0xFFU << count_position); /**< @brief The mask of the count bits. */
+
+                using BitType = reg_access::BitTypeValues<count_value, count_reg, count_mask, count_position>;
+                using Bits = count_reg::template Bits<BitType>;
+                using Value = BitType::value;
+            };
         }; // count
 
     };
