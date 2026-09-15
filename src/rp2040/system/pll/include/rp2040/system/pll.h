@@ -40,11 +40,8 @@ namespace rp2040::system::pll {
 
     /**
      * @brief Holds the configuration parameter for the PLL.
-     *
-     * The default parameter are for PLL_SYS to achieve a system frequency of 125MHz with the XOSC (12MHz) set as the
-     * reference clock.
      */
-     struct PLL_ConfigType {
+     struct PllConfigType {
          std::uint8_t refdiv; /**< @brief The reference clock divider value. */
          std::uint8_t postdiv1; /**< @brief The post divider 1 value. */
          std::uint8_t postdiv2; /**< @brief The post divider 2 value. */
@@ -58,8 +55,7 @@ namespace rp2040::system::pll {
           * @param postdiv2 The post divider 2 value.
           * @param fbdiv The feedback divider value.
           */
-         constexpr explicit PLL_ConfigType(std::uint8_t refdiv = 1U, std::uint8_t postdiv1 = 6U,
-                                           std::uint8_t postdiv2 = 2U, std::uint16_t fbdiv = 125U) :
+         constexpr explicit PllConfigType(std::uint8_t refdiv, std::uint8_t postdiv1, std::uint8_t postdiv2, std::uint16_t fbdiv) :
          refdiv(refdiv), postdiv1(postdiv1), postdiv2(postdiv2), fbdiv(fbdiv) {}
 
     };
@@ -70,14 +66,8 @@ namespace rp2040::system::pll {
      * @tparam pll_addr The address of the pll.
      */
     template <std::uintptr_t pll_addr>
-    class PLL_Type {
-        static_assert((pll_addr == pll_sys_base) || (pll_addr == pll_usb_base), "Invalid pll address.");
-
-        using pll_regs = PLL_RegMapType<pll_addr>; /**< @brief The register map of the pll. */
-        using cs_r = pll_regs::cs; /**< @brief The control and status register. */
-        using pwr_r = pll_regs::pwr; /**< @brief The power modes register. */
-        using fbdiv_int_r = pll_regs::fbdiv_int; /**< @brief The feedback divisor register. */
-        using prim_r = pll_regs::prim;  /**< @brief The register to control the post dividers. */
+    class PllType {
+        static_assert((pll_addr == address::pll_sys) || (pll_addr == address::pll_usb), "Invalid pll address.");
 
     public:
         /**
@@ -85,7 +75,7 @@ namespace rp2040::system::pll {
          *
          * @return PLL_Type<pll_addr>& The instance of the singleton.
          */
-        static PLL_Type<pll_addr>& getInstance();
+        static PllType<pll_addr>& get_instance();
 
         /**
          * @brief Enables the PLL, if the PLL is not already enabled.
@@ -121,8 +111,8 @@ namespace rp2040::system::pll {
          *
          * @post The PLL runs at the configured frequency.
          */
-        template <PLL_ConfigType config, std::uint32_t refFreq_Hz = 12'000'000U>
-        std::expected<unsigned int, status::Status> setFrequency();
+        template <PllConfigType config, std::uint32_t refFreq_Hz = 12'000'000U>
+        std::expected<unsigned int, status::Status> set_frequency();
 
         /**
          * @brief Returns the frequency at which the PLL runs.
@@ -136,24 +126,30 @@ namespace rp2040::system::pll {
          *
          * @post None
          */
-        std::expected<unsigned int, status::Status> getFrequency();
+        std::expected<unsigned int, status::Status> get_frequency();
 
 
     private:
-        PLL_Type() : m_flags(0), m_frequency_hz(0) {}
+        using pll_regs = PllRegMapType<pll_addr>; /**< @brief The register map of the pll. */
+        using cs_r = pll_regs::Cs; /**< @brief The control and status register. */
+        using pwr_r = pll_regs::Pwr; /**< @brief The power modes register. */
+        using fbdiv_int_r = pll_regs::FbDivInt; /**< @brief The feedback divisor register. */
+        using prim_r = pll_regs::Prim;  /**< @brief The register to control the post dividers. */
+
+        PllType() : m_flags(0), m_frequency_hz(0) {}
 
         enum class Flags : std::uint32_t {
-            isInitialized = 0U,
-            NumberOfFlags
+            is_initialized = 0U,
+            number_of_flags
         };
 
-        std::bitset<static_cast<std::uint32_t>(Flags::NumberOfFlags)> m_flags;
+        std::bitset<static_cast<std::uint32_t>(Flags::number_of_flags)> m_flags;
 
         unsigned int m_frequency_hz;
     };
 
-    using PLL_Sys = PLL_Type<pll_sys_base>; /**< @brief The System PLL. */
-    using PLL_USB = PLL_Type<pll_usb_base>; /**< @brief The USB PLL. */
+    using PllSys = PllType<address::pll_sys>; /**< @brief The System PLL. */
+    using PllUsb = PllType<address::pll_usb>; /**< @brief The USB PLL. */
     /** @} */ // rp2040_pll
 } // rp2040::system
 

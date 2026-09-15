@@ -49,8 +49,8 @@ namespace rp2040::system::gpio {
             return;
         }
 
-        resets::Resets::get_instance().reset<resets::Subsystems::IO_BANK0>();
-        resets::Resets::get_instance().reset<resets::Subsystems::PADS_BANK0>();
+        resets::Resets::get_instance().reset<resets::Subsystems::io_bank0>();
+        resets::Resets::get_instance().reset<resets::Subsystems::pads_bank0>();
 
         m_flags.set(static_cast<std::uint32_t>(Flags::Initialized));
     }
@@ -61,8 +61,8 @@ namespace rp2040::system::gpio {
             return;
         }
 
-        resets::Resets::get_instance().disable<resets::Subsystems::IO_BANK0>();
-        resets::Resets::get_instance().disable<resets::Subsystems::PADS_BANK0>();
+        resets::Resets::get_instance().disable<resets::Subsystems::io_bank0>();
+        resets::Resets::get_instance().disable<resets::Subsystems::pads_bank0>();
 
         m_flags.reset(static_cast<std::uint32_t>(Flags::Initialized));
     }
