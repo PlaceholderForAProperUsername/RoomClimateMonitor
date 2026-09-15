@@ -43,29 +43,23 @@ namespace rp2040::system::resets {
     template <std::uintptr_t resets_addr>
     template <Subsystems subsystem>
     void ResetsType<resets_addr>::enable() {
-        static_assert(subsystem < Subsystems::NumberOfSubsystems, "Invalid template parameter subsystem in ResetsType::enable()!");
+        static_assert(subsystem < Subsystems::number_of_subsystems, "Invalid template parameter subsystem in ResetsType::enable()!");
 
-        using reset_bits_t = reset_r::reset_reg::template Bits<typename reset_r::template ResetBitType<subsystem>>;
-        using reset_value_t = reset_r::template ResetBitType<subsystem>::value;
-
-        reset_bits_t::set(reset_value_t::enable);
+        reset_r::template Subsystem<subsystem>::Bits::set(reset_r::template Subsystem<subsystem>::Value::enable);
     }
 
     template <std::uintptr_t resets_addr>
     template <Subsystems subsystem>
     void ResetsType<resets_addr>::disable() {
-        static_assert(subsystem < Subsystems::NumberOfSubsystems, "Invalid template parameter subsystem in ResetsType::disable()!");
+        static_assert(subsystem < Subsystems::number_of_subsystems, "Invalid template parameter subsystem in ResetsType::disable()!");
 
-        using reset_bits_t = reset_r::reset_reg::template Bits<typename reset_r::template ResetBitType<subsystem>>;
-        using reset_value_t = reset_r::template ResetBitType<subsystem>::value;
-
-        reset_bits_t::set(reset_value_t::disable);
+        reset_r::template Subsystem<subsystem>::Bits::set(reset_r::template Subsystem<subsystem>::Value::disable);
     }
 
     template <std::uintptr_t resets_addr>
     template <Subsystems subsystem>
     void ResetsType<resets_addr>::reset() {
-        static_assert(subsystem < Subsystems::NumberOfSubsystems, "Invalid template parameter subsystem in ResetsType::reset()!");
+        static_assert(subsystem < Subsystems::number_of_subsystems, "Invalid template parameter subsystem in ResetsType::reset()!");
 
         disable<subsystem>();
 
@@ -75,10 +69,10 @@ namespace rp2040::system::resets {
     template <std::uintptr_t resets_addr>
     template <Subsystems subsystem>
     bool ResetsType<resets_addr>::is_enabled() {
-        static_assert(subsystem < Subsystems::NumberOfSubsystems, "Invalid template parameter subsystem in ResetsType::is_enabled()!");
+        static_assert(subsystem < Subsystems::number_of_subsystems, "Invalid template parameter subsystem in ResetsType::is_enabled()!");
 
-        using reset_done_bits_t = reset_done_r::reset_done_reg::template Bits<typename reset_done_r::template ResetDoneBitType<subsystem>>;
-        using reset_done_value_t = reset_done_r::template ResetDoneBitType<subsystem>::value;
+        using reset_done_bits_t = reset_done_r::template Subsystem<subsystem>::Bits ;
+        using reset_done_value_t = reset_done_r::template Subsystem<subsystem>::Value;
         using T = reset_done_r::reset_done_reg::RegType;
 
         return reset_done_bits_t::getValue() == static_cast<T>(reset_done_value_t::enabled);

@@ -48,32 +48,32 @@ namespace rp2040::system::resets {
      * The value corresponds to the bit position in the registers.
      */
     enum class Subsystems : std::uint32_t {
-        ADC = 0U,
-        BUSCTRL = 1U,
-        DMA = 2U,
-        I2C0 = 3U,
-        I2C1 = 4U,
-        IO_BANK0 = 5U,
-        IO_QSPI = 6U,
-        JTAG = 7U,
-        PADS_BANK0 = 8U,
-        PADS_QSPI = 9U,
-        PIO0 = 10U,
-        PIO1 = 11U,
-        PLL_SYS = 12U,
-        PLL_USB = 13U,
-        PWM = 14U,
-        RTC = 15U,
-        SPI0 = 16U,
-        SPI1 = 17U,
-        SYSCFG = 18U,
-        SYSINFO = 19U,
-        TBMAN = 20U,
-        TIMER = 21U,
-        UART0 = 22U,
-        UART1 = 23U,
-        USBCTRL = 24U,
-        NumberOfSubsystems
+        adc = 0U,
+        bus_ctrl = 1U,
+        dma = 2U,
+        i2c0 = 3U,
+        i2c1 = 4U,
+        io_bank0 = 5U,
+        io_qspi = 6U,
+        jtag = 7U,
+        pads_bank0 = 8U,
+        pads_qspi = 9U,
+        pio0 = 10U,
+        pio1 = 11U,
+        pll_sys = 12U,
+        pll_usb = 13U,
+        pwm = 14U,
+        rtc = 15U,
+        spi0 = 16U,
+        spi1 = 17U,
+        sys_cfg = 18U,
+        sys_info = 19U,
+        tbman = 20U,
+        timer = 21U,
+        uart0 = 22U,
+        uart1 = 23U,
+        usb_ctrl = 24U,
+        number_of_subsystems
     };
 
     /**
@@ -101,28 +101,41 @@ namespace rp2040::system::resets {
 
 
             /**
-             * @brief The BitType representing the bits of the reset register.
+             * @brief The bit of a subsystem in the Reset register.
              *
              * @tparam subsystem The subsystem to be controlled.
              */
             template <Subsystems subsystem>
-            struct ResetBitType {
-                using reg = reset_reg; /**< @brief The register to which the bit belongs. */
-                using T = reg::RegType; /**< @brief The type of the register. */
-                using bit_access = reg_access::access_tag::read_write; /**< @brief Access specifier of the specific bit. */
+            struct Subsystem {
+                static_assert(subsystem < Subsystems::number_of_subsystems, "Invalid subsystem for Subsystem bit!");
+                /**
+                 * @brief The description of the subsystem bit.
+                 */
+                struct BitType {
+                    using reg = reset_reg; /**< @brief The register to which the bit belongs. */
+                    using T = reg::RegType; /**< @brief The type of the register. */
+                    using bit_access = reg_access::access_tag::read_write; /**< @brief Access specifier of the specific bit. */
 
-                static_assert(subsystem < Subsystems::NumberOfSubsystems, "Invalid subsystem for ResetBitType!");
+                    static constexpr T position = static_cast<T>(subsystem); /**< @brief The position of the bits in the register */
+                    static constexpr T mask = (0x01U << position); /**< @brief The mask of the affected bits. */
 
-                static constexpr T position = static_cast<T>(subsystem); /**< @brief The position of the bits in the register */
-                static constexpr T mask = (0x01U << position); /**< @brief The mask of the affected bits. */
+                    /**
+                     * @brief The valid values for the bits.
+                     */
+                    enum class value : T {
+                        enable = 0U, /**< @brief Deassert the reset and thus enable the subsystem. */
+                        disable = 1U, /**< @brief Put the subsystem in reset and thus disable it. */
+                    };
+                };
 
                 /**
-                 * @brief The valid values for the bits.
+                 * @brief The object to control the subsystem bit.
                  */
-                enum class value : T {
-                    enable = 0U, /**< @brief Deassert the reset and thus enable the subsystem. */
-                    disable = 1U, /**< @brief Put the subsystem in reset and thus disable it. */
-                };
+                using Bits = reset_reg::template Bits<BitType>;
+                /**
+                 * @brief The value of the Subsystem bit.
+                 */
+                using Value = BitType::value;
             };
         };
 
@@ -136,28 +149,42 @@ namespace rp2040::system::resets {
             using wdsel_reg = reg_access::Reg<addr, reg_access::access_tag::read_write, std::uint32_t>; /**< @brief The wdsel register. */
 
             /**
-             * @brief The bits of the watchdog select register.
+             * @brief The subsystem bit of the watchdog select register.
              *
-             * @tparam subsystem The subsystem to be selected.
+             * @tparam subsystem The subsystem to which this bit belongs.
              */
             template <Subsystems subsystem>
-            struct WDSelBitType {
-                using reg = wdsel_reg; /**< @brief The register to which the bits belongs. */
-                using T = reg::RegType; /**< @brief The type of the register. */
-                using bit_access = reg_access::access_tag::read_write; /**< @brief Access specifier of the specific bit. */
-
-                static_assert(subsystem < Subsystems::NumberOfSubsystems, "Invalid subsystem for WDSelBitType!");
-
-                static constexpr T position = static_cast<T>(subsystem); /**< @brief The position of the bits in the register */
-                static constexpr T mask = (0x01U << position); /**< @brief The mask of the affected bits. */
+            struct Subsystem {
+                static_assert(subsystem < Subsystems::number_of_subsystems, "Invalid subsystem for WDSel register!");
 
                 /**
-                 * @brief The valid values for the bits.
+                 * @brief The description of the subsystem bit of the watchdog select register.
                  */
-                enum class value : T {
-                    disable = 0U, /**< @brief The subsystem will be unaffected when the watchdog fires */
-                    enable = 1U, /**< @brief The subsystem will be put in reset when the watchdog fires */
+                struct BitType {
+                    using reg = wdsel_reg; /**< @brief The register to which the bits belongs. */
+                    using T = reg::RegType; /**< @brief The type of the register. */
+                    using bit_access = reg_access::access_tag::read_write; /**< @brief Access specifier of the specific bit. */
+
+                    static constexpr T position = static_cast<T>(subsystem); /**< @brief The position of the bits in the register */
+                    static constexpr T mask = (0x01U << position); /**< @brief The mask of the affected bits. */
+
+                    /**
+                     * @brief The valid values for the bits.
+                     */
+                    enum class value : T {
+                        disable = 0U, /**< @brief The subsystem will be unaffected when the watchdog fires */
+                        enable = 1U, /**< @brief The subsystem will be put in reset when the watchdog fires */
+                    };
                 };
+
+                /**
+                 * @brief The object to control the subsystem bit of the watchdog select register.
+                 */
+                using Bits = wdsel_reg::template Bits<BitType>;
+                /**
+                 * @brief The values of the subsystem bit.
+                 */
+                using Value = BitType::value;
             };
         };
 
@@ -172,28 +199,42 @@ namespace rp2040::system::resets {
             using reset_done_reg = reg_access::Reg<addr, reg_access::access_tag::read, std::uint32_t>; /**< @brief The reset_done register. */
 
             /**
-             * @brief The bits of the reset_done register.
+             * @brief The subsystem bit of the ResetDone register.
              *
-             * @tparam subsystem The subsystem whose status is to be checked.
+             * @tparam subsystem The to which this bit belongs.
              */
             template <Subsystems subsystem>
-            struct ResetDoneBitType {
-                using reg = reset_done_reg; /**< @brief The register to which the bitfield belongs. */
-                using T = reg::RegType; /**< @brief The type of the register. */
-                using bit_access = reg_access::access_tag::read; /**< @brief Access specifier of the specific bit. */
-
-                static_assert(subsystem < Subsystems::NumberOfSubsystems, "Invalid subsystem!");
-
-                static constexpr T position = static_cast<T>(subsystem); /**< @brief The position of the bits in the register */
-                static constexpr T mask = (0x01U << position); /**< @brief The mask of the affected bits. */
+            struct Subsystem {
+                static_assert(subsystem < Subsystems::number_of_subsystems, "Invalid subsystem for ResetDone register!");
 
                 /**
-                 * @brief The meaning of the bits.
+                 * @brief The description of the subsystem bit.
                  */
-                enum class value : T {
-                    disabled = 0U, /**< @brief The subsystem is still in reset and thus disabled. */
-                    enabled = 1U /**< @brief The subsystem is out of reset and thus enabled. */
+                struct BitType {
+                    using reg = reset_done_reg; /**< @brief The register to which the bitfield belongs. */
+                    using T = reg::RegType; /**< @brief The type of the register. */
+                    using bit_access = reg_access::access_tag::read; /**< @brief Access specifier of the specific bit. */
+
+                    static constexpr T position = static_cast<T>(subsystem); /**< @brief The position of the bits in the register */
+                    static constexpr T mask = (0x01U << position); /**< @brief The mask of the affected bits. */
+
+                    /**
+                     * @brief The meaning of the bits.
+                     */
+                    enum class value : T {
+                        disabled = 0U, /**< @brief The subsystem is still in reset and thus disabled. */
+                        enabled = 1U /**< @brief The subsystem is out of reset and thus enabled. */
+                    };
                 };
+
+                /**
+                 * @brief The object to control the subsystem bit.
+                 */
+                using Bits = reset_done_reg::template Bits<BitType>;
+                /**
+                 * @brief The values of the subsystem bit.
+                 */
+                using Value = BitType::value;
             };
         };
     };
