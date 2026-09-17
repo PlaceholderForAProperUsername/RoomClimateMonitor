@@ -48,7 +48,7 @@ namespace rp2040::system::gpio {
      */
     template <std::uintptr_t ioBankBase, std::uintptr_t padsBankBase, std::uintptr_t sioBase>
     class GpioType {
-        static_assert((ioBankBase == IO_BANK0_BASE) && (padsBankBase == PADS_BANK0_BASE) && (sioBase == SIO_BASE), "Invalid gpio base addresses.");
+        static_assert((ioBankBase == address::gpio0::io_bank0) && (padsBankBase == address::gpio0::pads_bank0) && (sioBase == address::gpio0::sio), "Invalid gpio base addresses.");
 
     public:
         /**
@@ -249,8 +249,8 @@ namespace rp2040::system::gpio {
         };
 
         std::bitset<static_cast<std::uint32_t>(Flags::NumberOfFlags)> m_flags;
-        std::bitset<static_cast<std::uint32_t>(Pins::NumberOfGPIOs)> m_input_enabled;
-        std::bitset<static_cast<std::uint32_t>(Pins::NumberOfGPIOs)> m_output_enabled;
+        std::bitset<static_cast<std::uint32_t>(Pins::number_of_gpio)> m_input_enabled;
+        std::bitset<static_cast<std::uint32_t>(Pins::number_of_gpio)> m_output_enabled;
 
         using io_bank = IO_BankRegMap<ioBankBase>; /**< @brief The user IO bank to read the status and configure the pin. */
         using pad_bank = PadsBankRegMap<padsBankBase>; /**< @brief The user pads bank to configure electrical parameters of the pad. */
@@ -258,7 +258,7 @@ namespace rp2040::system::gpio {
     };
 
 
-    using GPIO = GpioType<IO_BANK0_BASE, PADS_BANK0_BASE, SIO_BASE>; /**< @brief The GPIO. */
+    using GPIO = GpioType<address::gpio0::io_bank0, address::gpio0::pads_bank0, address::gpio0::sio>; /**< @brief The GPIO. */
 
     /** @} */ // rp2040_gpio
 } // rp2040::system::gpio

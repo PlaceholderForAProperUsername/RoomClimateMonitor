@@ -34,45 +34,60 @@ namespace rp2040::system::gpio {
      * @{
      */
 
-    constexpr std::uintptr_t IO_BANK0_BASE = 0x40014000U; /**< @brief Base address of the user bank IO registers. */
-    constexpr std::uintptr_t PADS_BANK0_BASE = 0x4001C000U; /**< @brief Base address of the user bank pad control registers. */
-    constexpr std::uintptr_t SIO_BASE = 0xD0000000U; /**< @brief Base address of the software input/output registers. */
+    /**
+     * @brief The addresses of the gpio module.
+     *
+     * Each gpio module has three different parts:
+     * - IO_Bank: General configuration (func select, etc.)
+     * - Pads_Bank: Configuration of electrical parameters (internal resistors, slew rate, etc.)
+     * - SIO: Software input output
+     */
+    namespace address {
+        /**
+         * @brief The addresses of gpio bank 0.
+         */
+        namespace gpio0 {
+            constexpr std::uintptr_t io_bank0 = 0x40014000U; /**< @brief Base address of the user bank IO registers. */
+            constexpr std::uintptr_t pads_bank0 = 0x4001C000U; /**< @brief Base address of the user bank pad control registers. */
+            constexpr std::uintptr_t sio = 0xD0000000U; /**< @brief Base address of the software input/output registers. */
+        }
+    }
 
     /**
      * @brief The GPIO pins of the RP2040.
      */
     enum class Pins : std::uint8_t {
-        GPIO0 = 0U,
-        GPIO1 = 1U,
-        GPIO2 = 2U,
-        GPIO3 = 3U,
-        GPIO4 = 4U,
-        GPIO5 = 5U,
-        GPIO6 = 6U,
-        GPIO7 = 7U,
-        GPIO8 = 8U,
-        GPIO9 = 9U,
-        GPIO10 = 10U,
-        GPIO11 = 11U,
-        GPIO12 = 12U,
-        GPIO13 = 13U,
-        GPIO14 = 14U,
-        GPIO15 = 15U,
-        GPIO16 = 16U,
-        GPIO17 = 17U,
-        GPIO18 = 18U,
-        GPIO19 = 19U,
-        GPIO20 = 20U,
-        GPIO21 = 21U,
-        GPIO22 = 22U,
-        GPIO23 = 23U,
-        GPIO24 = 24U,
-        GPIO25 = 25U,
-        GPIO26 = 26U,
-        GPIO27 = 27U,
-        GPIO28 = 28U,
-        GPIO29 = 29U,
-        NumberOfGPIOs
+        gpio0 = 0U,
+        gpio1 = 1U,
+        gpio2 = 2U,
+        gpio3 = 3U,
+        gpio4 = 4U,
+        gpio5 = 5U,
+        gpio6 = 6U,
+        gpio7 = 7U,
+        gpio8 = 8U,
+        gpio9 = 9U,
+        gpio10 = 10U,
+        gpio11 = 11U,
+        gpio12 = 12U,
+        gpio13 = 13U,
+        gpio14 = 14U,
+        gpio15 = 15U,
+        gpio16 = 16U,
+        gpio17 = 17U,
+        gpio18 = 18U,
+        gpio19 = 19U,
+        gpio20 = 20U,
+        gpio21 = 21U,
+        gpio22 = 22U,
+        gpio23 = 23U,
+        gpio24 = 24U,
+        gpio25 = 25U,
+        gpio26 = 26U,
+        gpio27 = 27U,
+        gpio28 = 28U,
+        gpio29 = 29U,
+        number_of_gpio
     };
 
     /**
@@ -81,75 +96,75 @@ namespace rp2040::system::gpio {
      * The pads include the GPIOs and additionally SWCLK and SWD.
      */
     enum class Pads : std::uint8_t {
-        GPIO0 = 0U,
-        GPIO1 = 1U,
-        GPIO2 = 2U,
-        GPIO3 = 3U,
-        GPIO4 = 4U,
-        GPIO5 = 5U,
-        GPIO6 = 6U,
-        GPIO7 = 7U,
-        GPIO8 = 8U,
-        GPIO9 = 9U,
-        GPIO10 = 10U,
-        GPIO11 = 11U,
-        GPIO12 = 12U,
-        GPIO13 = 13U,
-        GPIO14 = 14U,
-        GPIO15 = 15U,
-        GPIO16 = 16U,
-        GPIO17 = 17U,
-        GPIO18 = 18U,
-        GPIO19 = 19U,
-        GPIO20 = 20U,
-        GPIO21 = 21U,
-        GPIO22 = 22U,
-        GPIO23 = 23U,
-        GPIO24 = 24U,
-        GPIO25 = 25U,
-        GPIO26 = 26U,
-        GPIO27 = 27U,
-        GPIO28 = 28U,
-        GPIO29 = 29U,
-        SWCLK = 30U,
-        SWD = 31U,
-        NumberOfPads
+        gpio0 = 0U,
+        gpio1 = 1U,
+        gpio2 = 2U,
+        gpio3 = 3U,
+        gpio4 = 4U,
+        gpio5 = 5U,
+        gpio6 = 6U,
+        gpio7 = 7U,
+        gpio8 = 8U,
+        gpio9 = 9U,
+        gpio10 = 10U,
+        gpio11 = 11U,
+        gpio12 = 12U,
+        gpio13 = 13U,
+        gpio14 = 14U,
+        gpio15 = 15U,
+        gpio16 = 16U,
+        gpio17 = 17U,
+        gpio18 = 18U,
+        gpio19 = 19U,
+        gpio20 = 20U,
+        gpio21 = 21U,
+        gpio22 = 22U,
+        gpio23 = 23U,
+        gpio24 = 24U,
+        gpio25 = 25U,
+        gpio26 = 26U,
+        gpio27 = 27U,
+        gpio28 = 28U,
+        gpio29 = 29U,
+        swclk = 30U,
+        swd = 31U,
+        number_of_pads
     };
 
     /**
      * @brief The functions a GPIO can be configured for.
      */
     enum class FuncSelect : std::uint32_t {
-        SPI = 1U,
-        UART = 2U,
-        I2C = 3U,
-        PWM = 4U,
-        SIO = 5U,
-        PIO0 = 6U,
-        PIO1 = 7U,
-        CLOCK = 8U, /**< @brief Only available for GPIO20 - GPIO25.  */
-        USB = 9U,
-        NumberOfFunctions,
+        spi = 1U,
+        uart = 2U,
+        i2c = 3U,
+        pwm = 4U,
+        sio = 5U,
+        pio0 = 6U,
+        pio1 = 7U,
+        clock = 8U, /**< @brief Only available for GPIO20 - GPIO25.  */
+        usb = 9U,
+        number_of_functions,
     };
 
     /**
      * @brief The base of the interrupt register.
      */
     enum class InterruptBase : std::uint32_t {
-        RAW_INTERRUPT = 0x0F0U,
-        PROC0 = 0x100U,
-        PROC1 = 0x130U,
-        DORMANT_WAKE = 0x160U,
+        raw_interrupt = 0x0F0U,
+        proc0 = 0x100U,
+        proc1 = 0x130U,
+        dormant_wake = 0x160U,
     };
 
     /**
      * @brief The different interrupt register types.
      */
     enum class InterruptType : std::uint32_t {
-        RAW = 0x00U,
-        ENABLE = 0x00U,
-        FORCE = 0x10U,
-        STATUS = 0x20U,
+        raw = 0x00U,
+        enable = 0x00U,
+        force = 0x10U,
+        status = 0x20U,
     };
 
     /**
@@ -159,7 +174,7 @@ namespace rp2040::system::gpio {
      */
     template <std::uintptr_t ioBankBaseAddr>
     struct IO_BankRegMap {
-        static_assert(ioBankBaseAddr == IO_BANK0_BASE, "Invalid base address for IO_BankRegMap.");
+        static_assert(ioBankBaseAddr == address::gpio0::io_bank0, "Invalid base address for IO_BankRegMap.");
 
         /**
          * @brief General register map to configure and read the status of a GPIO of the user bank IO.
@@ -168,7 +183,7 @@ namespace rp2040::system::gpio {
          */
         template <Pins gpio>
         struct GPIOX_RegMap {
-            static_assert(gpio < Pins::NumberOfGPIOs, "Invalid GPIO. There are only 29 user GPIOs.");
+            static_assert(gpio < Pins::number_of_gpio, "Invalid GPIO. There are only 29 user GPIOs.");
 
             static constexpr std::uint8_t BytesPerGPIORegisters {8U}; /**< @brief The number of bytes required for the ctrl and status registers of a GPIO. */
             static constexpr std::uint8_t offset = static_cast<std::uint8_t>(gpio) * BytesPerGPIORegisters; /**< @brief The offset of the registers of the gpio. */
@@ -406,11 +421,11 @@ namespace rp2040::system::gpio {
          */
         template <Pins gpio, InterruptBase base, InterruptType type>
         struct InterruptGPIOX_RegMap {
-            static_assert(gpio < Pins::NumberOfGPIOs, "Invalid GPIO.");
+            static_assert(gpio < Pins::number_of_gpio, "Invalid GPIO.");
 
-            static_assert((base == InterruptBase::RAW_INTERRUPT && type == InterruptType::RAW) ||
-                    ((base == InterruptBase::PROC0 || base == InterruptBase::PROC1 || base == InterruptBase::DORMANT_WAKE) &&
-                    (type == InterruptType::ENABLE || type == InterruptType::FORCE || type == InterruptType::STATUS)), "Invalid combination of interrupt base and type");
+            static_assert((base == InterruptBase::raw_interrupt && type == InterruptType::raw) ||
+                    ((base == InterruptBase::proc0 || base == InterruptBase::proc1 || base == InterruptBase::dormant_wake) &&
+                    (type == InterruptType::enable || type == InterruptType::force || type == InterruptType::status)), "Invalid combination of interrupt base and type");
 
             static constexpr std::uint32_t baseOffset =  static_cast<std::uint32_t>(base) + static_cast<std::uint32_t>(type); /**< @brief The offset of the target register block to the USER_BANK_BASE address. */
             static constexpr std::uint32_t gpioPerRegister = 8U; /**< @brief The maximum number of gpio per interrupt register. */
@@ -431,9 +446,9 @@ namespace rp2040::system::gpio {
                  * are read-only and enable and force interrupt registers have read-write access.
                  */
                 using interrupt_reg = decltype([]() {
-                    if constexpr (type == InterruptType::RAW) {
+                    if constexpr (type == InterruptType::raw) {
                         return std::type_identity_t<rp2040::reg_access::Reg<addr, rp2040::reg_access::access_tag::mixed_access, std::uint32_t>>();
-                    } else if constexpr (type == InterruptType::STATUS) {
+                    } else if constexpr (type == InterruptType::status) {
                         return std::type_identity_t<rp2040::reg_access::Reg<addr, rp2040::reg_access::access_tag::read, std::uint32_t>>();
                     } else {
                         return std::type_identity_t<rp2040::reg_access::Reg<addr, rp2040::reg_access::access_tag::read_write, std::uint32_t>>();
@@ -449,9 +464,9 @@ namespace rp2040::system::gpio {
                  * interrupts edge high bits are read-only and enable and force interrupt edge high bits have read-write access.
                  */
                 using edgeHighBitField = decltype([]() {
-                    if constexpr (type == InterruptType::RAW) {
+                    if constexpr (type == InterruptType::raw) {
                         return std::type_identity_t<reg_access::BitTypeEnableDisable<interrupt_reg, gpioBitOffset + 3U, reg_access::access_tag::write_clear>>();
-                    } else if constexpr (type == InterruptType::STATUS) {
+                    } else if constexpr (type == InterruptType::status) {
                         return std::type_identity_t<reg_access::BitTypeEnableDisable<interrupt_reg, gpioBitOffset + 3U, reg_access::access_tag::read>>();
                     } else {
                         return std::type_identity_t<reg_access::BitTypeEnableDisable<interrupt_reg, gpioBitOffset + 3U, reg_access::access_tag::read_write>>();
@@ -470,9 +485,9 @@ namespace rp2040::system::gpio {
                  * interrupts edge low bits are read-only and enable and force interrupt edge low bits have read-write access.
                  */
                 using edgeLowBitField = decltype([]() {
-                    if constexpr (type == InterruptType::RAW) {
+                    if constexpr (type == InterruptType::raw) {
                         return std::type_identity_t<reg_access::BitTypeEnableDisable<interrupt_reg, gpioBitOffset + 2U, reg_access::access_tag::write_clear>>();
-                    } else if constexpr (type == InterruptType::STATUS) {
+                    } else if constexpr (type == InterruptType::status) {
                         return std::type_identity_t<reg_access::BitTypeEnableDisable<interrupt_reg, gpioBitOffset + 2U, reg_access::access_tag::read>>();
                     } else {
                         return std::type_identity_t<reg_access::BitTypeEnableDisable<interrupt_reg, gpioBitOffset + 2U, reg_access::access_tag::read_write>>();
@@ -490,9 +505,9 @@ namespace rp2040::system::gpio {
                  * interrupts level high bits are read-only and enable and force interrupt level high bits have read-write access.
                  */
                 using levelHighBitField = decltype([]() {
-                    if constexpr (type == InterruptType::RAW) {
+                    if constexpr (type == InterruptType::raw) {
                         return std::type_identity_t<reg_access::BitTypeEnableDisable<interrupt_reg, gpioBitOffset + 1U, reg_access::access_tag::read>>();
-                    } else if constexpr (type == InterruptType::STATUS) {
+                    } else if constexpr (type == InterruptType::status) {
                         return std::type_identity_t<reg_access::BitTypeEnableDisable<interrupt_reg, gpioBitOffset + 1U, reg_access::access_tag::read>>();
                     } else {
                         return std::type_identity_t<reg_access::BitTypeEnableDisable<interrupt_reg, gpioBitOffset + 1U, reg_access::access_tag::read_write>>();
@@ -509,9 +524,9 @@ namespace rp2040::system::gpio {
                  * interrupts level low bits are read-only and enable and force interrupt level low bits have read-write access.
                  */
                 using levelLowBitField = decltype([]() {
-                    if constexpr (type == InterruptType::RAW) {
+                    if constexpr (type == InterruptType::raw) {
                         return std::type_identity_t<reg_access::BitTypeEnableDisable<interrupt_reg, gpioBitOffset, reg_access::access_tag::read>>();
-                    } else if constexpr (type == InterruptType::STATUS) {
+                    } else if constexpr (type == InterruptType::status) {
                         return std::type_identity_t<reg_access::BitTypeEnableDisable<interrupt_reg, gpioBitOffset, reg_access::access_tag::read>>();
                     } else {
                         return std::type_identity_t<reg_access::BitTypeEnableDisable<interrupt_reg, gpioBitOffset, reg_access::access_tag::read_write>>();
@@ -530,7 +545,7 @@ namespace rp2040::system::gpio {
          * @tparam gpio The gpio for which the status of the interrupts is to be read/cleared.
          */
         template <Pins gpio>
-        using rawInterruptRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::RAW_INTERRUPT, InterruptType::RAW>;
+        using rawInterruptRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::raw_interrupt, InterruptType::raw>;
 
         /**
          * @brief The enable interrupt registers for processor 0.
@@ -538,7 +553,7 @@ namespace rp2040::system::gpio {
          * @tparam gpio The gpio for which the interrupt is to be enabled.
          */
         template <Pins gpio>
-        using proc0InterruptEnableRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::PROC0, InterruptType::ENABLE>;
+        using proc0InterruptEnableRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::proc0, InterruptType::enable>;
 
         /**
          * @brief The force interrupt registers for processor 0.
@@ -546,7 +561,7 @@ namespace rp2040::system::gpio {
          * @tparam gpio The gpio for which the interrupt is to be forced.
          */
         template <Pins gpio>
-        using proc0InterruptForceRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::PROC0, InterruptType::FORCE>;
+        using proc0InterruptForceRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::proc0, InterruptType::force>;
 
         /**
          * @brief The status interrupt registers for processor 0.
@@ -554,7 +569,7 @@ namespace rp2040::system::gpio {
          * @tparam gpio The gpio for which the interrupt status is to be read.
          */
         template <Pins gpio>
-        using proc0InterruptStatusRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::PROC0, InterruptType::STATUS>;
+        using proc0InterruptStatusRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::proc0, InterruptType::status>;
 
         /**
          * @brief The enable interrupt registers for processor 1.
@@ -562,7 +577,7 @@ namespace rp2040::system::gpio {
          * @tparam gpio The gpio for which the interrupt is to be enabled.
          */
         template <Pins gpio>
-        using proc1InterruptEnableRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::PROC1, InterruptType::ENABLE>;
+        using proc1InterruptEnableRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::proc1, InterruptType::enable>;
 
         /**
          * @brief The force interrupt registers for processor 1.
@@ -570,7 +585,7 @@ namespace rp2040::system::gpio {
          * @tparam gpio The gpio for which the interrupt is to be forced.
          */
         template <Pins gpio>
-        using proc1InterruptForceRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::PROC1, InterruptType::FORCE>;
+        using proc1InterruptForceRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::proc1, InterruptType::force>;
 
         /**
          * @brief The status interrupt registers for processor 1.
@@ -578,7 +593,7 @@ namespace rp2040::system::gpio {
          * @tparam gpio The gpio for which the interrupt status is to be read.
          */
         template <Pins gpio>
-        using proc1InterruptStatusRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::PROC1, InterruptType::STATUS>;
+        using proc1InterruptStatusRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::proc1, InterruptType::status>;
 
         /**
          * @brief The enable interrupt registers for dormant wake.
@@ -586,7 +601,7 @@ namespace rp2040::system::gpio {
          * @tparam gpio The gpio for which the interrupt is to be enabled.
          */
         template <Pins gpio>
-        using dormWakeInterruptEnableRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::DORMANT_WAKE, InterruptType::ENABLE>;
+        using dormWakeInterruptEnableRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::dormant_wake, InterruptType::enable>;
 
         /**
          * @brief The force interrupt registers for dormant wake.
@@ -594,7 +609,7 @@ namespace rp2040::system::gpio {
          * @tparam gpio The gpio for which the interrupt is to be forced.
          */
         template <Pins gpio>
-        using dormWakeInterruptForceRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::DORMANT_WAKE, InterruptType::FORCE>;
+        using dormWakeInterruptForceRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::dormant_wake, InterruptType::force>;
 
         /**
          * @brief The status interrupt registers for dormant wake.
@@ -602,7 +617,7 @@ namespace rp2040::system::gpio {
          * @tparam gpio The gpio for which the interrupt status is to be read.
          */
         template <Pins gpio>
-        using dormWakeInterruptStatusRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::DORMANT_WAKE, InterruptType::STATUS>;
+        using dormWakeInterruptStatusRegs = InterruptGPIOX_RegMap<gpio, InterruptBase::dormant_wake, InterruptType::status>;
 
     };
 
@@ -613,7 +628,7 @@ namespace rp2040::system::gpio {
      */
     template <std::uintptr_t PadsBaseAddr>
     struct PadsBankRegMap {
-        static_assert(PadsBaseAddr == PADS_BANK0_BASE, "Invalid address for PadsBaseAddr.");
+        static_assert(PadsBaseAddr == address::gpio0::pads_bank0, "Invalid address for PadsBaseAddr.");
 
         static constexpr std::uint8_t voltageSelectOffset = 0x00U; /**< @brief The offset of the voltage select register. */
         static constexpr std::uint8_t padRegisterStartOffset = 0x04U; /**< @brief The offset of the first pad control register. */
@@ -658,7 +673,7 @@ namespace rp2040::system::gpio {
          */
         template <Pads pad>
         struct padX {
-            static_assert(pad < Pads::NumberOfPads, "Invalid Pad. For valid options see enum Pads.");
+            static_assert(pad < Pads::number_of_pads, "Invalid Pad. For valid options see enum Pads.");
 
             static constexpr std::uint8_t bytesPerRegister = 0x04U; /**< @brief The RP2040 is a 32 bit architecture and every register is therefore 4 bytes. */
             static constexpr std::uint8_t padOffset = padRegisterStartOffset + static_cast<std::uint8_t>(pad) * bytesPerRegister; /**< @brief The offset of the specified pad from the first pad (GPIO0). */
@@ -790,7 +805,7 @@ namespace rp2040::system::gpio {
      */
     template <std::uintptr_t SIOBaseAddr>
     struct SIORegMap {
-        static_assert(SIOBaseAddr == SIO_BASE, "Invalid address for SIOBaseAddr.");
+        static_assert(SIOBaseAddr == address::gpio0::sio, "Invalid address for SIOBaseAddr.");
 
         static constexpr std::uint32_t cpuidOffset = 0x000U; /**< @brief Offset of the cpuid register to the sio base address. */
         static constexpr std::uint32_t gpioInOffset = 0x004U; /**< @brief Offset of the gpio_in register to the sio base address. */
@@ -843,7 +858,7 @@ namespace rp2040::system::gpio {
              * @tparam gpio The GPIO where the input value is to be get.
              */
             template <Pins gpio>
-            requires (gpio < Pins::NumberOfGPIOs)
+            requires (gpio < Pins::number_of_gpio)
             using InputBitField = rp2040::reg_access::BitTypeHighLow<input_reg, static_cast<input_reg::RegType>(gpio)>;
             /**
              * @brief The input bit of the gpio.
@@ -890,7 +905,7 @@ namespace rp2040::system::gpio {
                  */
                 template <Pins gpio>
                 using ValueBitField = decltype([] () {
-                    static_assert(gpio < Pins::NumberOfGPIOs);
+                    static_assert(gpio < Pins::number_of_gpio);
                     if constexpr(baseOffset == gpioOutOffset) {
                         return std::type_identity_t<rp2040::reg_access::BitTypeHighLow<value_reg, static_cast<value_reg::RegType>(gpio)>>();
                     } else if constexpr (baseOffset == gpioOutEnOffset) {

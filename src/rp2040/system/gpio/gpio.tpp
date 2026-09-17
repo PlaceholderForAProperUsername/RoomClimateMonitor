@@ -74,9 +74,9 @@ namespace rp2040::system::gpio {
             return status::Status::ERROR_INIT;
         }
 
-        static_assert(pin < Pins::NumberOfGPIOs, "Invalid GPIO pin!");
-        static_assert(func < FuncSelect::NumberOfFunctions &&
-            !(((pin < Pins::GPIO20) || (pin > Pins::GPIO25)) && (func == FuncSelect::CLOCK)),
+        static_assert(pin < Pins::number_of_gpio, "Invalid GPIO pin!");
+        static_assert(func < FuncSelect::number_of_functions &&
+            !(((pin < Pins::gpio20) || (pin > Pins::gpio25)) && (func == FuncSelect::clock)),
             "Invalid function or invalid function assignment (Clock functionality only available for GPIO20-GPIO25)!");
 
         io_bank::template GPIOX_RegMap<pin>::ctrl::funcSelect_bits::set(func);
@@ -90,7 +90,7 @@ namespace rp2040::system::gpio {
         if (!m_flags.test(static_cast<std::uint32_t>(Flags::Initialized))) {
             return status::Status::ERROR_INIT;
         }
-        static_assert(pin < Pins::NumberOfGPIOs, "Invalid GPIO pin!");
+        static_assert(pin < Pins::number_of_gpio, "Invalid GPIO pin!");
 
         if constexpr (enable) {
             if (!m_output_enabled.test(static_cast<std::uint32_t>(pin))) {
@@ -117,7 +117,7 @@ namespace rp2040::system::gpio {
         if (!m_output_enabled.test(static_cast<std::uint32_t>(pin))) {
             return status::Status::ERROR_GENERIC;
         }
-        static_assert(pin < Pins::NumberOfGPIOs, "Invalid GPIO pin!");
+        static_assert(pin < Pins::number_of_gpio, "Invalid GPIO pin!");
 
         if constexpr (high) {
             sio_bank::output::set::template set_bits<pin>::set();
@@ -136,7 +136,7 @@ namespace rp2040::system::gpio {
         if (!m_output_enabled.test(static_cast<std::uint32_t>(pin))) {
             return status::Status::ERROR_GENERIC;
         }
-        static_assert(pin < Pins::NumberOfGPIOs, "Invalid GPIO pin!");
+        static_assert(pin < Pins::number_of_gpio, "Invalid GPIO pin!");
 
         sio_bank::output::toggle::template toggle_bits<pin>::toggle();
 
@@ -150,7 +150,7 @@ namespace rp2040::system::gpio {
             return status::Status::ERROR_INIT;
         }
 
-        static_assert(pin < Pins::NumberOfGPIOs, "Invalid GPIO pin!");
+        static_assert(pin < Pins::number_of_gpio, "Invalid GPIO pin!");
 
         if constexpr (enable) {
             if (!m_input_enabled.test(static_cast<std::uint32_t>(pin))) {
@@ -176,7 +176,7 @@ namespace rp2040::system::gpio {
         if (!m_input_enabled.test(static_cast<std::uint32_t>(pin))) {
             return std::unexpected(status::Status::ERROR_GENERIC);
         }
-        static_assert(pin < Pins::NumberOfGPIOs, "Invalid GPIO pin!");
+        static_assert(pin < Pins::number_of_gpio, "Invalid GPIO pin!");
 
         bool output_level = sio_bank::output::value::template value_bits<pin>::getValue();
 
@@ -190,7 +190,7 @@ namespace rp2040::system::gpio {
             return status::Status::ERROR_INIT;
         }
 
-        static_assert(pin < Pins::NumberOfGPIOs, "Invalid GPIO pin!");
+        static_assert(pin < Pins::number_of_gpio, "Invalid GPIO pin!");
 
         /** short hand for the pad register of the GPIO pin */
         using pad_t = pad_bank::template padX<static_cast<Pads>(std::to_underlying(pin))>;
@@ -211,7 +211,7 @@ namespace rp2040::system::gpio {
             return status::Status::ERROR_INIT;
         }
 
-        static_assert(pin < Pins::NumberOfGPIOs, "Invalid GPIO pin!");
+        static_assert(pin < Pins::number_of_gpio, "Invalid GPIO pin!");
 
         /** short hand for the pad register of the GPIO pin */
         using pad_t = pad_bank::template padX<static_cast<Pads>(std::to_underlying(pin))>;
@@ -232,7 +232,7 @@ namespace rp2040::system::gpio {
             return status::Status::ERROR_INIT;
         }
 
-        static_assert(pin < Pins::NumberOfGPIOs, "Invalid GPIO pin!");
+        static_assert(pin < Pins::number_of_gpio, "Invalid GPIO pin!");
 
         /** short hand for the pad register of the GPIO pin */
         using pad_t = pad_bank::template padX<static_cast<Pads>(std::to_underlying(pin))>;
@@ -254,7 +254,7 @@ namespace rp2040::system::gpio {
             return status::Status::ERROR_INIT;
         }
 
-        static_assert(pin < Pins::NumberOfGPIOs, "Invalid GPIO pin!");
+        static_assert(pin < Pins::number_of_gpio, "Invalid GPIO pin!");
 
         using pad_t = pad_bank::template padX<static_cast<Pads>(std::to_underlying(pin))>;
 
