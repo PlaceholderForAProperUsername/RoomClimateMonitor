@@ -79,7 +79,7 @@ namespace rp2040::system::gpio {
             !(((pin < Pins::gpio20) || (pin > Pins::gpio25)) && (func == FuncSelect::clock)),
             "Invalid function or invalid function assignment (Clock functionality only available for GPIO20-GPIO25)!");
 
-        io_bank::template GPIOX_RegMap<pin>::ctrl::funcSelect_bits::set(func);
+        io_bank::template Gpio<pin>::Ctrl::FuncSel::Bits::set(func);
 
         return status::Status::OK;
     }
