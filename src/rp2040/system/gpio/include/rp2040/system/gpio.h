@@ -252,7 +252,7 @@ namespace rp2040::system::gpio {
         std::bitset<static_cast<std::uint32_t>(Pins::number_of_gpio)> m_input_enabled;
         std::bitset<static_cast<std::uint32_t>(Pins::number_of_gpio)> m_output_enabled;
 
-        using io_bank = IO_BankRegMap<ioBankBase>; /**< @brief The user IO bank to read the status and configure the pin. */
+        using io_bank = IoBankRegMap<ioBankBase>; /**< @brief The user IO bank to read the status and configure the pin. */
         using pad_bank = PadsBankRegMap<padsBankBase>; /**< @brief The user pads bank to configure electrical parameters of the pad. */
         using sio_bank = SIORegMap<sioBase>; /**< @brief Software input/output control. */
     };
