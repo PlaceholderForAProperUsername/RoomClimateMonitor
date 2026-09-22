@@ -496,7 +496,7 @@ namespace rp2040::system::gpio {
                     struct BitType {
                         using reg = ctrl_reg; /**< @brief The register to which the bitfield belongs. */
                         using T = reg::RegType; /**< @brief The type of the register. */
-                        using bit_access = ctrl_reg::reg_access;
+                        using bit_access = ctrl_reg::reg_access; /**< @brief The access tag defining bit operations. */
 
                         static constexpr T position = 0x00U; /**< @brief The position of the bits in the register. */
                         static constexpr T mask = (0x1FU << position); /**< @brief The mask of the bits. */
@@ -780,177 +780,196 @@ namespace rp2040::system::gpio {
     /**
      * @brief The user bank pad control registers.
      *
-     * @tparam PadsBaseAddr The base address of the user bank pad control registers.
+     * @tparam pads_base_addr The base address of the user bank pad control registers.
      */
-    template <std::uintptr_t PadsBaseAddr>
+    template <std::uintptr_t pads_base_addr>
     struct PadsBankRegMap {
-        static_assert(PadsBaseAddr == address::gpio0::pads_bank0, "Invalid address for PadsBaseAddr.");
+        static_assert(pads_base_addr == address::gpio0::pads_bank0, "Invalid address for PadsBaseAddr.");
 
-        static constexpr std::uint8_t voltageSelectOffset = 0x00U; /**< @brief The offset of the voltage select register. */
-        static constexpr std::uint8_t padRegisterStartOffset = 0x04U; /**< @brief The offset of the first pad control register. */
+        static constexpr std::uint8_t voltage_select_offset = 0x00U; /**< @brief The offset of the voltage select register. */
+        static constexpr std::uint8_t pad_register_start_offset = 0x04U; /**< @brief The offset of the first pad control register. */
 
         /**
          * @brief The voltage select register.
          */
-        struct voltage_select {
-            static constexpr std::uintptr_t addr = PadsBaseAddr + voltageSelectOffset; /**< @brief Base address of the voltage select register. */
-            using voltage_select_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::access_tag::read_write, std::uint32_t>; /**< @brief The voltage select register. */
+        struct VoltageSelect {
+            static constexpr std::uintptr_t addr = pads_base_addr + voltage_select_offset; /**< @brief Base address of the voltage select register. */
+            using voltage_select_reg = reg_access::Reg<addr, reg_access::access_tag::read_write, std::uint32_t>; /**< @brief The voltage select register. */
 
             /**
-             * @brief The voltage select bits as a bit field.
+             * @brief The voltage select bit.
              */
-            struct VoltageSelectBitField {
-                using reg = voltage_select_reg; /**< @brief The register to which the bitfield belongs. */
-                using T = reg::RegType; /**< @brief The type of the register. */
-                using bit_access = reg::reg_access;
-
-                static constexpr T position = 0x00U; /**< @brief The position of the bits in the register. */
-                static constexpr T mask = (0x01U << position); /**< @brief The mask of the bits. */
-
+            struct VoltSel {
                 /**
-                 * @brief The voltage select control per bank control.
+                 * @brief Description of the voltage select bit.
                  */
-                enum class value : T {
-                    VOLTAGE_3_3 = 0x0U, /**< @brief Set the voltage to 3.3V. */
-                    VOLTAGE_1_8 = 0x1U, /**< @brief Set the voltage to 1.8V. */
-                };
-            };
+                struct BitType {
+                    using reg = voltage_select_reg; /**< @brief The register to which the bitfield belongs. */
+                    using T = reg::RegType; /**< @brief The type of the register. */
+                    using bit_access = reg::reg_access; /**< @brief The access tag defining bit operations. */
 
-            /**
-             * @brief The voltage select bits.
-             */
-            using voltageSelect_bits = voltage_select_reg::template Bits<VoltageSelectBitField>;
+                    static constexpr T position = 0x00U; /**< @brief The position of the bits in the register. */
+                    static constexpr T mask = (0x01U << position); /**< @brief The mask of the bits. */
+
+                    /**
+                     * @brief The voltage select control per bank control.
+                     */
+                    enum class value : T {
+                        voltage_3_3 = 0x0U, /**< @brief Set the voltage to 3.3V. */
+                        voltage_1_8 = 0x1U, /**< @brief Set the voltage to 1.8V. */
+                    };
+                };
+
+                using Bits = voltage_select_reg::template Bits<BitType>; /**< @brief The object to handle the voltage select bits. */
+                using Value = BitType::value; /**< @brief Values of the voltage select bit. */
+            };
         };
 
         /**
-         * @brief The register to configure a pad.
+         * @brief The pad control register.
+         *
+         * Configures the electrical components of a pad. The pads include the GPIOs and additionally the swclk and swd pads.
+         * Each pad has its own register and the pads are ordered by GPIO0-GPIO29, swclk, swd.
          *
          * @tparam pad The pad to be configured.
          */
         template <Pads pad>
-        struct padX {
+        struct Pad {
             static_assert(pad < Pads::number_of_pads, "Invalid Pad. For valid options see enum Pads.");
 
-            static constexpr std::uint8_t bytesPerRegister = 0x04U; /**< @brief The RP2040 is a 32 bit architecture and every register is therefore 4 bytes. */
-            static constexpr std::uint8_t padOffset = padRegisterStartOffset + static_cast<std::uint8_t>(pad) * bytesPerRegister; /**< @brief The offset of the specified pad from the first pad (GPIO0). */
+            static constexpr std::uint8_t bytes_per_register = 4U; /**< @brief The RP2040 is a 32 bit architecture and every register is therefore 4 bytes. */
+            static constexpr std::uint8_t pad_offset = pad_register_start_offset + static_cast<std::uint8_t>(pad) * bytes_per_register; /**< @brief The offset of the specified pad from the first pad (GPIO0). */
 
-            static constexpr std::uintptr_t addr = PadsBaseAddr + padOffset; /**< @brief The address of the pad register to be configured. */
-            using ctrl_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::access_tag::read_write, std::uint32_t>; /**< @brief The pad register to be configured. */
+            static constexpr std::uintptr_t addr = pads_base_addr + pad_offset; /**< @brief The address of the pad register to be configured. */
+            using pad_reg = reg_access::Reg<addr, reg_access::access_tag::read_write, std::uint32_t>; /**< @brief The pad register to be configured. */
 
             /**
-             * @brief The output disable bit as a bit field.
+             * @brief Output disable bit.
              *
-             * Disabling the output via this bit has priority over output enable from peripherals.
+             * This bit has priority over output enable from peripherals. Setting this bit to 0 only disables only the
+             * output disable mode, not enabling output automatically.
              */
-            struct OutputDisableBitField {
-                using reg = ctrl_reg; /**< @brief The register to which the bitfield belongs. */
-                using T = reg::RegType; /**< @brief The type of the register. */
-                using bit_access = reg::reg_access;
-
-                static constexpr T position = 0x07U; /**< @brief The position of the bits in the register. */
-                static constexpr T mask = (0x01U << position); /**< @brief The mask of the bits. */
-
+            struct OutputDisable {
                 /**
-                 * @brief The output disable options.
+                 * @brief Description of the output disable bit.
                  */
-                enum class value : T {
-                    Reset = 0x0U, /**< @brief Resets the output disable bit and allows peripherals to enable output. */
-                    DisableOutput = 0x1U, /**< @brief Disables the output. */
+                struct BitType {
+                    using reg = pad_reg; /**< @brief The register to which the bitfield belongs. */
+                    using T = reg::RegType; /**< @brief The type of the register. */
+                    using bit_access = reg::reg_access; /**< @brief The access tag defining bit operations. */
+
+                    static constexpr T position = 0x07U; /**< @brief The position of the bits in the register. */
+                    static constexpr T mask = (0x01U << position); /**< @brief The mask of the bits. */
+
+                    /**
+                     * @brief The output disable options.
+                     */
+                    enum class value : T {
+                        Reset = 0x0U, /**< @brief Resets the output disable bit and allows peripherals to enable output. */
+                        DisableOutput = 0x1U, /**< @brief Disables the output. */
+                    };
                 };
+                using Bits = pad_reg::template Bits<BitType>; /**< @brief Object to handle the output disable bit. */
+                using Value = BitType::value; /**< @brief Values of the object disable bit. */
             };
 
             /**
-             * @brief The output disable bit.
+             * @brief Input enable bit.
              */
-            using outputDisable_bits = ctrl_reg::template Bits<OutputDisableBitField>;
-
-            /**
-             * @brief The input enable bit field.
-             */
-            using InputEnableBitField = rp2040::reg_access::BitTypeEnableDisable<ctrl_reg, 0x6U>;
-            /**
-             * @brief The input enable bit.
-             */
-            using inputEnable_bits = ctrl_reg::template Bits<InputEnableBitField>;
-
-            /**
-             * @brief The bit field to set the drive strength of the pad.
-             */
-            struct DriveBitField {
-                using reg = ctrl_reg; /**< @brief The register to which the bitfield belongs. */
-                using T = reg::RegType; /**< @brief The type of the register. */
-                using bit_access = reg::reg_access;
-
-                static constexpr T position = 0x04U; /**< @brief The position of the bits in the register. */
-                static constexpr T mask = (0x03U << position); /**< @brief The mask of the bits. */
-
-                /**
-                 * @brief The drive strength options.
-                 */
-                enum class value : T {
-                    Drive_2MA = 0x0U,
-                    Drive_4MA = 0x01U,
-                    Drive_8MA = 0x02U,
-                    Drive_12MA = 0x03U,
-                };
+            struct InputEnable {
+                static constexpr std::uint32_t pos = 6U; /**< @brief Position of the bit in the register. */
+                using BitType = reg_access::BitTypeEnableDisable<pad_reg, pos>; /**< @brief Description of the input enable bit. */
+                using Bits = pad_reg::template Bits<BitType>; /**< @brief Object to handle the input enable bit. */
+                using Value = BitType::value; /**< @brief Values of the input enable bit. */
             };
 
             /**
-             * @brief The drive strength bits.
+             * @brief Drive bits.
+             *
+             * Sets the drive strength of a pad.
              */
-            using drive_bits = ctrl_reg::template Bits<DriveBitField>;
-
-            /**
-             * @brief The pull up enable bit as a bit field.
-             */
-            using PullUpEnableBitField = rp2040::reg_access::BitTypeEnableDisable<ctrl_reg, 0x3U>;
-            /**
-             * @brief The pull up enable bit.
-             */
-            using pullUpEnable_bits = ctrl_reg::template Bits<PullUpEnableBitField>;
-
-            /**
-             * @brief The pull down enable bit as a bit field.
-             */
-            using PullDownEnableBitField = rp2040::reg_access::BitTypeEnableDisable<ctrl_reg, 0x2U>;
-            /**
-             * @brief The pull down enable bit.
-             */
-            using pullDownEnable_bits = ctrl_reg::template Bits<PullDownEnableBitField>;
-
-            /**
-             * @brief The schmitt bit as a bit field to enable/disable the schmitt trigger.
-             */
-            using SchmittBitField = rp2040::reg_access::BitTypeEnableDisable<ctrl_reg, 0x1U>;
-            /**
-             * @brief The schmitt bit to enable/disable the schmitt trigger.
-             */
-            using schmitt_bits = ctrl_reg::template Bits<SchmittBitField>;
-
-            /**
-             * @brief The slew rate control bit as a bit field.
-             */
-            struct SlewFastBitField {
-                using reg = ctrl_reg; /**< @brief The register to which the bitfield belongs. */
-                using T = reg::RegType; /**< @brief The type of the register. */
-                using bit_access = reg::reg_access;
-
-                static constexpr T position = 0x00U; /**< @brief The position of the bits in the register. */
-                static constexpr T mask = (0x01U << position); /**< @brief The mask of the bits. */
-
+            struct Drive {
                 /**
-                 * @brief The slew rate control options.
+                 * @brief Description of the drive bits.
                  */
-                enum class value : T {
-                    Slow = 0x0U,
-                    Fast = 0x1U,
+                struct BitType {
+                    using reg = pad_reg; /**< @brief The register to which the bitfield belongs. */
+                    using T = reg::RegType; /**< @brief The type of the register. */
+                    using bit_access = reg::reg_access; /**< @brief The access tag defining bit operations. */
+
+                    static constexpr T position = 0x04U; /**< @brief The position of the bits in the register. */
+                    static constexpr T mask = (0x03U << position); /**< @brief The mask of the bits. */
+
+                    /**
+                     * @brief The drive strength options.
+                     */
+                    enum class value : T {
+                        Drive_2MA = 0x0U,
+                        Drive_4MA = 0x01U,
+                        Drive_8MA = 0x02U,
+                        Drive_12MA = 0x03U,
+                    };
                 };
+                using Bits = pad_reg::template Bits<BitType>; /**< @brief Objects to handle the drive bits. */
+                using Value = BitType::value; /**< @brief Values of the drive bits. */
             };
 
             /**
-             * @brief The slew rate control bit.
+             * @brief Pull up enable bit.
              */
-            using slewFast_bits = ctrl_reg::template Bits<SlewFastBitField>;
+            struct PullUpEnable {
+                static constexpr std::uint32_t pos = 3U; /**< @brief Position of the bit in the register. */
+                using BitType = reg_access::BitTypeEnableDisable<pad_reg, pos>; /**< @brief Description of the pull up enable bit. */
+                using Bits = pad_reg::template Bits<BitType>; /**< @brief Object to handle the pull up enable bit. */
+                using Value = BitType::value; /**< @brief Values of the pull up enable bit. */
+            };
+
+            /**
+             * @brief Pull down enable bit.
+             */
+            struct PullDownEnable {
+                static constexpr std::uint32_t pos = 2U; /**< @brief Position of the bit in the register. */
+                using BitType = reg_access::BitTypeEnableDisable<pad_reg, pos>; /**< @brief Description of the pull down enable bit. */
+                using Bits = pad_reg::template Bits<BitType>; /**< @brief Object to handle the pull down enable bit. */
+                using Value = BitType::value; /**< @brief Values of the pull down enable bit. */
+            };
+
+            /**
+             * @brief Schmitt trigger enable bit.
+             */
+            struct Schmitt {
+                static constexpr std::uint32_t pos = 1U; /**< @brief Position of the bit in the register. */
+                using BitType = reg_access::BitTypeEnableDisable<pad_reg, pos>; /**< @brief Description of the schmitt trigger enable bit. */
+                using Bits = pad_reg::template Bits<BitType>; /**< @brief Object to handle the schmitt trigger enable bit. */
+                using Value = BitType::value; /**< @brief Values of the schmitt trigger enable bit. */
+            };
+
+            /**
+             * @brief Slew rate control bit.
+             */
+            struct SlewFast {
+                /**
+                 * @brief Description of the slew rate control bit.
+                 */
+                struct BitType {
+                    using reg = pad_reg; /**< @brief The register to which the bitfield belongs. */
+                    using T = reg::RegType; /**< @brief The type of the register. */
+                    using bit_access = reg::reg_access; /**< @brief The access tag defining bit operations. */
+
+                    static constexpr T position = 0x00U; /**< @brief The position of the bits in the register. */
+                    static constexpr T mask = (0x01U << position); /**< @brief The mask of the bits. */
+
+                    /**
+                     * @brief The slew rate control options.
+                     */
+                    enum class value : T {
+                        slow = 0x0U,
+                        fast = 0x1U,
+                    };
+                };
+                using Bits = pad_reg::template Bits<BitType>; /**< @brief Object to handle the slew rate control bit. */
+                using Value = BitType::value; /**< @brief Values of the slew rate control bit. */
+            };
         };
     };
 

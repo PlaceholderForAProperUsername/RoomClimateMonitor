@@ -92,9 +92,11 @@ namespace rp2040::system::gpio {
         }
         static_assert(pin < Pins::number_of_gpio, "Invalid GPIO pin!");
 
+        using pad_t = pad_bank::template Pad<static_cast<Pads>(std::to_underlying(pin))>;
+
         if constexpr (enable) {
             if (!m_output_enabled.test(static_cast<std::uint32_t>(pin))) {
-                pad_bank::template padX<static_cast<Pads>(std::to_underlying(pin))>::outputDisable_bits::clear();
+                pad_t::OutputDisable::Bits::clear();
                 sio_bank::outputEnable::set::template set_bits<pin>::set();
                 m_output_enabled.set(static_cast<std::uint32_t>(pin));
             }
@@ -152,14 +154,16 @@ namespace rp2040::system::gpio {
 
         static_assert(pin < Pins::number_of_gpio, "Invalid GPIO pin!");
 
+        using pad_t = pad_bank::template Pad<static_cast<Pads>(std::to_underlying(pin))>;
+
         if constexpr (enable) {
             if (!m_input_enabled.test(static_cast<std::uint32_t>(pin))) {
-                pad_bank::template padX<static_cast<Pads>(std::to_underlying(pin))>::inputEnable_bits::set(pad_bank::template padX<static_cast<Pads>(std::to_underlying(pin))>::InputEnableBitField::value::enable);
+                pad_t::InputEnable::Bits::set(pad_t::InputEnable::Value::enable);
                 m_input_enabled.set(static_cast<std::uint32_t>(pin));
             }
         } else {
             if (m_input_enabled.test(static_cast<std::uint32_t>(pin))) {
-                pad_bank::template padX<static_cast<Pads>(std::to_underlying(pin))>::inputEnable_bits::clear();
+                pad_t::InputEnable::Bits::clear();
                 m_input_enabled.reset(static_cast<std::uint32_t>(pin));
             }
         }
@@ -193,12 +197,12 @@ namespace rp2040::system::gpio {
         static_assert(pin < Pins::number_of_gpio, "Invalid GPIO pin!");
 
         /** short hand for the pad register of the GPIO pin */
-        using pad_t = pad_bank::template padX<static_cast<Pads>(std::to_underlying(pin))>;
+        using pad_t = pad_bank::template Pad<static_cast<Pads>(std::to_underlying(pin))>;
 
         if constexpr (enable) {
-            pad_t::pullUpEnable_bits::set(pad_t::PullUpEnableBitField::value::enable);
+            pad_t::PullUpEnable::Bits::set(pad_t::PullUpEnable::Value::enable);
         } else {
-            pad_t::pullUpEnable_bits::set(pad_t::PullUpEnableBitField::value::disable);
+            pad_t::PullUpEnable::Bits::set(pad_t::PullUpEnable::Value::disable);
         }
 
         return status::Status::OK;
@@ -214,12 +218,12 @@ namespace rp2040::system::gpio {
         static_assert(pin < Pins::number_of_gpio, "Invalid GPIO pin!");
 
         /** short hand for the pad register of the GPIO pin */
-        using pad_t = pad_bank::template padX<static_cast<Pads>(std::to_underlying(pin))>;
+        using pad_t = pad_bank::template Pad<static_cast<Pads>(std::to_underlying(pin))>;
 
         if constexpr (enable) {
-            pad_t::pullDownEnable_bits::set(pad_t::PullDownEnableBitField::value::enable);
+            pad_t::PullDownEnable::Bits::set(pad_t::PullDownEnable::Value::enable);
         } else {
-            pad_t::pullDownEnable_bits::set(pad_t::PullDownEnableBitField::value::disable);
+            pad_t::PullDownEnable::Bits::set(pad_t::PullDownEnable::Value::disable);
         }
 
         return status::Status::OK;
@@ -235,12 +239,12 @@ namespace rp2040::system::gpio {
         static_assert(pin < Pins::number_of_gpio, "Invalid GPIO pin!");
 
         /** short hand for the pad register of the GPIO pin */
-        using pad_t = pad_bank::template padX<static_cast<Pads>(std::to_underlying(pin))>;
+        using pad_t = pad_bank::template Pad<static_cast<Pads>(std::to_underlying(pin))>;
 
         if constexpr (enable) {
-            pad_t::schmitt_bits::set(pad_t::SchmittBitField::value::enable);
+            pad_t::Schmitt::Bits::set(pad_t::Schmitt::Value::enable);
         } else {
-            pad_t::schmitt_bits::set(pad_t::SchmittBitField::value::disable);
+            pad_t::Schmitt::Bits::set(pad_t::Schmitt::Value::disable);
         }
 
         return status::Status::OK;
@@ -259,9 +263,9 @@ namespace rp2040::system::gpio {
         using pad_t = pad_bank::template padX<static_cast<Pads>(std::to_underlying(pin))>;
 
         if constexpr (enable_fast_mode) {
-            pad_t::slewFast_bits::set(pad_t::SlewFastBitField::value::Fast);
+            pad_t::SlewFast::Bits::set(pad_t::SlewFast::Value::Fast);
         } else {
-            pad_t::slewFast_bits::set(pad_t::SlewFastBitField::value::Slow);
+            pad_t::SlewFast::Bits::set(pad_t::SlewFast::Value::Slow);
         }
 
         return status::Status::OK;
