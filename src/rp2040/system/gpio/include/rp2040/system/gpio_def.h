@@ -976,72 +976,71 @@ namespace rp2040::system::gpio {
     /**
      * @brief Register map to handle software input/output.
      *
-     * @tparam SIOBaseAddr The base address of the software input/output registers.
+     * @tparam sio_base_addr The base address of the software input/output registers.
      */
-    template <std::uintptr_t SIOBaseAddr>
+    template <std::uintptr_t sio_base_addr>
     struct SIORegMap {
-        static_assert(SIOBaseAddr == address::gpio0::sio, "Invalid address for SIOBaseAddr.");
+        static_assert(sio_base_addr == address::gpio0::sio, "Invalid address for SIOBaseAddr.");
 
-        static constexpr std::uint32_t cpuidOffset = 0x000U; /**< @brief Offset of the cpuid register to the sio base address. */
-        static constexpr std::uint32_t gpioInOffset = 0x004U; /**< @brief Offset of the gpio_in register to the sio base address. */
-        static constexpr std::uint32_t gpioOutOffset = 0x010U; /**< @brief Offset of the gpio_out register to the sio base address. */
-        static constexpr std::uint32_t gpioOutEnOffset = 0x020U; /**< @brief Offset of the gpio_oe register to the sio base address. */
+        static constexpr std::uint32_t cpuid_offset = 0x000U; /**< @brief Offset of the cpuid register to the sio base address. */
+        static constexpr std::uint32_t gpio_in_offset = 0x004U; /**< @brief Offset of the gpio_in register to the sio base address. */
+        static constexpr std::uint32_t gpio_out_offset = 0x010U; /**< @brief Offset of the gpio_out register to the sio base address. */
+        static constexpr std::uint32_t gpio_out_en_offset = 0x020U; /**< @brief Offset of the gpio_oe register to the sio base address. */
 
         /**
          * @brief The processor core identifier register.
          */
-        struct cpuid {
-            static constexpr std::uintptr_t addr = SIOBaseAddr + cpuidOffset; /**< @brief The base address of the cpuid register. */
-            using cpuid_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::access_tag::read, std::uint32_t>; /**< @brief The the cpuid register. */
+        struct CpuId {
+            static constexpr std::uintptr_t addr = sio_base_addr + cpuid_offset; /**< @brief The base address of the cpuid register. */
+            using cpuid_reg = reg_access::Reg<addr, reg_access::access_tag::read, std::uint32_t>; /**< @brief The the cpuid register. */
 
             /**
-             * @brief The processor core identifier bits as a bit field.
+             * @brief The processor id bits.
              */
-            struct CPUIDBitField {
-                using reg = cpuid_reg; /**< @brief The register to which the bitfield belongs. */
-                using T = reg::RegType; /**< @brief The type of the register. */
-                using bit_access = reg::reg_access;
-
-                static constexpr T position = 0x00U; /**< @brief The position of the bits in the register. */
-                static constexpr T mask = (0xFFFFFFFFU << position); /**< @brief The mask of the bits. */
-
+            struct Id {
                 /**
-                 * @brief The value depends on from which processor core this register is read.
+                 * @brief Description of the processor id bits.
                  */
-                enum class value : T {
-                    PROC0 = 0x0U, /**< @brief Value when read from processor core 0. */
-                    PROC1 = 0x1U, /**< @brief Value when read from processor core 1. */
-                };
-            };
+                struct BitType {
+                    using reg = cpuid_reg; /**< @brief The register to which the bitfield belongs. */
+                    using T = reg::RegType; /**< @brief The type of the register. */
+                    using bit_access = reg::reg_access; /**< @brief The access tag defining bit operations. */
 
-            /**
-             * @brief The processor core identifier bits.
-             */
-            using cpuid_bits = cpuid_reg::template Bits<CPUIDBitField>;
+                    static constexpr T position = 0x00U; /**< @brief The position of the bits in the register. */
+                    static constexpr T mask = (0xFFFFFFFFU << position); /**< @brief The mask of the bits. */
+
+                    /**
+                     * @brief The value depends on from which processor core this register is read.
+                     */
+                    enum class value : T {
+                        proc0 = 0x0U, /**< @brief Value when read from processor core 0. */
+                        proc1 = 0x1U, /**< @brief Value when read from processor core 1. */
+                    };
+                };
+                using Bits = cpuid_reg::template Bits<BitType>; /**< @brief Object to handle the processor id bits. */
+                using Value = BitType::value; /**< @brief Values of the processor id bits. */
+            };
         };
 
         /**
          * @brief The gpio input register.
          */
-        struct input {
-            static constexpr std::uintptr_t addr = SIOBaseAddr + gpioInOffset; /**< @brief The base address of the sio input register. */
-            using input_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::access_tag::read, std::uint32_t>; /**< @brief The sio input register. */
+        struct Input {
+            static constexpr std::uintptr_t addr = sio_base_addr + gpio_in_offset; /**< @brief The base address of the sio input register. */
+            using input_reg = reg_access::Reg<addr, reg_access::access_tag::read, std::uint32_t>; /**< @brief The sio input register. */
 
             /**
-             * @brief The gpio input bit as a bit field.
+             * @brief The GPIO specific bit of the input register.
              *
-             * @tparam gpio The GPIO where the input value is to be get.
+             * @tparam gpio The GPIO to which this bit belongs.
              */
             template <Pins gpio>
-            requires (gpio < Pins::number_of_gpio)
-            using InputBitField = rp2040::reg_access::BitTypeHighLow<input_reg, static_cast<input_reg::RegType>(gpio)>;
-            /**
-             * @brief The input bit of the gpio.
-             *
-             * @tparam gpio The GPIO where the input value is to be get.
-             */
-            template <Pins gpio>
-            using input_bits = input_reg::template Bits<InputBitField<gpio>>;
+            struct Gpio {
+                static constexpr std::uint32_t pos = static_cast<input_reg::RegType>(gpio); /**< @brief Position of the bit in the input register. */
+                using BitType = reg_access::BitTypeHighLow<input_reg, pos>; /**< @brief Description of the gpio bit of the input register. */
+                using Bits = input_reg::template Bits<BitType>; /**< @brief Object to handle the gpio bit. */
+                using Value = BitType::value; /**< @brief Values of the gpio bit. */
+            };
         };
 
         /**
@@ -1052,49 +1051,50 @@ namespace rp2040::system::gpio {
          * non-type template parameter. The output and output enable register are in an identical format, therefore these registers
          * share a template.
          *
-         * @tparam baseOffset Base offset of either the output or output enable registers to SIO_Base address.
+         * @tparam base_offset Base offset of either the output or output enable registers to SIO_Base address.
          */
-        template <std::uint32_t baseOffset>
+        template <std::uint32_t base_offset>
         struct OutputRegMap {
-            static_assert((baseOffset == gpioOutOffset) || (baseOffset == gpioOutEnOffset), "Invalid base offset for output.");
+            static_assert((base_offset == gpio_out_offset) || (base_offset == gpio_out_en_offset), "Invalid base offset for output.");
 
-            static constexpr std::uint32_t setOffset = 0x04U; /**< @brief Offset of the atomic set register. */
-            static constexpr std::uint32_t clearOffset = 0x08U; /**< @brief Offset of the atomic clear register. */
-            static constexpr std::uint32_t xorOffset = 0x0C; /**< @brief Offset of the atomic xor register. */
+            static constexpr std::uint32_t set_offset = 0x04U; /**< @brief Offset of the atomic set register. */
+            static constexpr std::uint32_t clear_offset = 0x08U; /**< @brief Offset of the atomic clear register. */
+            static constexpr std::uint32_t xor_offset = 0x0C; /**< @brief Offset of the atomic xor register. */
 
-            static constexpr std::uintptr_t outputBaseAddr = SIOBaseAddr + baseOffset; /**< @brief Base address of either the output or output enable register. */
+            static constexpr std::uintptr_t output_base_addr = sio_base_addr + base_offset; /**< @brief Base address of either the output or output enable register. */
 
             /**
              * @brief The output/output enable value register.
              */
-            struct value {
-                using value_reg = rp2040::reg_access::Reg<outputBaseAddr, rp2040::reg_access::access_tag::read_write, std::uint32_t>; /**< @brief The output or output enable register. */
+            struct Value {
+                using value_reg = reg_access::Reg<output_base_addr, reg_access::access_tag::read_write, std::uint32_t>; /**< @brief The output or output enable register. */
 
                 /**
-                 * @brief The output/output enable value bits as a Bitfield.
-                 *
-                 * The options only differ in the enum values. High/Low is more reasonable for the output value, while
-                 * Enable/Disable is more reasonable to set output enable bits.
+                 * @brief Gpio bit of the value register to handle either output or output enable.
                  *
                  * @tparam gpio The gpio to be configured.
                  */
                 template <Pins gpio>
-                using ValueBitField = decltype([] () {
-                    static_assert(gpio < Pins::number_of_gpio);
-                    if constexpr(baseOffset == gpioOutOffset) {
-                        return std::type_identity_t<rp2040::reg_access::BitTypeHighLow<value_reg, static_cast<value_reg::RegType>(gpio)>>();
-                    } else if constexpr (baseOffset == gpioOutEnOffset) {
-                        return std::type_identity_t<rp2040::reg_access::BitTypeEnableDisable<value_reg, static_cast<value_reg::RegType>(gpio)>>();
-                    }
-                }());
+                struct Gpio {
+                    static_assert(gpio < Pins::number_of_gpio, "Invalid gpio in Value register.");
 
-                /**
-                 * @brief The output/output enable value bits.
-                 *
-                 * @tparam gpio The gpio to be configured.
-                 */
-                template <Pins gpio>
-                using value_bits = value_reg::template Bits<ValueBitField<gpio>>;
+                    static constexpr std::uint32_t pos = static_cast<value_reg::RegType>(gpio); /**< @brief Position of the bit in the register. */
+                    /**
+                     * @brief Description of the gpio bit.
+                     *
+                     * High/low are more reasonable for the output bits, while enable/disable are more reasonable for the
+                     * output enable bits.
+                     */
+                    using BitType = decltype([] () {
+                        if constexpr(base_offset == gpio_out_offset) {
+                            return std::type_identity_t<reg_access::BitTypeHighLow<value_reg, pos>>();
+                        } else if constexpr (base_offset == gpio_out_en_offset) {
+                            return std::type_identity_t<reg_access::BitTypeEnableDisable<value_reg, pos>>();
+                        }
+                    }());
+                    using Bits = value_reg::template Bits<BitType>; /**< @brief Object to handle the gpio bits. */
+                    using Value = BitType::value; /**< @brief Values of the gpio bits. */
+                };
             };
 
             /**
@@ -1102,19 +1102,23 @@ namespace rp2040::system::gpio {
              *
              * This is an atomic register.
              */
-            struct set {
-                static constexpr std::uintptr_t outputSetAddr = outputBaseAddr + setOffset; /**< @brief Base address of the atomic set register. */
-                using set_reg = rp2040::reg_access::Reg<outputSetAddr, rp2040::reg_access::access_tag::atomic_set_mask, std::uint32_t>; /**< @brief The atomic set register. */
+            struct Set {
+                static constexpr std::uintptr_t outputSetAddr = output_base_addr + set_offset; /**< @brief Base address of the atomic set register. */
+                using set_reg = reg_access::Reg<outputSetAddr, reg_access::access_tag::atomic_set_mask, std::uint32_t>; /**< @brief The atomic set register. */
 
                 /**
-                 * @brief The output set bits.
+                 * @brief GPIO bit of the atomic set register.
                  *
-                 * This is an atomic operation.
-                 *
-                 * @tparam gpio The gpio for which the output is to be set.
+                 * @tparam gpio GPIO for which the output/output enable is to be set.
                  */
                 template <Pins gpio>
-                using set_bits = set_reg::template Bits<rp2040::reg_access::BitTypeAtomicBitOp<set_reg, static_cast<set_reg::RegType>(gpio)>>;
+                struct Gpio {
+                    static_assert(gpio < Pins::number_of_gpio, "Invalid gpio in Set register.");
+
+                    static constexpr std::uint32_t pos = static_cast<set_reg::RegType>(gpio); /**< @brief Position of the bit in the register. */
+                    using BitType = reg_access::BitTypeAtomicBitOp<set_reg, pos>; /**< @brief Description of the gpio bit of the atomic set register. */
+                    using Bits = set_reg::template Bits<BitType>; /**< @brief Object to handle the gpio bits in the atomic set register. */
+                };
             };
 
             /**
@@ -1122,19 +1126,23 @@ namespace rp2040::system::gpio {
              *
              * This is an atomic register.
              */
-            struct clear {
-                static constexpr std::uintptr_t outputClearAddr = outputBaseAddr + clearOffset; /**< @brief Base address of the atomic clear register. */
-                using clear_reg = rp2040::reg_access::Reg<outputClearAddr, rp2040::reg_access::access_tag::atomic_clear, std::uint32_t>; /**< @brief The atomic clear register. */
+            struct Clear {
+                static constexpr std::uintptr_t outputClearAddr = output_base_addr + clear_offset; /**< @brief Base address of the atomic clear register. */
+                using clear_reg = reg_access::Reg<outputClearAddr, reg_access::access_tag::atomic_clear, std::uint32_t>; /**< @brief The atomic clear register. */
 
                 /**
-                 * @brief The output clear bits.
+                 * @brief GPIO bit of the atomic clear register.
                  *
-                 * This is an atomic operation.
-                 *
-                 * @tparam gpio The gpio for which the output is to be cleared.
+                 * @tparam gpio GPIO for which the output/output enable is to be cleared.
                  */
                 template <Pins gpio>
-                using clear_bits = clear_reg::template Bits<rp2040::reg_access::BitTypeAtomicBitOp<clear_reg, static_cast<clear_reg::RegType>(gpio)>>;
+                struct Gpio {
+                    static_assert(gpio < Pins::number_of_gpio, "Invalid gpio in Clear register.");
+
+                    static constexpr std::uint32_t pos = static_cast<clear_reg::RegType>(gpio); /**< @brief Position of the bit in the register. */
+                    using BitType = reg_access::BitTypeAtomicBitOp<clear_reg, pos>; /**< @brief Description of the gpio bit of the atomic clear register. */
+                    using Bits = clear_reg::template Bits<BitType>; /**< @brief Object to handle the gpio bits in the atomic clear register. */
+                };
             };
 
             /**
@@ -1142,24 +1150,28 @@ namespace rp2040::system::gpio {
             *
             * This is an atomic register.
             */
-            struct toggle {
-                static constexpr std::uintptr_t outputXorAddr = outputBaseAddr + xorOffset; /**< @brief Base address of the atomic xor register. */
-                using toggle_reg = rp2040::reg_access::Reg<outputXorAddr, rp2040::reg_access::access_tag::atomic_xor, std::uint32_t>; /**< @brief The atomic xor register. */
+            struct Toggle {
+                static constexpr std::uintptr_t outputXorAddr = output_base_addr + xor_offset; /**< @brief Base address of the atomic xor register. */
+                using toggle_reg = reg_access::Reg<outputXorAddr, reg_access::access_tag::atomic_xor, std::uint32_t>; /**< @brief The atomic xor register. */
 
                 /**
-                 * @brief The output toggle bits.
+                 * @brief GPIO bit of the atomic toggle register.
                  *
-                 * This is an atomic operation.
-                 *
-                 * @tparam gpio The gpio for which the output is to be toggled.
+                 * @tparam gpio GPIO for which the output/output enable is to be toggled.
                  */
                 template <Pins gpio>
-                using toggle_bits = toggle_reg::template Bits<rp2040::reg_access::BitTypeAtomicBitOp<toggle_reg, static_cast<toggle_reg::RegType>(gpio)>>;
+                struct Gpio {
+                    static_assert(gpio < Pins::number_of_gpio, "Invalid gpio in Toggle register.");
+
+                    static constexpr std::uint32_t pos = static_cast<toggle_reg::RegType>(gpio); /**< @brief Position of the bit in the register. */
+                    using BitType = reg_access::BitTypeAtomicBitOp<toggle_reg, pos>; /**< @brief Description of the gpio bit of the atomic toggle register. */
+                    using Bits = toggle_reg::template Bits<BitType>; /**< @brief Object to handle the gpio bits in the atomic toggle register. */
+                };
             };
         };
 
-        using output = OutputRegMap<gpioOutOffset>; /**< @brief The output registers. */
-        using outputEnable = OutputRegMap<gpioOutEnOffset>; /**< @brief The output enable registers. */
+        using Output = OutputRegMap<gpio_out_offset>; /**< @brief The output registers. */
+        using OutputEnable = OutputRegMap<gpio_out_en_offset>; /**< @brief The output enable registers. */
     };
 
     /** @} */ // rp2040_gpio

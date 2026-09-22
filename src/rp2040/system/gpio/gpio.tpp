@@ -97,12 +97,12 @@ namespace rp2040::system::gpio {
         if constexpr (enable) {
             if (!m_output_enabled.test(static_cast<std::uint32_t>(pin))) {
                 pad_t::OutputDisable::Bits::clear();
-                sio_bank::outputEnable::set::template set_bits<pin>::set();
+                sio_bank::OutputEnable::Set::template Gpio<pin>::set();
                 m_output_enabled.set(static_cast<std::uint32_t>(pin));
             }
         } else {
             if (m_output_enabled.test(static_cast<std::uint32_t>(pin))) {
-                sio_bank::outputEnable::clear::template clear_bits<pin>::clear();
+                sio_bank::OutputEnable::Clear::template Gpio<pin>::clear();
                 m_output_enabled.reset(static_cast<std::uint32_t>(pin));
             }
         }
@@ -122,9 +122,9 @@ namespace rp2040::system::gpio {
         static_assert(pin < Pins::number_of_gpio, "Invalid GPIO pin!");
 
         if constexpr (high) {
-            sio_bank::output::set::template set_bits<pin>::set();
+            sio_bank::Output::Set::template Gpio<pin>::set();
         } else {
-            sio_bank::output::clear::template clear_bits<pin>::clear();
+            sio_bank::Output::Clear::template Gpio<pin>::clear();
         }
         return status::Status::OK;
     }
@@ -140,7 +140,7 @@ namespace rp2040::system::gpio {
         }
         static_assert(pin < Pins::number_of_gpio, "Invalid GPIO pin!");
 
-        sio_bank::output::toggle::template toggle_bits<pin>::toggle();
+        sio_bank::Output::Toggle::template Gpio<pin>::toggle();
 
         return status::Status::OK;
     }
