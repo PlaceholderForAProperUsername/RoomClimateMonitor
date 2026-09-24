@@ -138,6 +138,53 @@ namespace rp2040::system::clocks {
     constexpr std::uint32_t ctrlAuxSrcPosition = 0x05U; /**< @brief The Position of the auxsrc bits in the ctrl register. */
 
     /**
+     * @brief Checks if a type has the required format to describe the layout of a clock.
+     *
+     * The clocks don't necessarily use every bit or the amount of bits used varies between clocks, making a single, fixed
+     * register map to describe a clock not feasable. A clock layout is used to enable/disable bits (boolean) or set the
+     * amount of bits (integer). A field described by an integer can be disabled by setting the amount to 0 bits.
+     *
+     * A clock layout has the following form:
+     *  struct Layout {
+     *      struct Ctrl {
+     *          static constexpr bool nudge = false;
+     *          static constexpr bool phase = false;
+     *          static constexpr bool dc50 = false;
+     *          static constexpr bool enable = false;
+     *          static constexpr bool kill = false;
+     *          static constexpr std::uint8_t aux_src_bits = 0;
+     *          static constexpr std::uint8_t src_bits = 0;
+     *      };
+     *      struct Frac {
+     *          static constexpr std::uint8_t int_bits = 0;
+     *          static constexpr std::uint8_t frac_bits = 0;
+     *      };
+     *      enum class Src : std::uin32_t {
+     *
+     *      };
+     *  };
+     *
+     * @tparam ClockLayout
+     */
+    template <typename ClockLayout>
+    concept ClockLayoutConcept =
+        std::is_class_v<typename ClockLayout::Ctrl> &&
+        std::is_same_v<typename ClockLayout::Ctrl::nudge, bool> &&
+        std::is_same_v<typename ClockLayout::Ctrl::phase, bool> &&
+        std::is_same_v<typename ClockLayout::Ctrl::dc50, bool> &&
+        std::is_same_v<typename ClockLayout::Ctrl::enable, bool> &&
+        std::is_same_v<typename ClockLayout::Ctrl::kill, bool> &&
+        std::is_integral_v<typename ClockLayout::Ctrl::aux_src_bits> &&
+        std::is_integral_v<typename ClockLayout::Ctrl::src_bits> &&
+        std::is_class_v<typename ClockLayout::Frac> &&
+        std::is_integral_v<typename ClockLayout::Frac::int_bits> &&
+        std::is_integral_v<typename ClockLayout::Frac::frac_bits> &&
+        std::is_enum_v<typename ClockLayout::Src>;
+
+
+
+
+    /**
      * @brief Defines the reference clock with its registers.
      *
      */
