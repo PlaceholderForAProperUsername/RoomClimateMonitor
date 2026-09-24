@@ -67,7 +67,7 @@ namespace rp2040::reg_access {
             /**
              * @brief Sets the bits to the value.
              *
-             * @tparam BitsAccess_ Access specifier for the bits.
+             * @tparam BitsAccess Access specifier for the bits.
              * @param[in] bits_value The value to be set.
              * @return None
              */
@@ -86,7 +86,7 @@ namespace rp2040::reg_access {
              *
              * Requires atomic set register.
              *
-             * @tparam BitsAccess_ Access specifier for the bits.
+             * @tparam BitsAccess Access specifier for the bits.
              * @param[in] bits_value The value to be set.
              * @return None
              */
@@ -105,7 +105,7 @@ namespace rp2040::reg_access {
              * where defining an enum with the values and providing the value when calling is unnecessary and clutters the
              * program.
              *
-             * @tparam BitsAccess_ Access specifier for the bits.
+             * @tparam BitsAccess Access specifier for the bits.
              * @return None
              */
             template <typename BitsAccess = BitsAccess_>
@@ -119,7 +119,7 @@ namespace rp2040::reg_access {
             /**
              * @brief Returns the bits.
              *
-             * @tparam BitsAccess_ Access specifier for the bits.
+             * @tparam BitsAccess Access specifier for the bits.
              * @return T The unshifted bits.
              */
             template <typename BitsAccess = BitsAccess_>
@@ -134,7 +134,7 @@ namespace rp2040::reg_access {
             /**
              * @brief Returns the value of the bits.
              *
-             * @tparam BitsAccess_ Access specifier for the bits.
+             * @tparam BitsAccess Access specifier for the bits.
              * @return T The value of the bits (Bits are shifted to position 0).
              */
             template <typename BitsAccess = BitsAccess_>
@@ -150,7 +150,7 @@ namespace rp2040::reg_access {
             /**
              * @brief Toggles the bits.
              *
-             * @tparam BitsAccess_ Access specifier for the bits.
+             * @tparam BitsAccess Access specifier for the bits.
              * @return None
              */
             template <typename BitsAccess = BitsAccess_>
@@ -167,7 +167,7 @@ namespace rp2040::reg_access {
              *
              * Requires atomic xor register.
              *
-             * @tparam BitsAccess_ Access specifier for the bits.
+             * @tparam BitsAccess Access specifier for the bits.
              * @return None
              */
             template <typename BitsAccess = BitsAccess_>
@@ -182,7 +182,7 @@ namespace rp2040::reg_access {
             /**
              * @brief Clears the bits.
              *
-             * @tparam BitsAccess_ Access specifier for the bits.
+             * @tparam BitsAccess Access specifier for the bits.
              * @return None
              */
             template <typename BitsAccess = BitsAccess_>
@@ -200,7 +200,7 @@ namespace rp2040::reg_access {
              *
              * Requires atomic clear register.
              *
-             * @tparam BitsAccess_ Access specifier for the bits.
+             * @tparam BitsAccess Access specifier for the bits.
              * @return None
              */
             template <typename BitsAccess = BitsAccess_>
