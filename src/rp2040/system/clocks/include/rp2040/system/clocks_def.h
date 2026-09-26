@@ -229,6 +229,11 @@ namespace rp2040::system::clocks {
      */
     template <std::uintptr_t base, ClockLayoutConcept ClockLayout>
     struct ClockRegMap {
+        static_assert((base == address::base::gpout0) || (base == address::base::gpout1) || (base == address::base::gpout2) ||
+            (base == address::base::gpout3) || (base == address::base::ref) || (base == address::base::sys) ||
+            (base == address::base::peri) || (base == address::base::usb) || (base == address::base::adc) ||
+            (base == address::base::rtc), "Invalid base address for clock regmap!");
+
         static constexpr std::uint32_t ctrl_offset = 0x00U; /**< @brief Offset for the control register. */
         static constexpr std::uint32_t div_offset = 0x04U; /**< @brief Offset for the divisor register. */
         static constexpr std::uint32_t selected_offset = 0x08U; /**< @brief Offset for the selected register. */
