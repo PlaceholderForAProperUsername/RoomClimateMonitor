@@ -37,68 +37,6 @@ namespace rp2040::system::clocks {
      */
 
     /**
-     * @brief Checks if the clock type can switch the clock glitchlessly for some clock sources.
-     *
-     * There are two principal types of clocks in the RP2040. One that has additional src bits, which can be selected
-     * glitchlessly, and the other type without the possibility to switch a clock source glitchlessly. Both types have
-     * auxiliary sources, which glitch when changed for both types. The way to change the auxiliary source differs
-     * between the two types. For the type with the option to glitchlessly change the clock source, another glitchless
-     * source is selected to prevent the auxiliary source from glitching and after that the clock source is switched to
-     * use the auxiliary source as a primary source. For the other type, there is an option to stop the clock. That is
-     * done when switching the auxiliary source, the only type of source for that type and after the switch, the clock is
-     * enabled again. This concept serve as to check if the clock has glitchless src bits.
-     *
-     * @tparam ClockDefType The clock type to be checked.
-     */
-    template <typename ClockDefType>
-    concept ClockHasGlitchlessSrcType = requires {typename ClockDefType::ctrl::template src_bits<0x0U>;};
-
-    /**
-     * @brief Checks if the clock type is of the type which only has the glitching aux src register.
-     *
-     * This type is characterized by having an enable bit in the ctrl register.
-     *
-     * @tparam ClockDefType The clock type to be checked.
-     */
-    template <typename ClockDefType>
-    concept ClockOnlyGlitchingAuxSrcType = requires {typename ClockDefType::ctrl::enable_bits;};
-
-    /**
-     * @brief Describes the minimum requirements for a ClockType.
-     *
-     * The minimum requirements are:
-     * - An enum to select the clock source
-     * - A struct to represent the ctrl register
-     * - The base address of the clock register
-     * - Have either src bits or an enable bit
-     *
-     * @tparam ClockDefType The type to be checked.
-     */
-    template <typename ClockDefType>
-    concept IsClockType =
-        std::is_enum_v<typename ClockDefType::ClockSrc> &&
-        std::is_class_v<typename ClockDefType::ctrl> &&
-        std::is_same_v<decltype(ClockDefType::base_addr), const std::uintptr_t> &&
-        (ClockHasGlitchlessSrcType<ClockDefType> || ClockOnlyGlitchingAuxSrcType<ClockDefType>);
-
-
-    /**
-     * @brief Checks if the clock has a div register with a fractional component.
-     *
-     * @tparam ClockDefType The type to be checked.
-     */
-    template <typename ClockDefType>
-    concept HasDivWithFracRegister = requires {typename ClockDefType::div::template frac_bits<0x0U>;};
-
-    /**
-     * @brief Checks if the clock has a div register.
-     *
-     * @tparam ClockDefType The type to be checked.
-     */
-    template <typename ClockDefType>
-    concept HasDivRegister = std::is_class_v<typename ClockDefType::div>;
-
-    /**
      * @brief Address of the clock module.
      */
     namespace address {
@@ -136,45 +74,31 @@ namespace rp2040::system::clocks {
         }
     }
 
+    namespace clk_src_param {
+        /**
+         * @brief Maximum number of bits reserved for the src bits in the ctrl register.
+         *
+         * The actual src bits of the clocks may use fewer bits.
+         */
+        constexpr std::uint32_t ctrl_src_mask_max = 0x1FU;
 
+        /**
+         * @brief Maximum number of bits reserved for the auxsrc bits in the ctrl register.
+         *
+         * The actual auxsrc bits of the clocks may use fewer bits.
+         */
+        constexpr std::uint32_t ctrl_aux_src_mask_max = 0x3E0U;
 
-    constexpr std::uintptr_t clocks_base = 0x40008000U; /**< @brief Base address of clocks. */
+        /**
+         * @brief The auxiliary source bit of the ctrl register.
+         *
+         * This bit is the same for every clock with src bits.
+         */
+        constexpr std::uint32_t ctrl_src_aux_src_val = (1U<<0U);
 
-    constexpr std::uint32_t ref_base_offset = 0x30U; /**< @brief Offset for reference clock control registers. */
-    constexpr std::uint32_t sys_base_offset = 0x3CU; /**< @brief Offset for system clock control registers. */
-    constexpr std::uint32_t peri_base_offset = 0x48U; /**< @brief Offset for peripheral clock control registers. */
-
-    constexpr std::uintptr_t ref_base = clocks_base + ref_base_offset; /**< @brief The base address of the reference clock registers. */
-    constexpr std::uintptr_t sys_base = clocks_base + sys_base_offset; /**< @brief The base address of the system clock registers. */
-    constexpr std::uintptr_t peri_base = clocks_base + peri_base_offset; /**< @brief The base address of the peripheral clock registers. */
-
-    constexpr std::uint32_t ctrl_offset = 0x00U; /**< @brief Offset for the control register. */
-    constexpr std::uint32_t div_offset = 0x04U; /**< @brief Offset for the divisor register. */
-    constexpr std::uint32_t selected_offset = 0x08U; /**< @brief Offset for the selected register. */
-
-    /**
-     * @brief Maximum number of bits reserved for the src bits in the ctrl register.
-     *
-     * The actual src bits of the clocks may use fewer bits.
-     */
-    constexpr std::uint32_t ctrlSrcMask_max = 0x1FU;
-
-    /**
-     * @brief Maximum number of bits reserved for the auxsrc bits in the ctrl register.
-     *
-     * The actual auxsrc bits of the clocks may use fewer bits.
-     */
-    constexpr std::uint32_t ctrlAuxSrcMask_max = 0x3E0U;
-
-    /**
-     * @brief The auxiliary source bit of the ctrl register.
-     *
-     * This bit is the same for every clock with src bits.
-     */
-    constexpr std::uint32_t ctrlSrcAuxSrcBit = (1U<<0U);
-
-    constexpr std::uint32_t ctrlSrcPosition = 0x00U; /**< @brief The Position of the src bits in the ctrl register. */
-    constexpr std::uint32_t ctrlAuxSrcPosition = 0x05U; /**< @brief The Position of the auxsrc bits in the ctrl register. */
+        constexpr std::uint32_t ctrl_src_position = 0x00U; /**< @brief The Position of the src bits in the ctrl register. */
+        constexpr std::uint32_t ctrl_aux_src_position = 0x05U; /**< @brief The Position of the auxsrc bits in the ctrl register. */
+    }
 
     /**
      * @brief Checks if a type has the required format to describe the layout of a clock.
@@ -185,6 +109,7 @@ namespace rp2040::system::clocks {
      *
      * A clock layout has the following form:
      *  struct Layout {
+     *      std::uintptr_t addr = 0x00000000U;
      *      struct Ctrl {
      *          static constexpr bool nudge = false;
      *          static constexpr bool phase = false;
@@ -197,8 +122,10 @@ namespace rp2040::system::clocks {
      *          static constexpr std::uint8_t src_max_val = 0U;
      *      };
      *      struct Div {
-     *          static constexpr std::uint8_t int_mask = 0x0U;
+     *          static constexpr std::uint32_t int_mask = 0x0U;
      *          static constexpr std::uint8_t frac_mask = 0x0U;
+     *      };
+     *      enum class Src : std::uint32_t {
      *      };
      *  };
      *
@@ -206,6 +133,7 @@ namespace rp2040::system::clocks {
      */
     template <typename ClockLayout>
     concept ClockLayoutConcept =
+        std::is_integral_v<typename ClockLayout::addr> &&
         std::is_class_v<typename ClockLayout::Ctrl> &&
         std::is_same_v<typename ClockLayout::Ctrl::nudge, bool> &&
         std::is_same_v<typename ClockLayout::Ctrl::phase, bool> &&
@@ -218,21 +146,158 @@ namespace rp2040::system::clocks {
         std::is_integral_v<typename ClockLayout::Ctrl::src_max_val> &&
         std::is_class_v<typename ClockLayout::Div> &&
         std::is_integral_v<typename ClockLayout::Div::int_mask> &&
-        std::is_integral_v<typename ClockLayout::Div::frac_mask>;
+        std::is_integral_v<typename ClockLayout::Div::frac_mask> &&
+        std::is_enum_v<typename ClockLayout::Src>;
+
+    /**
+     * @brief The clock layouts.
+     */
+    namespace layout {
+        /**
+         * @brief Base layout for GPOUT0-3
+         *
+         * GPOUT0-3 have the same layout, only the address differs.
+         *
+         * @tparam base_addr Address of the GPOUT clock.
+         */
+        template <std::uintptr_t base_addr>
+        struct GpOutBase {
+            static_assert((base_addr == address::base::gpout0) || (base_addr == address::base::gpout1) ||
+                (base_addr == address::base::gpout2) || (base_addr == address::base::gpout3), "Invalid base address for GpOutBase!");
+            std::uintptr_t addr = base_addr;
+            struct Ctrl {
+                static constexpr bool nudge {true};
+                static constexpr bool phase {true};
+                static constexpr bool dc50 {true};
+                static constexpr bool enable {true};
+                static constexpr bool kill {true};
+                static constexpr std::uint8_t aux_src_mask {0xFU};
+                static constexpr std::uint8_t aux_src_max_val {10U};
+                static constexpr std::uint8_t src_mask {0x0U};
+                static constexpr std::uint8_t src_max_val {0U};
+            };
+            struct Div {
+                static constexpr std::uint32_t int_mask {0xFFFFFFU};
+                static constexpr std::uint8_t frac_mask {0xFFU};
+            };
+            enum class Src : std::uint32_t {
+                pll_sys = (0x0U << clk_src_param::ctrl_aux_src_position),
+                gpin0 = (0x1U << clk_src_param::ctrl_aux_src_position),
+                gpin1 = (0x2U << clk_src_param::ctrl_aux_src_position),
+                pll_usb = (0x3U << clk_src_param::ctrl_aux_src_position),
+                rosc = (0x4U << clk_src_param::ctrl_aux_src_position),
+                xosc = (0x5U << clk_src_param::ctrl_aux_src_position),
+                clk_sys = (0x6U << clk_src_param::ctrl_aux_src_position),
+                clk_usb = (0x7U << clk_src_param::ctrl_aux_src_position),
+                clk_adc = (0x8U << clk_src_param::ctrl_aux_src_position),
+                clk_rtc = (0x9U << clk_src_param::ctrl_aux_src_position),
+                clk_ref = (0xAU << clk_src_param::ctrl_aux_src_position),
+            };
+        };
+        using GpOut0 = GpOutBase<address::base::gpout0>;
+        using GpOut1 = GpOutBase<address::base::gpout1>;
+        using GpOut2 = GpOutBase<address::base::gpout2>;
+        using GpOut3 = GpOutBase<address::base::gpout3>;
+
+        struct Ref {
+            std::uintptr_t addr = address::base::ref;
+            struct Ctrl {
+                static constexpr bool nudge {false};
+                static constexpr bool phase {false};
+                static constexpr bool dc50 {false};
+                static constexpr bool enable {false};
+                static constexpr bool kill {false};
+                static constexpr std::uint8_t aux_src_mask {0x3U};
+                static constexpr std::uint8_t aux_src_max_val {2U};
+                static constexpr std::uint8_t src_mask {0x3U};
+                static constexpr std::uint8_t src_max_val {2U};
+            };
+            struct Div {
+                static constexpr std::uint32_t int_mask {0x3U};
+                static constexpr std::uint8_t frac_mask {0x0U};
+            };
+            enum class Src : std::uint32_t {
+                rosc = (0x0U << clk_src_param::ctrl_src_position),
+                aux = (0x1U << clk_src_param::ctrl_src_position),
+                xosc = (0x2U << clk_src_param::ctrl_src_position),
+                pll_usb = (0x0U << clk_src_param::ctrl_aux_src_position) | aux,
+                gpin0 = (0x1U << clk_src_param::ctrl_aux_src_position) | aux,
+                gpin1 = (0x2U << clk_src_param::ctrl_aux_src_position) | aux,
+            };
+        };
+
+        struct Sys {
+            std::uintptr_t addr = address::base::sys;
+            struct Ctrl {
+                static constexpr bool nudge {false};
+                static constexpr bool phase {false};
+                static constexpr bool dc50 {false};
+                static constexpr bool enable {false};
+                static constexpr bool kill {false};
+                static constexpr std::uint8_t aux_src_mask {0x7U};
+                static constexpr std::uint8_t aux_src_max_val {5U};
+                static constexpr std::uint8_t src_mask {0x3U};
+                static constexpr std::uint8_t src_max_val {1U};
+            };
+            struct Div {
+                static constexpr std::uint32_t int_mask {0xFFFFFFU};
+                static constexpr std::uint8_t frac_mask {0xFFU};
+            };
+            enum class Src : std::uint32_t {
+                clk_ref = (0x0U << clk_src_param::ctrl_src_position),
+                aux = (0x1U << clk_src_param::ctrl_src_position),
+                pll_sys = (0x0U << clk_src_param::ctrl_aux_src_position) | aux,
+                pll_usb = (0x1U << clk_src_param::ctrl_aux_src_position) | aux,
+                rosc = (0x2U << clk_src_param::ctrl_aux_src_position) | aux,
+                xosc = (0x3U << clk_src_param::ctrl_aux_src_position) | aux,
+                gpin0 = (0x4U << clk_src_param::ctrl_aux_src_position) | aux,
+                gpin1 = (0x5U << clk_src_param::ctrl_aux_src_position) | aux,
+            };
+        };
+
+        struct Peri {
+            std::uintptr_t addr = address::base::peri;
+            struct Ctrl {
+                static constexpr bool nudge {false};
+                static constexpr bool phase {false};
+                static constexpr bool dc50 {false};
+                static constexpr bool enable {true};
+                static constexpr bool kill {true};
+                static constexpr std::uint8_t aux_src_mask {0x7U};
+                static constexpr std::uint8_t aux_src_max_val {6U};
+                static constexpr std::uint8_t src_mask {0x0U};
+                static constexpr std::uint8_t src_max_val {0U};
+            };
+            struct Div {
+                static constexpr std::uint32_t int_mask {0x0U};
+                static constexpr std::uint8_t frac_mask {0x0U};
+            };
+            enum class Src : std::uint32_t {
+                clk_sys = (0x0U << clk_src_param::ctrl_aux_src_position),
+                pll_sys = (0x1U << clk_src_param::ctrl_aux_src_position),
+                pll_usb = (0x2U << clk_src_param::ctrl_aux_src_position),
+                rosc = (0x3U << clk_src_param::ctrl_aux_src_position),
+                xosc = (0x4U << clk_src_param::ctrl_aux_src_position),
+                gpin0 = (0x5U << clk_src_param::ctrl_aux_src_position),
+                gpin1 = (0x6U << clk_src_param::ctrl_aux_src_position),
+            };
+        };
+    }
 
 
     /**
      * @brief Generic register map of a clock.
      *
-     * @tparam base Base address of a clock.
      * @tparam ClockLayout The layout of the clock.
      */
-    template <std::uintptr_t base, ClockLayoutConcept ClockLayout>
+    template <ClockLayoutConcept ClockLayout>
     struct ClockRegMap {
-        static_assert((base == address::base::gpout0) || (base == address::base::gpout1) || (base == address::base::gpout2) ||
-            (base == address::base::gpout3) || (base == address::base::ref) || (base == address::base::sys) ||
-            (base == address::base::peri) || (base == address::base::usb) || (base == address::base::adc) ||
-            (base == address::base::rtc), "Invalid base address for clock regmap!");
+        static_assert((ClockLayout::addr == address::base::gpout0) || (ClockLayout::addr == address::base::gpout1) ||
+            (ClockLayout::addr == address::base::gpout2) || (ClockLayout::addr == address::base::gpout3) ||
+            (ClockLayout::addr == address::base::ref) || (ClockLayout::addr == address::base::sys) ||
+            (ClockLayout::addr == address::base::peri) || (ClockLayout::addr == address::base::usb) ||
+            (ClockLayout::addr == address::base::adc) || (ClockLayout::addr == address::base::rtc),
+            "Invalid base address for clock regmap!");
 
         static constexpr std::uint32_t ctrl_offset = 0x00U; /**< @brief Offset for the control register. */
         static constexpr std::uint32_t div_offset = 0x04U; /**< @brief Offset for the divisor register. */
@@ -244,7 +309,7 @@ namespace rp2040::system::clocks {
          * The bits (except AuxSrc) can be changed on-the-fly.
          */
         struct Ctrl {
-            static constexpr std::uintptr_t addr = base + ctrl_offset; /**< @brief Address of the control register. */
+            static constexpr std::uintptr_t addr = ClockLayout::addr + ctrl_offset; /**< @brief Address of the control register. */
             using ctrl_reg = reg_access::Reg<addr, reg_access::access_tag::read_write, std::uint32_t>; /**< @brief The control register. */
 
             /**
@@ -372,7 +437,7 @@ namespace rp2040::system::clocks {
          * Can be changed on-the-fly.
          */
         struct Div {
-            static constexpr std::uintptr_t addr = base + div_offset; /**< @brief Address of the divisor register. */
+            static constexpr std::uintptr_t addr = ClockLayout::addr + div_offset; /**< @brief Address of the divisor register. */
             using div_reg = reg_access::Reg<addr, reg_access::access_tag::read_write, std::uint32_t>; /**< @brief The divisor register. */
 
             /**
@@ -413,483 +478,8 @@ namespace rp2040::system::clocks {
          * On clocks without Src bits, this register is hardwired to 0x01U.
          */
         struct Selected {
-            static constexpr std::uintptr_t addr = base + selected_offset; /**< @brief Address of the selected register. */
+            static constexpr std::uintptr_t addr = ClockLayout::addr + selected_offset; /**< @brief Address of the selected register. */
             using selected_reg = reg_access::Reg<addr, reg_access::access_tag::read, std::uint32_t>; /**< @brief The selected register. */
-        };
-    };
-
-
-    /**
-     * @brief Defines the reference clock with its registers.
-     *
-     */
-    struct RefClock_DefType {
-        static constexpr std::uintptr_t base_addr = ref_base; /**< @brief The base address of the reference clock registers. */
-
-        /**
-         * @brief The clock sources for the reference clock.
-         */
-        enum class ClockSrc : std::uint32_t {
-            ROSC = (0x00U << ctrlSrcPosition), /**< @brief The ring oscillator. */
-            XOSC = (0x02U << ctrlSrcPosition), /**< @brief The crystal oscillator */
-            PLL_USB = (0x00U << ctrlAuxSrcPosition) | ctrlSrcAuxSrcBit, /**< @brief The usb pll. */
-            GPIN0 = (0x01U << ctrlAuxSrcPosition) | ctrlSrcAuxSrcBit, /**< @brief External clock provided through GPIN0. */
-            GPIN1 = (0x02U << ctrlAuxSrcPosition) | ctrlSrcAuxSrcBit, /**< @brief External clock provided through GPIN1. */
-        };
-
-        /**
-         * @brief Register to control the reference clock.
-         */
-        struct ctrl {
-            static constexpr std::uintptr_t addr = base_addr + ctrl_offset; /**< @brief The address of the ctrl register of the reference clock control. */
-            using ctrl_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::access_tag::read_write, std::uint32_t>; /**< @brief The control register of the reference clock. */
-
-            /**
-             * @brief The auxiliary clock source bits as a BitField.
-             *
-             * @tparam Value The value for the auxiliary source for the reference clock.
-             */
-            template <std::uint32_t Value>
-            struct AuxSrcBitField {
-                using reg = ctrl_reg; /**< @brief The register to which the bitfield belongs. */
-                using T = reg::RegType; /**< @brief The type of the register. */
-                using bit_access = reg_access::access_tag::read_write; /**< @brief The access tag defining bit operations. */
-
-                static constexpr T position = 0x05U; /**< @brief The position of the bits in the register. */
-                static constexpr T mask = (0x03U << position); /**< @brief The mask of the bits. */
-
-                static_assert(Value <= 0x02U, "Invalid value for the auxiliary src of the reference clock.");
-
-                /**
-                 * @brief The values to which the auxiliary clock source can be set.
-                 *
-                 * Values:
-                 * - 0x00 PLL_USB
-                 * - 0x01 GPIN0
-                 * - 0x02 GPIN1
-                 */
-                enum class value : T {
-                    val = Value
-                };
-            };
-
-            /**
-             * @brief The auxiliary source bits.
-             *
-             * @tparam Value The value for the auxiliary source for the reference clock.
-             */
-            template <std::uint32_t Value>
-            using aux_src_bits = ctrl_reg::Bits<AuxSrcBitField<Value>>;
-
-            /**
-            * @brief The clock source bits as a BitField.
-            *
-            * @tparam Value The value of the src for the reference clock.
-            */
-            template <std::uint32_t Value>
-            struct SrcBitField {
-                using reg = ctrl_reg; /**< @brief The register to which the bitfield belongs. */
-                using T = reg::RegType; /**< @brief The type of the register. */
-                using bit_access = reg_access::access_tag::read_write;
-
-                static constexpr T position = 0x00U; /**< @brief The position of the bits in the register. */
-                static constexpr T mask = (0x03U << position); /**< @brief The mask of the bits. */
-
-                static_assert(Value <= 0x02U, "Invalid value for the reference clock.");
-
-                /**
-                 * @brief The values to which the reference clock source can be set.
-                 *
-                 * Values:
-                 * - 0x00 ROSC
-                 * - 0x01 AUXSRC
-                 * - 0x02 XOSC
-                 */
-                enum class value : T {
-                    val = Value,
-                };
-            };
-
-            /**
-             * @brief The src bits.
-             *
-             * @tparam Value The value of the src for the reference clock.
-             */
-            template <std::uint32_t Value>
-            using src_bits = ctrl_reg::Bits<SrcBitField<Value>>;
-        };
-
-        /**
-         * @brief The div register of the reference clock.
-         */
-        struct div {
-            static constexpr std::uintptr_t addr = base_addr + div_offset; /**< @brief The addr of the div register of the reference clock. */
-            using div_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::access_tag::read_write, std::uint32_t>; /**< @brief The div register. */
-
-            /**
-             * @brief The integer component of the clock divisor.
-             *
-             * @tparam Value The value to which the integer part is to be set.
-             */
-            template <std::uint32_t Value>
-            struct IntBitField {
-                using reg = div_reg; /**< @brief The register to which the bitfield belongs. */
-                using T = reg::RegType; /**< @brief The type of the register. */
-                using bit_access = reg_access::access_tag::read_write;
-
-                static constexpr T position = 0x08U; /**< @brief The position of the bits in the register. */
-                static constexpr T mask = (0x03U << position); /**< @brief The mask of the bits. */
-
-                static_assert(Value <= 0x03U, "Invalid value for the int bits.");
-
-                /**
-                 * @brief The value to which the integer component is to be set.
-                 */
-                enum class value : T {
-                    val = Value,
-                };
-            };
-
-            /**
-             * @brief The int bits of the reference clock.
-             *
-             * @tparam Value The value to which the integer component is to be set.
-             */
-            template <std::uint32_t Value>
-            using int_bits = div_reg::Bits<IntBitField<Value>>;
-        };
-
-        /**
-         * @brief The selected register contains information about the selected clock.
-         */
-        struct selected {
-            static constexpr std::uintptr_t addr = base_addr + selected_offset; /**< @brief The addr of the selected register of the reference clock. */
-            using selected_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::access_tag::read, std::uint32_t>; /**< @brief The selected register. */
-
-            /**
-             * @brief The selected bits contain information about the selected clock in the src bits of the ctrl register.
-             */
-            struct SelectedBitField {
-                using reg = selected_reg; /**< @brief The register to which the bitfield belongs. */
-                using T = reg::RegType; /**< @brief The type of the register. */
-                using bit_access = reg_access::access_tag::read_write;
-
-                static constexpr T position = 0x00U; /**< @brief The position of the bits in the register. */
-                static constexpr T mask = (0xFFFFFFFFU << position); /**< @brief The mask of the bits. */
-
-                /**
-                 * @brief Each clock corresponds to a bit in the selected register.
-                 */
-                enum class value : T {
-                    ROSC = (1U << 0U), /**< @brief The ROSC bit. */
-                    AUX = (1U << 1U), /**< @brief The auxiliary source bit. */
-                    XOSC = (1U << 2U), /**< @brief The XOSC bit. */
-                };
-            };
-
-            /**
-             * @brief The selected bits of the selected register.
-             */
-            using selected_bits = selected_reg::Bits<SelectedBitField>;
-        };
-    };
-
-    /**
-     * @brief The system clock.
-     */
-    struct SysClock_DefType {
-        static constexpr std::uintptr_t base_addr = sys_base; /**< @brief Base address of the system clock registers. */
-
-        /**
-         * @brief The clock sources for the system clock.
-         */
-        enum class ClockSrc : std::uint32_t {
-            CLK_REF = (0x00U << ctrlSrcPosition), /**< @brief The reference clock as a source for the system clock. @see RefClock_DefType */
-            PLL_SYS = (0x00U << ctrlAuxSrcPosition) | ctrlSrcAuxSrcBit, /**< @brief The system pll. */
-            PLL_USB = (0x01U << ctrlAuxSrcPosition) | ctrlSrcAuxSrcBit, /**< @brief The usb pll. */
-            ROSC = (0x02U << ctrlAuxSrcPosition) | ctrlSrcAuxSrcBit, /**< @brief The ring oscillator. */
-            XOSC = (0x03U << ctrlAuxSrcPosition) | ctrlSrcAuxSrcBit, /**< @brief The crystal oscillator. */
-            GPIN0 = (0x04U << ctrlAuxSrcPosition) | ctrlSrcAuxSrcBit, /**< @brief External clock through GPIN0. */
-            GPIN1 = (0x05U << ctrlAuxSrcPosition) | ctrlSrcAuxSrcBit, /**< @brief External clock through GPIN1. */
-        };
-
-        /**
-         * @brief Register to control the system clock.
-         */
-        struct ctrl {
-            static constexpr std::uintptr_t addr = base_addr + ctrl_offset; /**< @brief The address of the ctrl register of the system clock control. */
-            using ctrl_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::access_tag::read_write, std::uint32_t>; /**< @brief The control register of the system clock. */
-
-            /**
-             * @brief The auxiliary clock source bits as a BitField.
-             *
-             * @tparam Value The value for the auxiliary source for the system clock.
-             */
-            template <std::uint32_t Value>
-            struct AuxSrcBitField {
-                using reg = ctrl_reg; /**< @brief The register to which the bitfield belongs. */
-                using T = reg::RegType; /**< @brief The type of the register. */
-                using bit_access = reg_access::access_tag::read_write;
-
-                static constexpr T position = 0x05U; /**< @brief The position of the bits in the register. */
-                static constexpr T mask = (0x07U << position); /**< @brief The mask of the bits. */
-
-                static_assert(Value <= 0x05U, "Invalid value for the auxiliary src of the system clock.");
-
-                /**
-                 * @brief The values to which the auxiliary clock source can be set.
-                 *
-                 * Values:
-                 * - 0x00 PLL_SYS
-                 * - 0x01 PLL_USB
-                 * - 0x02 ROSC
-                 * - 0x03 XOSC
-                 * - 0x04 GPIN0
-                 * - 0x05 GPIN1
-                 */
-                enum class value : T {
-                    val = Value
-                };
-            };
-
-            /**
-             * @brief The auxiliary source bits.
-             *
-             * @tparam Value The value for the auxiliary source for the system clock.
-             */
-            template <std::uint32_t Value>
-            using aux_src_bits = ctrl_reg::Bits<AuxSrcBitField<Value>>;
-
-            /**
-            * @brief The clock source bits as a BitField.
-            *
-            * @tparam Value The value of the src for the system clock.
-            */
-            template <std::uint32_t Value>
-            struct SrcBitField {
-                using reg = ctrl_reg; /**< @brief The register to which the bitfield belongs. */
-                using T = reg::RegType; /**< @brief The type of the register. */
-                using bit_access = reg_access::access_tag::read_write;
-
-                static constexpr T position = 0x00U; /**< @brief The position of the bits in the register. */
-                static constexpr T mask = (0x03U << position); /**< @brief The mask of the bits. */
-
-                static_assert(Value <= 0x01U, "Invalid value for the system clock.");
-
-                /**
-                 * @brief The values to which the system clock source can be set.
-                 *
-                 * Values:
-                 * - 0x00 CLK_REF
-                 * - 0x01 AUXSRC
-                 */
-                enum class value : T {
-                    val = Value,
-                };
-            };
-
-            /**
-             * @brief The src bits.
-             *
-             * @tparam Value The value of the src for the reference clock.
-             */
-            template <std::uint32_t Value>
-            using src_bits = ctrl_reg::Bits<SrcBitField<Value>>;
-        };
-
-        /**
-         * @brief The register to set the clock divider.
-         */
-        struct div {
-            static constexpr std::uintptr_t addr = base_addr + div_offset; /**< @brief The address of the div register of the system clock. */
-            using div_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::access_tag::read_write, std::uint32_t>; /**< @brief The div register. */
-
-            /**
-             * @brief The integer component of the clock divisor.
-             *
-             * @tparam Value The value to which the integer part is to be set.
-             */
-            template <std::uint32_t Value>
-            struct IntBitField {
-                using reg = div_reg; /**< @brief The register to which the bitfield belongs. */
-                using T = reg::RegType; /**< @brief The type of the register. */
-                using bit_access = reg_access::access_tag::read_write;
-
-                static constexpr T position = 0x08U; /**< @brief The position of the bits in the register. */
-                static constexpr T mask = (0xFFFFFFU << position); /**< @brief The mask of the bits. */
-
-                static_assert(Value <= 0xFFFFFFU, "Invalid value for the int bits.");
-
-                /**
-                 * @brief The value to which the integer component is to be set.
-                 */
-                enum class value : T {
-                    val = Value,
-                };
-            };
-
-            /**
-             * @brief The int bits of the system clock.
-             *
-             * @tparam Value The value to which the integer component is to be set.
-             */
-            template <std::uint32_t Value>
-            using int_bits = div_reg::Bits<IntBitField<Value>>;
-
-            /**
-             * @brief The fractional component of the clock divisor.
-             *
-             * @tparam Value The value to which the fractional part is to be set.
-             */
-            template <std::uint32_t Value>
-            struct FracBitField {
-                using reg = div_reg; /**< @brief The register to which the bitfield belongs. */
-                using T = reg::RegType; /**< @brief The type of the register. */
-                using bit_access = reg_access::access_tag::read_write;
-
-                static constexpr T position = 0x00U; /**< @brief The position of the bits in the register. */
-                static constexpr T mask = (0xFFU << position); /**< @brief The mask of the bits. */
-
-                static_assert(Value <= 0xFFU, "Invalid value for the frac bits.");
-
-                /**
-                 * @brief The value to which the fractional component is to be set.
-                 */
-                enum class value : T {
-                    val = Value,
-                };
-            };
-
-            /**
-             * @brief The int bits of the system clock.
-             *
-             * @tparam Value The value to which the integer component is to be set.
-             */
-            template <std::uint32_t Value>
-            using frac_bits = div_reg::Bits<FracBitField<Value>>;
-
-        };
-
-
-        /**
-         * @brief The selected register contains information about the selected clock.
-         */
-        struct selected {
-            static constexpr std::uintptr_t addr = base_addr + selected_offset; /**< @brief The addr of the selected register of the system clock. */
-            using selected_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::access_tag::read, std::uint32_t>; /**< @brief The selected register. */
-
-            /**
-             * @brief The selected bits contain information about the selected clock in the src bits of the ctrl register.
-             */
-            struct SelectedBitField {
-                using reg = selected_reg; /**< @brief The register to which the bitfield belongs. */
-                using T = reg::RegType; /**< @brief The type of the register. */
-                using bit_access = reg_access::access_tag::read_write;
-
-                static constexpr T position = 0x00U; /**< @brief The position of the bits in the register. */
-                static constexpr T mask = (0xFFFFFFFFU << position); /**< @brief The mask of the bits. */
-
-                /**
-                 * @brief Each clock corresponds to a bit in the selected register.
-                 */
-                enum class value : T {
-                    CLK_REF = (1U << 0U), /**< @brief The reference clock bit. */
-                    AUX = (1U << 1U), /**< @brief The auxiliary source bit. */
-                };
-            };
-
-            /**
-             * @brief The selected bits of the selected register.
-             */
-            using selected_bits = selected_reg::Bits<SelectedBitField>;
-        };
-    };
-
-    /**
-     * @brief The peripheral clock.
-     */
-    struct PeriClock_DefType {
-        static constexpr std::uintptr_t base_addr = peri_base; /**< @brief Base address of the peripheral clock registers. */
-
-        /**
-         * @brief The clock sources for the peripheral clock.
-         */
-        enum class ClockSrc : std::uint32_t {
-            CLK_SYS = (0x00U << ctrlAuxSrcPosition) | ctrlSrcAuxSrcBit, /**< @brief The system clock. @see SysClock */
-            PLL_SYS = (0x01U << ctrlAuxSrcPosition) | ctrlSrcAuxSrcBit, /**< @brief The system pll. */
-            PLL_USB = (0x02U << ctrlAuxSrcPosition) | ctrlSrcAuxSrcBit, /**< @brief The usb pll. */
-            ROSC = (0x03U << ctrlAuxSrcPosition) | ctrlSrcAuxSrcBit, /**< @brief The ring oscillator. */
-            XOSC = (0x04U << ctrlAuxSrcPosition) | ctrlSrcAuxSrcBit, /**< @brief The crystal oscillator. */
-            GPIN0 = (0x05U << ctrlAuxSrcPosition) | ctrlSrcAuxSrcBit, /**< @brief External clock through GPIN0. */
-            GPIN1 = (0x06U << ctrlAuxSrcPosition) | ctrlSrcAuxSrcBit, /**< @brief External clock through GPIN1. */
-        };
-
-        /**
-         * @brief Register to control the peripheral clock.
-         */
-        struct ctrl {
-            static constexpr std::uintptr_t addr = base_addr + ctrl_offset; /**< @brief The address of the ctrl register of the peripheral clock control. */
-            using ctrl_reg = rp2040::reg_access::Reg<addr, rp2040::reg_access::access_tag::read_write, std::uint32_t>; /**< @brief The control register of the peripheral clock. */
-
-
-            /**
-             * @brief The enable bit of the peripheral clock.
-             */
-            using EnableBitField = rp2040::reg_access::BitTypeEnableDisable<ctrl_reg, 11U>;
-            /**
-             * @brief The enable bit of the peripheral clock.
-             */
-            using enable_bits = ctrl_reg::Bits<EnableBitField>;
-
-            /**
-             * @brief The kill bit of the peripheral clock.
-             */
-            using KillBitField = rp2040::reg_access::BitTypeEnableDisable<ctrl_reg, 10U>;
-            /**
-             * @brief The kill bit of the peripheral clock.
-             */
-            using kill_bits = ctrl_reg::Bits<KillBitField>;
-
-            /**
-             * @brief The auxiliary clock source bits as a BitField.
-             *
-             * @tparam Value The value for the auxiliary source for the peripheral clock.
-             */
-            template <std::uint32_t Value>
-            struct AuxSrcBitField {
-                using reg = ctrl_reg; /**< @brief The register to which the bitfield belongs. */
-                using T = reg::RegType; /**< @brief The type of the register. */
-                using bit_access = reg_access::access_tag::read_write;
-
-                static constexpr T position = 0x05U; /**< @brief The position of the bits in the register. */
-                static constexpr T mask = (0x07U << position); /**< @brief The mask of the bits. */
-
-                static_assert(Value <= 0x06U, "Invalid value for the auxiliary src of the peripheral clock.");
-
-                /**
-                 * @brief The values to which the auxiliary clock source can be set.
-                 *
-                 * Values:
-                 * - 0x00 CLK_SYS
-                 * - 0x01 PLL_SYS
-                 * - 0x02 PLL_USB
-                 * - 0x03 ROSC
-                 * - 0x04 XOSC
-                 * - 0x05 GPIN0
-                 * - 0x06 GPIN1
-                 */
-                enum class value : T {
-                    val = Value
-                };
-            };
-
-            /**
-             * @brief The auxiliary source bits.
-             *
-             * @tparam Value The value for the auxiliary source for the peripheral clock.
-             */
-            template <std::uint32_t Value>
-            using aux_src_bits = ctrl_reg::Bits<AuxSrcBitField<Value>>;
         };
     };
 

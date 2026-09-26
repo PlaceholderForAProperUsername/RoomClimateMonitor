@@ -26,6 +26,7 @@
 #define RP2040_SYSTEM_CLOCKS_H
 
 #include <cstdint>
+#include <variant>
 
 #include "clocks_def.h"
 
@@ -36,76 +37,56 @@ namespace rp2040::system::clocks {
      */
 
     /**
-     * @brief Contains basic clock configuration parameters.
+     * @brief Clock configuration.
      *
-     * @tparam ClockDefType The clock to be configured.
+     * There are three types of clocks:
+     * - Clocks without a div register
+     * - Clocks with a div register with only the integer component
+     * - Clocks with a div register with integer and fractional component
+     *
+     * The clock type is determined by ClockLayout
+     *
+     * @tparam ClockLayout Layout of the clock
      */
-    template <typename ClockDefType>
-    requires IsClockType<ClockDefType>
+    template <ClockLayoutConcept ClockLayout>
     struct ClockConfType {
-        ClockDefType::ClockSrc src; /**< @brief The source of the clock. */
+        ClockLayout::Src src; /**< @brief The source of the clock. */
         std::uint32_t frequency_hz; /**< @brief The frequency of the clock source. */
+        [[no_unique_address]] std::conditional_t<(ClockLayout::Div::int_mask > 0), std::uint32_t, std::monostate> div_int; /**< @brief The integer component of the clock divisor. */
+        [[no_unique_address]] std::conditional_t<(ClockLayout::Div::frac_mask > 0), std::uint8_t, std::monostate> div_frac; /**< @brief The fractional component of the clock divider. */
+
 
         /**
          * @brief Creates a compile time instance to hold the clock configuration data.
-         *
-         * This configuration is used for clocks without a div register.
          *
          * @param[in] src The clock source.
          * @param[in] frequency_hz The frequency of the clock source.
          */
-        constexpr ClockConfType(ClockDefType::ClockSrc src, std::uint32_t frequency_hz) : src(src), frequency_hz(frequency_hz) {}
-    };
-
-    /**
-     * @brief Contains clock configuration parameters for clocks with a div register.
-     *
-     * @tparam ClockDefType The clock to be configured.
-     */
-    template <typename ClockDefType>
-    requires IsClockType<ClockDefType> && HasDivRegister<ClockDefType> && (!HasDivWithFracRegister<ClockDefType>)
-    struct ClockConfType<ClockDefType> {
-        ClockDefType::ClockSrc src; /**< @brief The source of the clock. */
-        std::uint32_t frequency_hz; /**< @brief The frequency of the clock source. */
-        std::uint32_t div_int; /**< @brief The integer component of the clock divisor. */
+        template <typename = std::enable_if_t<(ClockLayout::Div::int_mask == 0) && (ClockLayout::Div::frac_mask == 0)>>
+        constexpr ClockConfType(const ClockLayout::Src src, const std::uint32_t frequency_hz) :
+        src(src), frequency_hz(frequency_hz) {}
 
         /**
          * @brief Creates a compile time instance to hold the clock configuration data.
-         *
-         * This configuration is used for clocks with a div register, but without a fractional part.
          *
          * @param[in] src The clock source.
          * @param[in] frequency_hz The frequency of the clock source.
          * @param[in] div_int The integer part of the clock divisor.
          */
-        constexpr ClockConfType(ClockDefType::ClockSrc src, std::uint32_t frequency_hz, std::uint32_t div_int = 0x01U) :
+        template <typename = std::enable_if_t<(ClockLayout::Div::int_mask > 0) && (ClockLayout::Div::frac_mask == 0)>>
+        constexpr ClockConfType(const ClockLayout::Src src, const std::uint32_t frequency_hz, const std::uint32_t div_int = 0x01U) :
         src(src), frequency_hz(frequency_hz), div_int(div_int) {}
-    };
-
-    /**
-     * @brief Contains clock configuration parameters for clocks with a div register with additional fractional bits.
-     *
-     * @tparam ClockDefType The clock to be configured.
-     */
-    template <typename ClockDefType>
-    requires IsClockType<ClockDefType> && HasDivWithFracRegister<ClockDefType>
-    struct ClockConfType<ClockDefType> {
-        ClockDefType::ClockSrc src; /**< @brief The source of the clock. */
-        std::uint32_t frequency_hz; /**< @brief The frequency of the clock source. */
-        std::uint32_t div_int; /**< @brief The integer component of the clock divisor. */
-        std::uint8_t div_frac; /**< @brief The fractional component of the clock divider. */
 
         /**
          * @brief Creates a compile time instance to hold the clock configuration data.
-         *
-         * This configuration is used for clock with a div register, including a fractional part.
          *
          * @param[in] src The clock source.
          * @param[in] frequency_hz The frequency of the clock source.
          * @param[in] div_int The integer part of the clock divisor.
          * @param[in] div_frac The fractional part of the clock divisor.
          */
-        constexpr ClockConfType(ClockDefType::ClockSrc src, std::uint32_t frequency_hz, std::uint32_t div_int = 0x01U, std::uint8_t div_frac = 0x00U) :
+        template <typename = std::enable_if_t<(ClockLayout::Div::int_mask > 0) && (ClockLayout::Div::frac_mask > 0)>>
+        constexpr ClockConfType(const ClockLayout::Src src, const std::uint32_t frequency_hz, const std::uint32_t div_int = 0x01U, const std::uint8_t div_frac = 0x00U) :
         src(src), frequency_hz(frequency_hz), div_int(div_int), div_frac(div_frac) {}
     };
 
@@ -113,30 +94,15 @@ namespace rp2040::system::clocks {
     /**
      * @brief Provides general functionality common to the clocks of the RP2040.
      *
-     * @tparam ClockDefType A clock type.
      */
-    template <typename ClockDefType>
-    requires IsClockType<ClockDefType>
+    template <ClockLayoutConcept ClockLayout>
     class ClockBaseType {
-        static constexpr decltype(auto) addr = ClockDefType::base_addr;
-
-        static_assert((addr == ref_base) || (addr == sys_base) || (addr == peri_base), "Invalid clock address.");
-
-        using ctrl_r = ClockDefType::ctrl;
-        using div_r = decltype([] {
-            if constexpr (requires {typename ClockDefType::div;}) {
-                return std::type_identity<typename ClockDefType::div>();
-            } else {
-                return std::type_identity<void>();
-            }
-        }())::type;
-        using selected_r = decltype([] {
-            if constexpr (requires {typename ClockDefType::selected;}) {
-                return std::type_identity<typename ClockDefType::selected>();
-            } else {
-                return std::type_identity<void>();
-            }
-        }())::type;
+        static_assert((ClockLayout::addr == address::base::gpout0) || (ClockLayout::addr == address::base::gpout1) ||
+            (ClockLayout::addr == address::base::gpout2) || (ClockLayout::addr == address::base::gpout3) ||
+            (ClockLayout::addr == address::base::ref) || (ClockLayout::addr == address::base::sys) ||
+            (ClockLayout::addr == address::base::peri) || (ClockLayout::addr == address::base::usb) ||
+            (ClockLayout::addr == address::base::adc) || (ClockLayout::addr == address::base::rtc),
+            "Invalid base address for clock regmap!");
 
     public:
         /**
@@ -144,7 +110,7 @@ namespace rp2040::system::clocks {
          *
          * @return The singleton instance.
          */
-        static ClockBaseType<ClockDefType>& getInstance();
+        static ClockBaseType& get_instance();
 
         /**
          * @brief Configures the clock.
@@ -157,30 +123,49 @@ namespace rp2040::system::clocks {
          *
          * @post The clock is now configured and running.
          */
-        template <ClockConfType<ClockDefType> conf>
-        void configureClock();
+        template <ClockConfType<ClockLayout> conf>
+        std::enable_if_t<(ClockLayout::Ctrl::src_max_val > 0), void> configure();
+
+        /**
+         * @brief Configures the clock.
+         *
+         * @tparam conf The configuration of the clock.
+         *
+         * @pre The source must be configured and running.
+         *
+         * @post The clock is now configured and running.
+         */
+        template <ClockConfType<ClockLayout> conf>
+        std::enable_if_t<(ClockLayout::Ctrl::src_max_val == 0), void> configure();
 
         /**
          * @brief Returns the frequency at which the clock is running.
          *
          * @return std::uint32_t The frequency of the clock in hertz.
          */
-        std::uint32_t getFrequencyHz();
+        std::uint32_t get_frequency_hz() const;
 
     private:
-        ClockBaseType() : m_frequency_hz(0) {};
+        using ClockRegister = ClockRegMap<ClockLayout>;
+        using ctrl_r = ClockRegister::Ctrl;
+        using div_r = ClockRegister::Div;
+        using selected_r = ClockRegister::Selected;
 
         std::uint32_t m_frequency_hz;
 
-    };
-    
-    using RefClock = ClockBaseType<RefClock_DefType>; /**< @brief The reference clock. */
-    using SysClock = ClockBaseType<SysClock_DefType>; /**< @brief The system clock. */
-    using PeriClock = ClockBaseType<PeriClock_DefType>; /**< @brief The peripheral clock. */
+        ClockBaseType() : m_frequency_hz(0) {};
 
-    using RefClockConfig = ClockConfType<RefClock_DefType>; /**< @brief The configuration for the reference clock. */
-    using SysClockConfig = ClockConfType<SysClock_DefType>; /**< @brief The configuration for the system clock. */
-    using PeriClockConfig = ClockConfType<PeriClock_DefType>; /**< @brief the configuration for the peripheral clock. */
+        std::enable_if_t<(ClockLayout::Div::int_mask > 0) && (ClockLayout::Div::frac_mask > 0), void>
+        _set_divisor (std::uint32_t integer, std::uint32_t frac);
+
+        std::enable_if_t<(ClockLayout::Div::int_mask > 0) && (ClockLayout::Div::frac_mask == 0), void>
+        _set_divisor (std::uint32_t integer);
+    };
+
+    namespace ref {
+        using Clock = ClockBaseType<layout::Ref>;
+    }
+
     /** @}*/ // rp2040_clocks
 } // rp2040::system::clocks
 
