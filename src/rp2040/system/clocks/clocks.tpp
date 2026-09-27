@@ -36,8 +36,8 @@ namespace rp2040::system::clocks {
     }
 
     template <ClockLayoutConcept ClockLayout>
-    template <ClockConfType<ClockLayout> conf>
-    std::enable_if_t<(ClockLayout::Ctrl::src_max_val > 0), void> ClockBaseType<ClockLayout>::configure() {
+    template <ClockConfType<ClockLayout> conf, ClockLayoutConcept layout>
+    std::enable_if_t<(layout::Ctrl::src_max_val > 0), void> ClockBaseType<ClockLayout>::configure() {
 
         // If the divisor is increased, the divisor should be set before the source to reduce momentary overspeed.
         // This is according to the RP2040's datasheet.
@@ -51,9 +51,9 @@ namespace rp2040::system::clocks {
             }();
             if (div_r::div_reg::read() > (div_val)) {
                 if constexpr ((ClockLayout::Div::int_mask > 0) && (ClockLayout::Div::frac_mask > 0)) {
-                    _set_divisor(conf.div_int, conf.div_frac);
+                    _set_divisor<conf.div_int, conf.div_frac>();
                 } else {
-                    _set_divisor(conf.div_int);
+                    _set_divisor<conf.div_int>();
                 }
             }
         }
@@ -63,12 +63,12 @@ namespace rp2040::system::clocks {
         constexpr std::uint32_t src_val = static_cast<std::uint32_t>(conf.src) & clk_src_param::ctrl_src_mask_max;
         if constexpr (src_val == clk_src_param::ctrl_src_aux_src_val) {
             // if already an auxiliary source is selected, a temporary clock must be selected to prevent glitching when setting the auxiliary source
-            if (selected_r::read() == (1U << clk_src_param::ctrl_src_aux_src_val)) {
+            if (selected_r::selected_reg::read() == (1U << clk_src_param::ctrl_src_aux_src_val)) {
                 constexpr std::uint32_t tmp_clock_src = 0x0U;
                 ctrl_r::template Src<tmp_clock_src>::Bits::set(ctrl_r::template Src<tmp_clock_src>::Value::val);
 
                 // wait for the temporary clock to settle
-                while (selected_r::selected_bits::getValue() == 0x00U) {}
+                while (selected_r::selected_reg::read() == 0x00U) {}
             }
             ctrl_r::template AuxSrc<aux_src_val>::Bits::set(ctrl_r::template AuxSrc<aux_src_val>::Value::val);
         }
@@ -77,17 +77,17 @@ namespace rp2040::system::clocks {
 
         if constexpr (ClockLayout::Div::int_mask > 0) {
             if constexpr ((ClockLayout::Div::int_mask > 0) && (ClockLayout::Div::frac_mask > 0)) {
-                _set_divisor(conf.div_int, conf.div_frac);
+                _set_divisor<conf.div_int, conf.div_frac>();
             } else {
-                _set_divisor(conf.div_int);
+                _set_divisor<conf.div_int>();
             }
         }
 
         this->m_frequency_hz = conf.frequency_hz;
     }
     template <ClockLayoutConcept ClockLayout>
-    template <ClockConfType<ClockLayout> conf>
-    std::enable_if_t<(ClockLayout::Ctrl::src_max_val == 0), void> ClockBaseType<ClockLayout>::configure() {
+    template <ClockConfType<ClockLayout> conf, ClockLayoutConcept layout>
+    std::enable_if_t<(layout::Ctrl::src_max_val == 0), void> ClockBaseType<ClockLayout>::configure() {
         // If the divisor is increased, the divisor should be set before the source to reduce momentary overspeed.
         // This is according to the RP2040's datasheet.
         if constexpr (ClockLayout::Div::int_mask > 0) {
@@ -100,9 +100,9 @@ namespace rp2040::system::clocks {
             }();
             if (div_r::div_reg::read() > (div_val)) {
                 if constexpr ((ClockLayout::Div::int_mask > 0) && (ClockLayout::Div::frac_mask > 0)) {
-                    _set_divisor(conf.div_int, conf.div_frac);
+                    _set_divisor<conf.div_int, conf.div_frac>();
                 } else {
-                    _set_divisor(conf.div_int);
+                    _set_divisor<conf.div_int>();
                 }
             }
         }
@@ -121,16 +121,16 @@ namespace rp2040::system::clocks {
         constexpr int expectedWorstCaseCycles {45};
         // Wait for the generated clock to stop
         for (int i = {0}; i < expectedWorstCaseCycles; ++i) {asm volatile("nop");}
-        ctrl_r::template AuxSrc<aux_src_val>::set(ctrl_r::template AuxSrc<aux_src_val>::Value::val);
-        ctrl_r::template Enable<>::Bits::set(ctrl_r::template Enable<>::Value::val);
+        ctrl_r::template AuxSrc<aux_src_val>::Bits::set(ctrl_r::template AuxSrc<aux_src_val>::Value::val);
+        ctrl_r::template Enable<>::Bits::set(ctrl_r::template Enable<>::Value::enable);
         // wait for the generated clock to start
         for (int i = {0}; i < expectedWorstCaseCycles; ++i) {asm volatile("nop");}
 
         if constexpr (ClockLayout::Div::int_mask > 0) {
             if constexpr ((ClockLayout::Div::int_mask > 0) && (ClockLayout::Div::frac_mask > 0)) {
-                _set_divisor(conf.div_int, conf.div_frac);
+                _set_divisor<conf.div_int, conf.div_frac>();
             } else {
-                _set_divisor(conf.div_int);
+                _set_divisor<conf.div_int>();
             }
         }
 
@@ -143,8 +143,9 @@ namespace rp2040::system::clocks {
     }
 
     template <ClockLayoutConcept ClockLayout>
-    std::enable_if_t<(ClockLayout::Div::int_mask > 0) && (ClockLayout::Div::frac_mask > 0), void>
-        ClockBaseType<ClockLayout>::_set_divisor (std::uint32_t integer, std::uint32_t frac) {
+    template <std::uint32_t integer, std::uint32_t frac, ClockLayoutConcept layout>
+    std::enable_if_t<(layout::Div::int_mask > 0) && (layout::Div::frac_mask > 0), void>
+        ClockBaseType<ClockLayout>::_set_divisor () {
         using int_bits = div_r::template Int<integer>;
         int_bits::Bits::set(int_bits::Value::val);
         using frac_bits = div_r::template Frac<frac>;
@@ -152,8 +153,9 @@ namespace rp2040::system::clocks {
     }
 
     template <ClockLayoutConcept ClockLayout>
-    std::enable_if_t<(ClockLayout::Div::int_mask > 0) && (ClockLayout::Div::frac_mask == 0), void>
-        ClockBaseType<ClockLayout>::_set_divisor (std::uint32_t integer) {
+    template <std::uint32_t integer, ClockLayoutConcept layout>
+    std::enable_if_t<(layout::Div::int_mask > 0) && (layout::Div::frac_mask == 0), void>
+        ClockBaseType<ClockLayout>::_set_divisor () {
         using int_bits = div_r::template Int<integer>;
         int_bits::Bits::set(int_bits::Value::val);
     }

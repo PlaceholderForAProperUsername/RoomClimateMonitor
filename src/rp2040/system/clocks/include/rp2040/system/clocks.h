@@ -123,8 +123,8 @@ namespace rp2040::system::clocks {
          *
          * @post The clock is now configured and running.
          */
-        template <ClockConfType<ClockLayout> conf>
-        std::enable_if_t<(ClockLayout::Ctrl::src_max_val > 0), void> configure();
+        template <ClockConfType<ClockLayout> conf, ClockLayoutConcept layout = ClockLayout>
+        std::enable_if_t<(layout::Ctrl::src_max_val > 0), void> configure();
 
         /**
          * @brief Configures the clock.
@@ -135,8 +135,8 @@ namespace rp2040::system::clocks {
          *
          * @post The clock is now configured and running.
          */
-        template <ClockConfType<ClockLayout> conf>
-        std::enable_if_t<(ClockLayout::Ctrl::src_max_val == 0), void> configure();
+        template <ClockConfType<ClockLayout> conf, ClockLayoutConcept layout = ClockLayout>
+        std::enable_if_t<(layout::Ctrl::src_max_val == 0), void> configure();
 
         /**
          * @brief Returns the frequency at which the clock is running.
@@ -155,11 +155,13 @@ namespace rp2040::system::clocks {
 
         ClockBaseType() : m_frequency_hz(0) {};
 
-        std::enable_if_t<(ClockLayout::Div::int_mask > 0) && (ClockLayout::Div::frac_mask > 0), void>
-        _set_divisor (std::uint32_t integer, std::uint32_t frac);
+        template <std::uint32_t integer, std::uint32_t frac , ClockLayoutConcept layout = ClockLayout>
+        std::enable_if_t<(layout::Div::int_mask > 0) && (layout::Div::frac_mask > 0), void>
+        _set_divisor ();
 
-        std::enable_if_t<(ClockLayout::Div::int_mask > 0) && (ClockLayout::Div::frac_mask == 0), void>
-        _set_divisor (std::uint32_t integer);
+        template <std::uint32_t integer, ClockLayoutConcept layout = ClockLayout>
+        std::enable_if_t<(layout::Div::int_mask > 0) && (layout::Div::frac_mask == 0), void>
+        _set_divisor ();
     };
 
     /**

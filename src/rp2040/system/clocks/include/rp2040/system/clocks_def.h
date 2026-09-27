@@ -109,7 +109,7 @@ namespace rp2040::system::clocks {
      *
      * A clock layout has the following form:
      *  struct Layout {
-     *      std::uintptr_t addr = 0x00000000U;
+     *      static constexpr std::uintptr_t addr = 0x00000000U;
      *      struct Ctrl {
      *          static constexpr bool nudge = false;
      *          static constexpr bool phase = false;
@@ -164,7 +164,7 @@ namespace rp2040::system::clocks {
         struct GpOutBase {
             static_assert((base_addr == address::base::gpout0) || (base_addr == address::base::gpout1) ||
                 (base_addr == address::base::gpout2) || (base_addr == address::base::gpout3), "Invalid base address for GpOutBase!");
-            std::uintptr_t addr = base_addr;
+            static constexpr std::uintptr_t addr = base_addr;
             struct Ctrl {
                 static constexpr bool nudge {true};
                 static constexpr bool phase {true};
@@ -200,7 +200,7 @@ namespace rp2040::system::clocks {
         using GpOut3 = GpOutBase<address::base::gpout3>;
 
         struct Ref {
-            std::uintptr_t addr = address::base::ref;
+            static constexpr std::uintptr_t addr = address::base::ref;
             struct Ctrl {
                 static constexpr bool nudge {false};
                 static constexpr bool phase {false};
@@ -227,7 +227,7 @@ namespace rp2040::system::clocks {
         };
 
         struct Sys {
-            std::uintptr_t addr = address::base::sys;
+            static constexpr std::uintptr_t addr = address::base::sys;
             struct Ctrl {
                 static constexpr bool nudge {false};
                 static constexpr bool phase {false};
@@ -256,7 +256,7 @@ namespace rp2040::system::clocks {
         };
 
         struct Peri {
-            std::uintptr_t addr = address::base::peri;
+            static constexpr std::uintptr_t addr = address::base::peri;
             struct Ctrl {
                 static constexpr bool nudge {false};
                 static constexpr bool phase {false};
@@ -315,7 +315,7 @@ namespace rp2040::system::clocks {
             /**
              * @brief Shifts the phase of the output by 1 cycle of the input clock.
              */
-            template <typename = std::enable_if_t<ClockLayout::Ctrl::nudge>>
+            template <ClockLayoutConcept Layout = ClockLayout, typename = std::enable_if_t<Layout::Ctrl::nudge>>
             struct Nudge {
                 static constexpr std::uint32_t pos = 20U; /**< @brief Position of the bit in the register. */
                 using BitType = reg_access::BitTypeEnableDisable<ctrl_reg, pos>; /**< @brief Description of the nudge bit. */
@@ -330,7 +330,7 @@ namespace rp2040::system::clocks {
              *
              * @tparam value The number of cycles.
              */
-            template <std::uint32_t value, typename = std::enable_if_t<ClockLayout::Ctrl::phase>>
+            template <std::uint32_t value, ClockLayoutConcept Layout = ClockLayout, typename = std::enable_if_t<Layout::Ctrl::phase>>
             struct Phase {
                 static constexpr std::uint32_t pos = 16U; /**< @brief Position of the bit in the register. */
                 static constexpr std::uint32_t mask = 0x03U; /**< @brief Mask of the bits. */
@@ -342,7 +342,7 @@ namespace rp2040::system::clocks {
             /**
              * @brief Duty cycle correction for odd divisors
              */
-            template <typename = std::enable_if_t<ClockLayout::Ctrl::dc50>>
+            template <ClockLayoutConcept Layout = ClockLayout, typename = std::enable_if_t<Layout::Ctrl::dc50>>
             struct Dc50 {
                 static constexpr std::uint32_t pos = 12U; /**< @brief Position of the bit in the register. */
                 using BitType = reg_access::BitTypeEnableDisable<ctrl_reg, pos>; /**< @brief Description of the dc50 bit. */
@@ -353,7 +353,7 @@ namespace rp2040::system::clocks {
             /**
              * @brief Starts and stops the clock generator cleanly.
              */
-            template <typename = std::enable_if_t<ClockLayout::Ctrl::enable>>
+            template <ClockLayoutConcept Layout = ClockLayout, typename = std::enable_if_t<Layout::Ctrl::enable>>
             struct Enable {
                 static constexpr std::uint32_t pos = 11U; /**< @brief Position of the bit in the register. */
                 using BitType = reg_access::BitTypeEnableDisable<ctrl_reg, pos>; /**< @brief Description of the enable bit. */
@@ -364,7 +364,7 @@ namespace rp2040::system::clocks {
             /**
              * @brief Asynchronously kills the clock generator.
              */
-            template <typename = std::enable_if_t<ClockLayout::Ctrl::kill>>
+            template <ClockLayoutConcept Layout = ClockLayout, typename = std::enable_if_t<Layout::Ctrl::kill>>
             struct Kill {
                 static constexpr std::uint32_t pos = 10U; /**< @brief Position of the bit in the register. */
                 using BitType = reg_access::BitTypeEnableDisable<ctrl_reg, pos>; /**< @brief Description of the kill bit. */
@@ -377,7 +377,7 @@ namespace rp2040::system::clocks {
              *
              * @tparam Value_ The value of the clock source.
              */
-            template <std::uint32_t Value_, typename = std::enable_if_t<(ClockLayout::Ctrl::aux_src_mask > 0)>>
+            template <std::uint32_t Value_, ClockLayoutConcept Layout = ClockLayout, typename = std::enable_if_t<(Layout::Ctrl::aux_src_mask > 0)>>
             struct AuxSrc {
                 struct  BitType {
                     using reg = ctrl_reg; /**< @brief The register to which the bitfield belongs. */
@@ -407,7 +407,7 @@ namespace rp2040::system::clocks {
              *
              * @tparam Value_ The value of the clock source.
              */
-            template <std::uint32_t Value_, typename = std::enable_if_t<(ClockLayout::Ctrl::src_mask > 0)>>
+            template <std::uint32_t Value_, ClockLayoutConcept Layout = ClockLayout, typename = std::enable_if_t<(Layout::Ctrl::src_mask > 0)>>
             struct Src {
                 struct  BitType {
                     using reg = ctrl_reg; /**< @brief The register to which the bitfield belongs. */
@@ -447,7 +447,7 @@ namespace rp2040::system::clocks {
              *
              * @tparam value The value of the integer component.
              */
-            template <std::uint32_t value, typename = std::enable_if_t<(ClockLayout::Div::int_mask > 0)>>
+            template <std::uint32_t value, ClockLayoutConcept Layout = ClockLayout, typename = std::enable_if_t<(Layout::Div::int_mask > 0)>>
             struct Int {
                 static constexpr std::uint32_t pos = 8U; /**< @brief Position of the bit in the register. */
                 using BitType = reg_access::BitTypeValues<value, div_reg, ClockLayout::Div::int_mask, pos>; /**< @brief Description of the int bits. */
@@ -460,7 +460,7 @@ namespace rp2040::system::clocks {
              *
              * @tparam value Value of the fractional component.
              */
-            template <std::uint32_t value, typename = std::enable_if_t<(ClockLayout::Div::frac_mask > 0)>>
+            template <std::uint32_t value, ClockLayoutConcept Layout = ClockLayout, typename = std::enable_if_t<(Layout::Div::frac_mask > 0)>>
             struct Frac {
                 static constexpr std::uint32_t pos = 0U; /**< @brief Position of the bit in the register. */
                 using BitType = reg_access::BitTypeValues<value, div_reg, ClockLayout::Div::frac_mask, pos>; /**< @brief Description of the frac bits. */
