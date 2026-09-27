@@ -155,10 +155,31 @@ namespace rp2040::system::clocks {
 
         ClockBaseType() : m_frequency_hz(0) {};
 
+        /**
+         * @brief Helper function to set the clock divisor.
+         *
+         * Setting the clock divisor bits requires access to bits not every clock has implemented. This can cause the
+         * compilation to fail, even if the required bits are gated by 'if constexpr' and technically shouldn't be in the
+         * code. Therefore this helper function was added.
+         *
+         * @tparam integer The integer part of the clock divisor.
+         * @tparam frac The fractional part of the clock divisor.
+         * @tparam layout The layout of the clock, required as direct template parameter for std::enable_if_t.
+         */
         template <std::uint32_t integer, std::uint32_t frac , ClockLayoutConcept layout = ClockLayout>
         std::enable_if_t<(layout::Div::int_mask > 0) && (layout::Div::frac_mask > 0), void>
         _set_divisor ();
 
+        /**
+         * @brief Helper function to set the clock divisor.
+         *
+         * Setting the clock divisor bits requires access to bits not every clock has implemented. This can cause the
+         * compilation to fail, even if the required bits are gated by 'if constexpr' and technically shouldn't be in the
+         * code. Therefore this helper function was added.
+         *
+         * @tparam integer The integer part of the clock divisor.
+         * @tparam layout The layout of the clock, required as direct template parameter for std::enable_if_t.
+         */
         template <std::uint32_t integer, ClockLayoutConcept layout = ClockLayout>
         std::enable_if_t<(layout::Div::int_mask > 0) && (layout::Div::frac_mask == 0), void>
         _set_divisor ();
