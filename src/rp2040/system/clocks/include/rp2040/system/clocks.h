@@ -62,7 +62,7 @@ namespace rp2040::system::clocks {
          * @param[in] src The clock source.
          * @param[in] frequency_hz The frequency of the clock source.
          */
-        template <typename = std::enable_if_t<(ClockLayout::Div::int_mask == 0) && (ClockLayout::Div::frac_mask == 0)>>
+        template <ClockLayoutConcept Layout = ClockLayout, typename = std::enable_if_t<(Layout::Div::int_mask == 0) && (Layout::Div::frac_mask == 0)>>
         constexpr ClockConfType(const ClockLayout::Src src, const std::uint32_t frequency_hz) :
         src(src), frequency_hz(frequency_hz) {}
 
@@ -73,7 +73,7 @@ namespace rp2040::system::clocks {
          * @param[in] frequency_hz The frequency of the clock source.
          * @param[in] div_int The integer part of the clock divisor.
          */
-        template <typename = std::enable_if_t<(ClockLayout::Div::int_mask > 0) && (ClockLayout::Div::frac_mask == 0)>>
+        template <ClockLayoutConcept Layout = ClockLayout, typename = std::enable_if_t<(Layout::Div::int_mask > 0) && (Layout::Div::frac_mask == 0)>>
         constexpr ClockConfType(const ClockLayout::Src src, const std::uint32_t frequency_hz, const std::uint32_t div_int = 0x01U) :
         src(src), frequency_hz(frequency_hz), div_int(div_int) {}
 
@@ -85,7 +85,7 @@ namespace rp2040::system::clocks {
          * @param[in] div_int The integer part of the clock divisor.
          * @param[in] div_frac The fractional part of the clock divisor.
          */
-        template <typename = std::enable_if_t<(ClockLayout::Div::int_mask > 0) && (ClockLayout::Div::frac_mask > 0)>>
+        template <ClockLayoutConcept Layout = ClockLayout, typename = std::enable_if_t<(Layout::Div::int_mask > 0) && (Layout::Div::frac_mask > 0)>>
         constexpr ClockConfType(const ClockLayout::Src src, const std::uint32_t frequency_hz, const std::uint32_t div_int = 0x01U, const std::uint8_t div_frac = 0x00U) :
         src(src), frequency_hz(frequency_hz), div_int(div_int), div_frac(div_frac) {}
     };
@@ -162,9 +162,21 @@ namespace rp2040::system::clocks {
         _set_divisor (std::uint32_t integer);
     };
 
-    namespace ref {
-        using Clock = ClockBaseType<layout::Ref>;
-    }
+    /**
+     * @brief The objects to configure a clock.
+     *
+     * @tparam ClockLayout The layout describing the clock.
+     */
+    template <ClockLayoutConcept ClockLayout>
+    struct ClockHandle {
+        using Clock = ClockBaseType<ClockLayout>; /**< @brief Object to control a clock. */
+        using Config = ClockConfType<ClockLayout>; /**< @brief Stores the configuration of a clock. */
+        using Src = ClockLayout::Src; /**< @brief Sources of the clock. */
+    };
+
+    using Ref = ClockHandle<layout::Ref>;
+    using Sys = ClockHandle<layout::Sys>;
+    using Peri = ClockHandle<layout::Peri>;
 
     /** @}*/ // rp2040_clocks
 } // rp2040::system::clocks
