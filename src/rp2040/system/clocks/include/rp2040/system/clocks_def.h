@@ -133,20 +133,20 @@ namespace rp2040::system::clocks {
      */
     template <typename ClockLayout>
     concept ClockLayoutConcept =
-        std::is_integral_v<typename ClockLayout::addr> &&
+        std::is_integral_v<decltype(ClockLayout::addr)> &&
         std::is_class_v<typename ClockLayout::Ctrl> &&
-        std::is_same_v<typename ClockLayout::Ctrl::nudge, bool> &&
-        std::is_same_v<typename ClockLayout::Ctrl::phase, bool> &&
-        std::is_same_v<typename ClockLayout::Ctrl::dc50, bool> &&
-        std::is_same_v<typename ClockLayout::Ctrl::enable, bool> &&
-        std::is_same_v<typename ClockLayout::Ctrl::kill, bool> &&
-        std::is_integral_v<typename ClockLayout::Ctrl::aux_src_mask> &&
-        std::is_integral_v<typename ClockLayout::Ctrl::aux_src_max_val> &&
-        std::is_integral_v<typename ClockLayout::Ctrl::src_mask> &&
-        std::is_integral_v<typename ClockLayout::Ctrl::src_max_val> &&
+        std::is_same_v<decltype(ClockLayout::Ctrl::nudge), const bool> &&
+        std::is_same_v<decltype(ClockLayout::Ctrl::phase), const bool> &&
+        std::is_same_v<decltype(ClockLayout::Ctrl::dc50), const bool> &&
+        std::is_same_v<decltype(ClockLayout::Ctrl::enable), const bool> &&
+        std::is_same_v<decltype(ClockLayout::Ctrl::kill), const bool> &&
+        std::is_integral_v<decltype(ClockLayout::Ctrl::aux_src_mask)> &&
+        std::is_integral_v<decltype(ClockLayout::Ctrl::aux_src_max_val)> &&
+        std::is_integral_v<decltype(ClockLayout::Ctrl::src_mask)> &&
+        std::is_integral_v<decltype(ClockLayout::Ctrl::src_max_val)> &&
         std::is_class_v<typename ClockLayout::Div> &&
-        std::is_integral_v<typename ClockLayout::Div::int_mask> &&
-        std::is_integral_v<typename ClockLayout::Div::frac_mask> &&
+        std::is_integral_v<decltype(ClockLayout::Div::int_mask)> &&
+        std::is_integral_v<decltype(ClockLayout::Div::frac_mask)> &&
         std::is_enum_v<typename ClockLayout::Src>;
 
     /**
