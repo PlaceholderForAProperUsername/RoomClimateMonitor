@@ -282,6 +282,87 @@ namespace rp2040::system::clocks {
                 gpin1 = (0x6U << clk_src_param::ctrl_aux_src_position),
             };
         };
+
+        struct Usb {
+            static constexpr std::uintptr_t addr = address::base::usb;
+            struct Ctrl {
+                static constexpr bool nudge {true};
+                static constexpr bool phase {true};
+                static constexpr bool dc50 {false};
+                static constexpr bool enable {true};
+                static constexpr bool kill {true};
+                static constexpr std::uint8_t aux_src_mask {0x7U};
+                static constexpr std::uint8_t aux_src_max_val {5U};
+                static constexpr std::uint8_t src_mask {0x0U};
+                static constexpr std::uint8_t src_max_val {0U};
+            };
+            struct Div {
+                static constexpr std::uint32_t int_mask {0x3U};
+                static constexpr std::uint8_t frac_mask {0x0U};
+            };
+            enum class Src : std::uint32_t {
+                pll_usb = (0x0U << clk_src_param::ctrl_aux_src_position),
+                pll_sys = (0x1U << clk_src_param::ctrl_aux_src_position),
+                rosc = (0x2U << clk_src_param::ctrl_aux_src_position),
+                xosc = (0x3U << clk_src_param::ctrl_aux_src_position),
+                gpin0 = (0x4U << clk_src_param::ctrl_aux_src_position),
+                gpin1 = (0x5U << clk_src_param::ctrl_aux_src_position),
+            };
+        };
+
+        struct Adc {
+            static constexpr std::uintptr_t addr = address::base::adc;
+            struct Ctrl {
+                static constexpr bool nudge {true};
+                static constexpr bool phase {true};
+                static constexpr bool dc50 {false};
+                static constexpr bool enable {true};
+                static constexpr bool kill {true};
+                static constexpr std::uint8_t aux_src_mask {0x7U};
+                static constexpr std::uint8_t aux_src_max_val {5U};
+                static constexpr std::uint8_t src_mask {0x0U};
+                static constexpr std::uint8_t src_max_val {0U};
+            };
+            struct Div {
+                static constexpr std::uint32_t int_mask {0x3U};
+                static constexpr std::uint8_t frac_mask {0x0U};
+            };
+            enum class Src : std::uint32_t {
+                pll_usb = (0x0U << clk_src_param::ctrl_aux_src_position),
+                pll_sys = (0x1U << clk_src_param::ctrl_aux_src_position),
+                rosc = (0x2U << clk_src_param::ctrl_aux_src_position),
+                xosc = (0x3U << clk_src_param::ctrl_aux_src_position),
+                gpin0 = (0x4U << clk_src_param::ctrl_aux_src_position),
+                gpin1 = (0x5U << clk_src_param::ctrl_aux_src_position),
+            };
+        };
+
+        struct Rtc {
+            static constexpr std::uintptr_t addr = address::base::rtc;
+            struct Ctrl {
+                static constexpr bool nudge {true};
+                static constexpr bool phase {true};
+                static constexpr bool dc50 {false};
+                static constexpr bool enable {true};
+                static constexpr bool kill {true};
+                static constexpr std::uint8_t aux_src_mask {0x7U};
+                static constexpr std::uint8_t aux_src_max_val {5U};
+                static constexpr std::uint8_t src_mask {0x0U};
+                static constexpr std::uint8_t src_max_val {0U};
+            };
+            struct Div {
+                static constexpr std::uint32_t int_mask {0xFFFFFFU};
+                static constexpr std::uint8_t frac_mask {0xFFU};
+            };
+            enum class Src : std::uint32_t {
+                pll_usb = (0x0U << clk_src_param::ctrl_aux_src_position),
+                pll_sys = (0x1U << clk_src_param::ctrl_aux_src_position),
+                rosc = (0x2U << clk_src_param::ctrl_aux_src_position),
+                xosc = (0x3U << clk_src_param::ctrl_aux_src_position),
+                gpin0 = (0x4U << clk_src_param::ctrl_aux_src_position),
+                gpin1 = (0x5U << clk_src_param::ctrl_aux_src_position),
+            };
+        };
     }
 
 
