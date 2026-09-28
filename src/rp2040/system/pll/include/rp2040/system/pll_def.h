@@ -58,6 +58,8 @@ namespace rp2040::system::pll {
         constexpr std::uint8_t postdiv_max_val = 7U; /**< @brief The maximum value for the post divider. */
         constexpr std::uint32_t pll_sys_max_freq_hz = 133'000'000U; /**< @brief The maximum value for the RP2040's system PLL. */
         constexpr std::uint32_t pll_usb_freq_hz = 48'000'000U; /**< @brief The value for the RP2040's USB PLL. */
+        constexpr std::uint32_t refdiv_min_val = 1U; /**< @brief Minimum value for the reference divisor. */
+        constexpr std::uint32_t refdiv_max_val = 63U; /**< @brief Maximum value for the reference divisor. */
     }
 
     /**
@@ -159,7 +161,7 @@ namespace rp2040::system::pll {
                     static constexpr T position = 0U; /**< @brief The position of the bits in the register. */
                     static constexpr T mask = (0x3FU << position); /**< @brief The mask of the bits. */
 
-                    static_assert((1 <= Divisor) && (Divisor <= 0x3FU), "Invalid ref divider.");
+                    static_assert((limits::refdiv_min_val <= Divisor) && (Divisor <= limits::refdiv_max_val), "Invalid ref divider.");
 
                     /**
                      * @brief The value to be set to the refdiv bits.
