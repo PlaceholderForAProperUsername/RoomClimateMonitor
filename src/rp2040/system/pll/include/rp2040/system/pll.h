@@ -102,7 +102,7 @@ namespace rp2040::system::pll {
          * @brief Sets the frequency of the PLL.
          *
          * @tparam config The Parameter to configure the PLL. @see PLL_ConfigType
-         * @tparam refFreq_Hz The frequency of the reference clock. The default is the frequency of the XOSC @see XOSC_Type
+         * @tparam ref_freq_hz The frequency of the reference clock. The default is the frequency of the XOSC @see XOSC_Type
          * @return The achieved frequency in Hz or an error code.
         *  @retval unsigned int The frequency at which the PLL runs.
          * @retval ERROR_INIT The PLL is not initialized. @see init
@@ -111,7 +111,7 @@ namespace rp2040::system::pll {
          *
          * @post The PLL runs at the configured frequency.
          */
-        template <PllConfigType config, std::uint32_t refFreq_Hz = 12'000'000U>
+        template <PllConfigType config, std::uint32_t ref_freq_hz = 12'000'000U>
         std::expected<unsigned int, status::Status> set_frequency();
 
         /**

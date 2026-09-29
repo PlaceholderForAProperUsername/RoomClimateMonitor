@@ -21,24 +21,6 @@ namespace rp2040::hardware::i2c {
     namespace address {
         constexpr std::uintptr_t i2c0_base = 0x40044000U; /**< @brief Base address of I2C0. */
         constexpr std::uintptr_t i2c1_base = 0x40048000U; /**< @brief Base address of I2C1. */
-
-
-    }
-
-    /**
-     * @brief Offset of the specific registers from the base address.
-     */
-    namespace offset {
-        constexpr std::uint32_t ctrl = 0x00U; /**< @brief Control register offset. */
-        constexpr std::uint32_t tar = 0x04U; /**< @brief Target address register offset. */
-        constexpr std::uint32_t data = 0x10U; /**< @brief Rx/Tx data buffer and command register offset. */
-        constexpr std::uint32_t ss_scl_hcnt = 0x14U; /**< @brief Standard speed I2C clock SCL high count register offset. */
-        constexpr std::uint32_t ss_scl_lcnt = 0x18U; /**< @brief Standard speed I2C clock SCL low count register offset. */
-        constexpr std::uint32_t fs_scl_hcnt = 0x1CU; /**< @brief Fast speed I2C clock SCL high count register offset. */
-        constexpr std::uint32_t fs_scl_lcnt = 0x20U; /**< @brief Fast speed I2C clock SCL low count register offset. */
-        constexpr std::uint32_t enable = 0x6CU; /**< @brief I2C enable register offset. */
-        constexpr std::uint32_t status = 0x70U; /**< @brief I2C status register offset. */
-        constexpr std::uint32_t fs_spklen = 0xA0U; /**< @brief I2C SS, FS or FM+ spike suppression limit register offset. */
     }
 
 
@@ -51,28 +33,40 @@ namespace rp2040::hardware::i2c {
     struct I2CRegMap {
         static_assert((base == address::i2c0_base) || (base == address::i2c1_base), "Wrong i2c base address!");
 
+        static constexpr std::uint32_t ctrl_offset = 0x00U; /**< @brief Control register offset. */
+        static constexpr std::uint32_t tar_offset = 0x04U; /**< @brief Target address register offset. */
+        static constexpr std::uint32_t data_offset = 0x10U; /**< @brief Rx/Tx data buffer and command register offset. */
+        static constexpr std::uint32_t ss_scl_hcnt_offset = 0x14U; /**< @brief Standard speed I2C clock SCL high count register offset. */
+        static constexpr std::uint32_t ss_scl_lcnt_offset = 0x18U; /**< @brief Standard speed I2C clock SCL low count register offset. */
+        static constexpr std::uint32_t fs_scl_hcnt_offset = 0x1CU; /**< @brief Fast speed I2C clock SCL high count register offset. */
+        static constexpr std::uint32_t fs_scl_lcnt_offset = 0x20U; /**< @brief Fast speed I2C clock SCL low count register offset. */
+        static constexpr std::uint32_t enable_offset = 0x6CU; /**< @brief I2C enable register offset. */
+        static constexpr std::uint32_t status_offset = 0x70U; /**< @brief I2C status register offset. */
+        static constexpr std::uint32_t fs_spklen_offset = 0xA0U; /**< @brief I2C SS, FS or FM+ spike suppression limit register offset. */
+
         /**
          * @brief The I2C control register. (Note: This register is called 'con' in the datasheet.)
          *
          * The I2C must be disabled in order to write to this register. Writes while the I2C is enabled have no effect.
          */
-        struct ctrl {
-            static constexpr std::uintptr_t addr = base + offset::ctrl; /**< @brief The address of the control register. */
+        struct Ctrl {
+            static constexpr std::uintptr_t addr = base + ctrl_offset; /**< @brief The address of the control register. */
             using ctrl_reg = reg_access::Reg<addr, reg_access::access_tag::mixed_access, std::uint32_t>; /**< @brief The ctrl register. */
 
             /**
              * @brief The slave disable bit.
              */
-            struct ic_slave_disable {
+            struct IcSlaveDisable {
                 /**
-                 * @brief A Bitfield to describe the slave disable bit.
+                 * @brief Description of the slave_disable bit.
                  */
-                struct bitfield {
-                    using reg = ctrl_reg; /**< @brief Alias for the register the bitfield belongs to. */
+                struct BitType {
+                    using reg = ctrl_reg; /**< @brief Alias for the register the bits belongs to. */
                     using T = reg::RegType; /**< @brief Alias for the underlying data type of the register. */
+                    using bit_access = reg::reg_access; /**< @brief The access tag defining bit operations. */
 
-                    static constexpr T position = 0x06U; /**< @brief The position of the bitfield in the register. */
-                    static constexpr T mask = (0x01U << position); /**< @brief The mask of the bitfield used in bit operations. */
+                    static constexpr T position = 0x06U; /**< @brief The position of the bit in the register. */
+                    static constexpr T mask = (0x01U << position); /**< @brief The mask of the bit used in bit operations. */
 
                     /**
                      * @brief The slave can either be enabled or disabled.
@@ -82,20 +76,85 @@ namespace rp2040::hardware::i2c {
                         slave_disabled = 0x1U,
                     };
                 };
-
-                using value = bitfield::value; /**< @brief The values for the slave disable bit. */
-
-                using bits = ctrl_reg::template Bits<bitfield>; /**< @brief The bits object to control the slave disable bit. */
+                using Bits = ctrl_reg::template Bits<BitType>; /**< @brief Object to control the slave disable bit. */
+                using Value = BitType::value; /**< @brief The values for the slave disable bit. */
             };
 
             /**
-             * @brief 
+             * @brief Enables sending restart condition.
              */
-            struct ic_restart_en {
-                static constexpr ctrl_reg::RegType Pos = 0x05U;
+            struct IcRestartEn {
+                static constexpr ctrl_reg::RegType pos = 0x05U; /**< @brief Position of the bit in the register. */
+                using BitType = reg_access::BitTypeEnableDisable<ctrl_reg, pos>; /**< @brief Description of the restart enable bit. */
+                using Bits = ctrl_reg::template Bits<BitType>; /**< @brief Object to control the restart enable bit. */
+                using Value = BitType::value; /**< @brief Values of the restart enable bit. */
+            };
 
-                using bits = ctrl_reg::template Bits<reg_access::BitFieldEnableDisable<ctrl_reg, Pos>>;
+            /**
+             * @brief Sets the addressing mode when acting as a master.
+             */
+            struct Ic10BitAddrMaster {
+                /**
+                 * @brief Description of the addressing mode bit.
+                 */
+                struct BitType {
+                    using reg = ctrl_reg; /**< @brief Alias for the register the bits belongs to. */
+                    using T = reg::RegType; /**< @brief Alias for the underlying data type of the register. */
+                    using bit_access = reg::reg_access; /**< @brief The access tag defining bit operations. */
 
+                    static constexpr T position = 0x04U; /**< @brief The position of the bit in the register. */
+                    static constexpr T mask = (0x01U << position); /**< @brief The mask of the bit used in bit operations. */
+
+                    /**
+                     * @brief The addressing modes when acting as a master.
+                     */
+                    enum class value : T {
+                        addr_7bits = 0x00U,
+                        addr_10bits = 0x01U,
+                    };
+                };
+                using Bits = ctrl_reg::template Bits<BitType>; /**< @brief Object to control the 10_bit_addr_master bit. */
+                using Value = BitType::value; /**< @brief Values of the 10_bit_addr_master bit. */
+            };
+
+            /**
+             * @brief Controls the speed at which the i2c controller operates.
+             */
+            struct Speed {
+                /**
+                 * @brief Description of the speed bits.
+                 */
+                struct BitType {
+                    using reg = ctrl_reg; /**< @brief Alias for the register the bits belongs to. */
+                    using T = reg::RegType; /**< @brief Alias for the underlying data type of the register. */
+                    using bit_access = reg::reg_access; /**< @brief The access tag defining bit operations. */
+
+                    static constexpr T position = 0x01U; /**< @brief The position of the bit in the register. */
+                    static constexpr T mask = (0x03U << position); /**< @brief The mask of the bit used in bit operations. */
+
+                    /**
+                     * @brief Available speed modes.
+                     */
+                    enum class value : T {
+                        standard_mode = 0x00U,
+                        fast_mode = 0x01U,
+                        high_speed_mode = 0x02U,
+                    };
+                };
+                using Bits = ctrl_reg::template Bits<BitType>; /**< @brief Object to control the speed bits. */
+                using Value = BitType::value; /**< @brief Values of the speed bits. */
+            };
+
+            /**
+             * @brief Enables/disables the master mode.
+             *
+             * Note: If master mode is enabled, the slave mode should be disabled. @see IcSlaveDisable
+             */
+            struct MasterMode {
+                static constexpr ctrl_reg::RegType pos = 0x00U; /**< @brief Position of the bit in the register. */
+                using BitType = reg_access::BitTypeEnableDisable<ctrl_reg, pos>; /**< @brief Description of the master mode bit. */
+                using Bits = ctrl_reg::template Bits<BitType>; /**< @brief Object to control the master mode bit. */
+                using Value = BitType::value; /**< @brief Values of the master mode bit. */
             };
         };
     };
