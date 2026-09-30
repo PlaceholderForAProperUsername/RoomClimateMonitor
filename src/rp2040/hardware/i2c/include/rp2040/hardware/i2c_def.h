@@ -65,7 +65,7 @@ namespace rp2040::hardware::i2c {
                     using T = reg::RegType; /**< @brief Alias for the underlying data type of the register. */
                     using bit_access = reg::reg_access; /**< @brief The access tag defining bit operations. */
 
-                    static constexpr T position = 0x06U; /**< @brief The position of the bit in the register. */
+                    static constexpr T position = 6U; /**< @brief The position of the bit in the register. */
                     static constexpr T mask = (0x01U << position); /**< @brief The mask of the bit used in bit operations. */
 
                     /**
@@ -84,7 +84,7 @@ namespace rp2040::hardware::i2c {
              * @brief Enables sending restart condition.
              */
             struct IcRestartEn {
-                static constexpr ctrl_reg::RegType pos = 0x05U; /**< @brief Position of the bit in the register. */
+                static constexpr ctrl_reg::RegType pos = 5U; /**< @brief Position of the bit in the register. */
                 using BitType = reg_access::BitTypeEnableDisable<ctrl_reg, pos>; /**< @brief Description of the restart enable bit. */
                 using Bits = ctrl_reg::template Bits<BitType>; /**< @brief Object to control the restart enable bit. */
                 using Value = BitType::value; /**< @brief Values of the restart enable bit. */
@@ -102,7 +102,7 @@ namespace rp2040::hardware::i2c {
                     using T = reg::RegType; /**< @brief Alias for the underlying data type of the register. */
                     using bit_access = reg::reg_access; /**< @brief The access tag defining bit operations. */
 
-                    static constexpr T position = 0x04U; /**< @brief The position of the bit in the register. */
+                    static constexpr T position = 4U; /**< @brief The position of the bit in the register. */
                     static constexpr T mask = (0x01U << position); /**< @brief The mask of the bit used in bit operations. */
 
                     /**
@@ -129,7 +129,7 @@ namespace rp2040::hardware::i2c {
                     using T = reg::RegType; /**< @brief Alias for the underlying data type of the register. */
                     using bit_access = reg::reg_access; /**< @brief The access tag defining bit operations. */
 
-                    static constexpr T position = 0x01U; /**< @brief The position of the bit in the register. */
+                    static constexpr T position = 1U; /**< @brief The position of the bit in the register. */
                     static constexpr T mask = (0x03U << position); /**< @brief The mask of the bit used in bit operations. */
 
                     /**
@@ -151,10 +151,90 @@ namespace rp2040::hardware::i2c {
              * Note: If master mode is enabled, the slave mode should be disabled. @see IcSlaveDisable
              */
             struct MasterMode {
-                static constexpr ctrl_reg::RegType pos = 0x00U; /**< @brief Position of the bit in the register. */
+                static constexpr ctrl_reg::RegType pos = 0U; /**< @brief Position of the bit in the register. */
                 using BitType = reg_access::BitTypeEnableDisable<ctrl_reg, pos>; /**< @brief Description of the master mode bit. */
                 using Bits = ctrl_reg::template Bits<BitType>; /**< @brief Object to control the master mode bit. */
                 using Value = BitType::value; /**< @brief Values of the master mode bit. */
+            };
+        };
+
+        /**
+         * @brief Target address and special command register.
+         *
+         * This register can only be written to when the I2C is disabled.
+         */
+        struct Tar {
+            static constexpr std::uintptr_t addr = base + tar_offset;
+            using tar_reg = reg_access::Reg<addr, reg_access::access_tag::read_write, std::uint32_t>;
+
+            /**
+             * @brief Enables special commands (General call, start byte)
+             */
+            struct Special {
+                static constexpr tar_reg::RegType pos = 11U; /**< @brief Position of the bit in the target register. */
+                using BitType = reg_access::BitTypeEnableDisable<tar_reg, pos>; /**< @brief Description of the special bit. */
+                using Bits = tar_reg::template Bits<BitType>; /**< @brief Object to handle the special bit. */
+                using Value = BitType::value; /**< @brief Values of the special bit. */
+            };
+
+            /**
+             * @brief General call or start byte command bit.
+             *
+             * The @see Special bit must be enabled to send either a general call or a start byte.
+             */
+            struct GcOrStart {
+                /**
+                 * @brief Description of the GcOrStart bit.
+                 */
+                struct BitType {
+                    using reg = tar_reg; /**< @brief Alias for the register the bits belongs to. */
+                    using T = reg::RegType; /**< @brief Alias for the underlying data type of the register. */
+                    using bit_access = reg::reg_access; /**< @brief The access tag defining bit operations. */
+
+                    static constexpr T position = 10U; /**< @brief The position of the bit in the register. */
+                    static constexpr T mask = (0x01U << position); /**< @brief The mask of the bit used in bit operations. */
+
+                    /**
+                     * @brief Values to select general call or start byte command.
+                     */
+                    enum class value : T {
+                        general_call = 0x00U,
+                        start_byte = 0x01U,
+                    };
+                };
+                using Bits = tar_reg::template Bits<BitType>; /**< @brief Object to handle the GcOrStart bit. */
+                using Value = BitType::value; /**< @brief Values of the GcOrStart bit. */
+            };
+
+            /**
+             * @brief Target address for any master transaction.
+             *
+             * @tparam target_address The address of the target.
+             */
+            template <typename tar_reg::RegType target_address>
+            struct IcTar {
+                /**
+                 * @brief Description of the target address bits.
+                 */
+                struct BitType {
+                    using reg = tar_reg; /**< @brief Alias for the register the bits belongs to. */
+                    using T = reg::RegType; /**< @brief Alias for the underlying data type of the register. */
+                    using bit_access = reg::reg_access; /**< @brief The access tag defining bit operations. */
+
+                    static constexpr T position = 0U; /**< @brief The position of the bit in the register. */
+                    static constexpr T mask = (0x3FFU << position); /**< @brief The mask of the bit used in bit operations. */
+
+                    static_assert(target_address <= mask, "Invalid value for target address!");
+
+                    /**
+                     * @brief Target address value.
+                     */
+                    enum class value : T {
+                        val = target_address,
+                    };
+                };
+                using Bits = tar_reg::template Bits<BitType>; /**< @brief Object to handle the target address bits. */
+                using Value = BitType::value; /**< @brief Value of the target address bits. */
             };
         };
     };
