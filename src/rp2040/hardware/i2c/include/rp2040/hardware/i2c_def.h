@@ -447,6 +447,204 @@ namespace rp2040::hardware::i2c {
                 using Value = BitType::value; /**< @brief Values of the enable bit. */
             };
         };
+
+        /**
+         * @brief The status register.
+         */
+        struct Status {
+            static constexpr std::uintptr_t addr = base + status_offset; /**< @brief Address of the status register. */
+            using status_reg = reg_access::Reg<addr, reg_access::access_tag::read, std::uint32_t>; /**< @brief The status register. */
+
+
+            /**
+             * @brief Slave FSM activity status.
+             */
+            struct SlvActivity {
+                /**
+                 * @brief Description of the slave activity bit.
+                 */
+                struct BitType {
+                    using reg = status_reg; /**< @brief Alias for the register the bits belongs to. */
+                    using T = reg::RegType; /**< @brief Alias for the underlying data type of the register. */
+                    using bit_access = status_reg::reg_access; /**< @brief The access tag defining bit operations. */
+
+                    static constexpr T position = 6U; /**< @brief The position of the bit in the register. */
+                    static constexpr T mask = (0x1U << position); /**< @brief The mask of the bit used in bit operations. */
+
+                    /**
+                     * @brief The activity value.
+                     */
+                    enum class value : T {
+                        idle = 0x00U, /**< @brief Slave is idle. */
+                        active = 0x01U, /**< @brief Slave is active. */
+                    };
+                };
+                using Bits = status_reg::template Bits<BitType>; /**< @brief Object to handle the slave activity bit. */
+                using Value = BitType::value; /**< @brief Values of the slave activity bit. */
+            };
+
+            /**
+            * @brief Master FSM activity status.
+            */
+            struct MstActivity {
+                /**
+                 * @brief Description of the master activity bit.
+                 */
+                struct BitType {
+                    using reg = status_reg; /**< @brief Alias for the register the bits belongs to. */
+                    using T = reg::RegType; /**< @brief Alias for the underlying data type of the register. */
+                    using bit_access = status_reg::reg_access; /**< @brief The access tag defining bit operations. */
+
+                    static constexpr T position = 5U; /**< @brief The position of the bit in the register. */
+                    static constexpr T mask = (0x1U << position); /**< @brief The mask of the bit used in bit operations. */
+
+                    /**
+                     * @brief The activity value.
+                     */
+                    enum class value : T {
+                        idle = 0x00U, /**< @brief Master is idle. */
+                        active = 0x01U, /**< @brief Master is active. */
+                    };
+                };
+                using Bits = status_reg::template Bits<BitType>; /**< @brief Object to handle the Master activity bit. */
+                using Value = BitType::value; /**< @brief Values of the Master activity bit. */
+            };
+
+            /**
+            * @brief Receive FIFO full bit.
+            */
+            struct Rff {
+                /**
+                 * @brief Description of the rff bit.
+                 */
+                struct BitType {
+                    using reg = status_reg; /**< @brief Alias for the register the bits belongs to. */
+                    using T = reg::RegType; /**< @brief Alias for the underlying data type of the register. */
+                    using bit_access = status_reg::reg_access; /**< @brief The access tag defining bit operations. */
+
+                    static constexpr T position = 4U; /**< @brief The position of the bit in the register. */
+                    static constexpr T mask = (0x1U << position); /**< @brief The mask of the bit used in bit operations. */
+
+                    /**
+                     * @brief The fullness value.
+                     */
+                    enum class value : T {
+                        not_full = 0x00U, /**< @brief Receive FIFO not full. */
+                        full = 0x01U, /**< @brief Receive FIFO full. */
+                    };
+                };
+                using Bits = status_reg::template Bits<BitType>; /**< @brief Object to handle the rff bit. */
+                using Value = BitType::value; /**< @brief Values of the rff bit. */
+            };
+
+            /**
+            * @brief Receive FIFO not empty bit.
+            */
+            struct Rfne {
+                /**
+                 * @brief Description of the rfne bit.
+                 */
+                struct BitType {
+                    using reg = status_reg; /**< @brief Alias for the register the bits belongs to. */
+                    using T = reg::RegType; /**< @brief Alias for the underlying data type of the register. */
+                    using bit_access = status_reg::reg_access; /**< @brief The access tag defining bit operations. */
+
+                    static constexpr T position = 3U; /**< @brief The position of the bit in the register. */
+                    static constexpr T mask = (0x1U << position); /**< @brief The mask of the bit used in bit operations. */
+
+                    /**
+                     * @brief The fullness value.
+                     */
+                    enum class value : T {
+                        empty = 0x00U, /**< @brief Receive FIFO is empty. */
+                        not_empty = 0x01U, /**< @brief Receive FIFO not empty. */
+                    };
+                };
+                using Bits = status_reg::template Bits<BitType>; /**< @brief Object to handle the rfne bit. */
+                using Value = BitType::value; /**< @brief Values of the rfne bit. */
+            };
+
+            /**
+            * @brief Transmit FIFO empty bit.
+            */
+            struct Tfe {
+                /**
+                 * @brief Description of the tfe bit.
+                 */
+                struct BitType {
+                    using reg = status_reg; /**< @brief Alias for the register the bits belongs to. */
+                    using T = reg::RegType; /**< @brief Alias for the underlying data type of the register. */
+                    using bit_access = status_reg::reg_access; /**< @brief The access tag defining bit operations. */
+
+                    static constexpr T position = 2U; /**< @brief The position of the bit in the register. */
+                    static constexpr T mask = (0x1U << position); /**< @brief The mask of the bit used in bit operations. */
+
+                    /**
+                     * @brief The fullness value.
+                     */
+                    enum class value : T {
+                        non_empty = 0x00U, /**< @brief Transmit FIFO not empty. */
+                        empty = 0x01U, /**< @brief Transmit FIFO is empty. */
+                    };
+                };
+                using Bits = status_reg::template Bits<BitType>; /**< @brief Object to handle the tfe bit. */
+                using Value = BitType::value; /**< @brief Values of the tfe bit. */
+            };
+
+            /**
+            * @brief Transmit FIFO not full bit.
+            */
+            struct Tfnf {
+                /**
+                 * @brief Description of the tfnf bit.
+                 */
+                struct BitType {
+                    using reg = status_reg; /**< @brief Alias for the register the bits belongs to. */
+                    using T = reg::RegType; /**< @brief Alias for the underlying data type of the register. */
+                    using bit_access = status_reg::reg_access; /**< @brief The access tag defining bit operations. */
+
+                    static constexpr T position = 1U; /**< @brief The position of the bit in the register. */
+                    static constexpr T mask = (0x1U << position); /**< @brief The mask of the bit used in bit operations. */
+
+                    /**
+                     * @brief The fullness value.
+                     */
+                    enum class value : T {
+                        full = 0x00U, /**< @brief Receive FIFO is full. */
+                        not_full = 0x01U, /**< @brief Receive FIFO not full. */
+                    };
+                };
+                using Bits = status_reg::template Bits<BitType>; /**< @brief Object to handle the tfnf bit. */
+                using Value = BitType::value; /**< @brief Values of the tfnf bit. */
+            };
+
+            /**
+            * @brief I2C activity status.
+            */
+            struct Activity {
+                /**
+                 * @brief Description of the I2C activity bit.
+                 */
+                struct BitType {
+                    using reg = status_reg; /**< @brief Alias for the register the bits belongs to. */
+                    using T = reg::RegType; /**< @brief Alias for the underlying data type of the register. */
+                    using bit_access = status_reg::reg_access; /**< @brief The access tag defining bit operations. */
+
+                    static constexpr T position = 0U; /**< @brief The position of the bit in the register. */
+                    static constexpr T mask = (0x1U << position); /**< @brief The mask of the bit used in bit operations. */
+
+                    /**
+                     * @brief The activity value.
+                     */
+                    enum class value : T {
+                        inactive = 0x00U, /**< @brief I2C is idle. */
+                        active = 0x01U, /**< @brief I2C is active. */
+                    };
+                };
+                using Bits = status_reg::template Bits<BitType>; /**< @brief Object to handle the I2C activity bit. */
+                using Value = BitType::value; /**< @brief Values of the I2C activity bit. */
+            };
+        };
     };
 
     /** @} */ // rp2040_i2c
