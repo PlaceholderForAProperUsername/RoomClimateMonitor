@@ -645,6 +645,44 @@ namespace rp2040::hardware::i2c {
                 using Value = BitType::value; /**< @brief Values of the I2C activity bit. */
             };
         };
+
+        /**
+         * @brief The spike length suppression register.
+         */
+        struct IcFsSpkLen {
+            static constexpr std::uintptr_t addr = base + fs_spklen_offset;
+            using spk_len_reg = reg_access::Reg<addr, reg_access::access_tag::read_write, std::uint32_t>;
+
+            /**
+             * @brief The spike length suppression bits.
+             *
+             * @tparam spk_len The length of the suppression in ic_clk cycles.
+             */
+            template <typename spk_len_reg::RegType spk_len>
+            struct SpkLen {
+                /** @brief Description of the spike length suppression bits. */
+                struct BitType {
+                    using reg = spk_len_reg; /**< @brief Alias for the register the bits belongs to. */
+                    using T = reg::RegType; /**< @brief Alias for the underlying data type of the register. */
+                    using bit_access = spk_len_reg::reg_access; /**< @brief The access tag defining bit operations. */
+
+                    static constexpr T position = 0U; /**< @brief The position of the bit in the register. */
+                    static constexpr T mask = (0xFFU << position); /**< @brief The mask of the bit used in bit operations. */
+
+                    static_assert((1 <= spk_len) && (spk_len <= mask), "Invalid spk_len value");
+
+                    /**
+                     * @brief The length of the longest spike filtered out.
+                     */
+                    enum class value : T {
+                        val = spk_len,
+                    };
+                };
+                using Bits = spk_len_reg::template Bits<BitType>; /**< @brief Object to handle the spike length suppression bit. */
+                using Value = BitType::value; /**< @brief Values of the spike length suppression bit. */
+            };
+
+        };
     };
 
     /** @} */ // rp2040_i2c
