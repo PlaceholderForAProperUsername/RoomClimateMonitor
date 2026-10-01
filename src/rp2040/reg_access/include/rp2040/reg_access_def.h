@@ -32,6 +32,11 @@ namespace rp2040::reg_access {
         struct mixed_access : read_write {};
         /** @brief Tag to control read and write access. Used to indicate a bit can be cleared with a write. */
         struct write_clear : read_write {};
+        /**
+         * @brief Tag to control read and write access. Used to indicate a bit is self-clearing, meaning if it is set
+         * and the event happens, this bit is automatically cleared.
+         */
+        struct self_clear : read, write {};
     }
 
     /**
