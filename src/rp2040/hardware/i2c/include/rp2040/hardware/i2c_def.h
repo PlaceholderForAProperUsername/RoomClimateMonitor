@@ -164,8 +164,8 @@ namespace rp2040::hardware::i2c {
          * This register can only be written to when the I2C is disabled.
          */
         struct Tar {
-            static constexpr std::uintptr_t addr = base + tar_offset;
-            using tar_reg = reg_access::Reg<addr, reg_access::access_tag::read_write, std::uint32_t>;
+            static constexpr std::uintptr_t addr = base + tar_offset; /**< @brief The address of the target address register. */
+            using tar_reg = reg_access::Reg<addr, reg_access::access_tag::read_write, std::uint32_t>; /**< @brief The target address register. */
 
             /**
              * @brief Enables special commands (General call, start byte)
@@ -239,8 +239,8 @@ namespace rp2040::hardware::i2c {
         };
 
         struct DataCmd {
-            static constexpr std::uintptr_t addr = base + data_offset;
-            using data_reg = reg_access::Reg<addr, reg_access::access_tag::mixed_access, std::uint32_t>;
+            static constexpr std::uintptr_t addr = base + data_offset; /**< @brief The address of the data cmd register. */
+            using data_reg = reg_access::Reg<addr, reg_access::access_tag::mixed_access, std::uint32_t>; /**< @brief The data cmd register. */
 
             /**
              * @brief Indicates if the byte received is the first data byte after address phase or an sequential byte.
@@ -345,6 +345,53 @@ namespace rp2040::hardware::i2c {
                 using Value = BitType::value; /**< @brief Values of the data bit. */
             };
         };
+
+        /**
+         * @brief The scl count register base.
+         *
+         * There are four count registers with the same layout: ss_scl_hcnt, ss_scl_lcnt, fs_scl_hcnt and fs_scl_lcnt.
+         *
+         * @tparam offset The register offset from the base address.
+         */
+        template <std::uintptr_t offset>
+        struct CountBase {
+            static constexpr std::uintptr_t addr = base + offset; /**< @brief The address of the count register. */
+            using cnt_reg = reg_access::Reg<addr, reg_access::access_tag::read_write, std::uint32_t>; /**< @brief The count register. */
+
+            /**
+             * @brief The count bits.
+             *
+             * @tparam count The count value.
+             */
+            template <typename cnt_reg::RegType count>
+            struct Cnt {
+                /** @brief Description of the count bits. */
+                struct BitType {
+                    using reg = cnt_reg; /**< @brief Alias for the register the bits belongs to. */
+                    using T = reg::RegType; /**< @brief Alias for the underlying data type of the register. */
+                    using bit_access = cnt_reg::reg_access; /**< @brief The access tag defining bit operations. */
+
+                    static constexpr T position = 0U; /**< @brief The position of the bit in the register. */
+                    static constexpr T mask = (0xFFFFU << position); /**< @brief The mask of the bit used in bit operations. */
+
+                    static_assert(count <= mask, "Invalid value for cnt bits!");
+
+                    /**
+                     * @brief The count value.
+                     */
+                    enum class value : T {
+                        val = count,
+                    };
+                };
+                using Bits = cnt_reg::template Bits<BitType>; /**< @brief Object to handle the count bits. */
+                using Value = BitType::value; /**< @brief Values of the count bits. */
+            };
+        };
+
+        using SsSclHcnt = CountBase<ss_scl_hcnt_offset>; /**< @brief The standard speed scl high count register. */
+        using SsSclLcnt = CountBase<ss_scl_lcnt_offset>; /**< @brief The standard speed scl low count register. */
+        using FsSclHcnt = CountBase<fs_scl_hcnt_offset>; /**< @brief The fast speed scl high count register. */
+        using FsSclLcnt = CountBase<fs_scl_lcnt_offset>; /**< @brief The fast speed scl low count register. */
     };
 
     /** @} */ // rp2040_i2c
