@@ -392,6 +392,61 @@ namespace rp2040::hardware::i2c {
         using SsSclLcnt = CountBase<ss_scl_lcnt_offset>; /**< @brief The standard speed scl low count register. */
         using FsSclHcnt = CountBase<fs_scl_hcnt_offset>; /**< @brief The fast speed scl high count register. */
         using FsSclLcnt = CountBase<fs_scl_lcnt_offset>; /**< @brief The fast speed scl low count register. */
+
+        /**
+         * @brief The enable register.
+         */
+        struct IcEnable {
+            static constexpr std::uintptr_t addr = base + enable_offset;
+            using enable_reg = reg_access::Reg<addr, reg_access::access_tag::read_write, std::uint32_t>;
+
+            /**
+             * @brief Blocks the transmission in master mode
+             */
+            struct TxCmdBlock {
+                /**
+                 * @brief Description of the TxCmdBlock bit.
+                 */
+                struct BitType {
+                    using reg = enable_reg; /**< @brief Alias for the register the bits belongs to. */
+                    using T = reg::RegType; /**< @brief Alias for the underlying data type of the register. */
+                    using bit_access = enable_reg::reg_access; /**< @brief The access tag defining bit operations. */
+
+                    static constexpr T position = 2U; /**< @brief The position of the bit in the register. */
+                    static constexpr T mask = (0x1U << position); /**< @brief The mask of the bit used in bit operations. */
+
+                    /**
+                     * @brief The count value.
+                     */
+                    enum class value : T {
+                        not_blocked = 0x00U, /**< @brief Transmission command execution not blocked. */
+                        blocked = 0x01U, /**< @brief Transmission command execution blocked. */
+                    };
+                };
+                using Bits = enable_reg::template Bits<BitType>; /**< @brief Object to handle the TxCmdBlock bit. */
+                using Value = BitType::value; /**< @brief Values of the TxCmdBlock bit. */
+            };
+
+            /**
+             * @brief Enables the transfer abort.
+             */
+            struct Abort {
+                static constexpr enable_reg::RegType pos = 1U; /**< @brief Position of the abort bit in the register. */
+                using BitType = reg_access::BitTypeEnableDisable<enable_reg, pos>; /**< @brief Description of the abort bit. */
+                using Bits = enable_reg::template Bits<BitType>; /**< @brief Object to handle the abort bit. */
+                using Value = BitType::value; /**< @brief Values of the abort bit. */
+            };
+
+            /**
+             * @brief Enables the i2c controller.
+             */
+            struct Enable {
+                static constexpr enable_reg::RegType pos = 0U; /**< @brief Position of the enable bit in the register. */
+                using BitType = reg_access::BitTypeEnableDisable<enable_reg, pos>; /**< @brief Description of the enable bit. */
+                using Bits = enable_reg::template Bits<BitType>; /**< @brief Object to handle the enable bit. */
+                using Value = BitType::value; /**< @brief Values of the enable bit. */
+            };
+        };
     };
 
     /** @} */ // rp2040_i2c
