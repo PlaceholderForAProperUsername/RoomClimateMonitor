@@ -25,6 +25,8 @@
 #ifndef RP2040_HARDWARE_I2C_H
 #define RP2040_HARDWARE_I2C_H
 
+#include <bitset>
+
 #include "i2c_def.h"
 
 namespace rp2040::hardware::i2c {
@@ -39,10 +41,18 @@ namespace rp2040::hardware::i2c {
     public:
         static I2cType& get_instance();
 
+        void init();
+
     private:
         using Registers = I2CRegMap<base>;
 
-        I2cType() = default;
+        I2cType() : m_flags(0) {};
+
+        enum class Flags : std::uint32_t {
+            initialized = 0U,
+            number_of_flags
+        };
+        std::bitset<static_cast<std::uint32_t>(Flags::number_of_flags)> m_flags;
     };
 
     using I2C0 = I2cType<address::i2c0_base>;

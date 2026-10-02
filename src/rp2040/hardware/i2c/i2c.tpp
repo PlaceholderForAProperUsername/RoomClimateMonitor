@@ -25,7 +25,10 @@
 #ifndef RP2040_HARDWARE_I2C_T
 #define RP2040_HARDWARE_I2C_T
 
+#include <utility>
+
 #include "include/rp2040/hardware/i2c.h"
+#include "rp2040/system/resets.h"
 
 namespace rp2040::hardware::i2c {
     /**
@@ -37,6 +40,20 @@ namespace rp2040::hardware::i2c {
     I2cType<base>& I2cType<base>::get_instance() {
         static I2cType instance;
         return instance;
+    }
+
+    template <std::uintptr_t base>
+    void I2cType<base>::init() {
+        if (m_flags.test(std::to_underlying(Flags::initialized))) {
+            return;
+        }
+        if constexpr (base == address::i2c0_base) {
+            system::resets::Resets::get_instance().reset<system::resets::Subsystems::i2c0>();
+        } else if constexpr (base == address::i2c1_base) {
+            system::resets::Resets::get_instance().reset<system::resets::Subsystems::i2c1>();
+        }
+
+        m_flags.set(std::to_underlying(Flags::initialized));
     }
 
     /** @} */ // rp2040_i2c
