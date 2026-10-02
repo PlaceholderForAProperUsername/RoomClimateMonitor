@@ -7,4 +7,4 @@ add_subdirectory(reg_access)
 add_subdirectory(startup)
 add_subdirectory(system)
 
-target_link_libraries(${TARGET} INTERFACE RP2040_Startup RP2040_System)
+target_link_libraries(${TARGET} INTERFACE RP2040_Hardware RP2040_Startup RP2040_System)
