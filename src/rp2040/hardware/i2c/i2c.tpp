@@ -56,6 +56,17 @@ namespace rp2040::hardware::i2c {
         m_flags.set(std::to_underlying(Flags::initialized));
     }
 
+    template <std::uintptr_t base>
+    void I2cType<base>::deinit() {
+        if constexpr (base == address::i2c0_base) {
+            system::resets::Resets::get_instance().disable<system::resets::Subsystems::i2c0>();
+        } else if constexpr (base == address::i2c1_base) {
+            system::resets::Resets::get_instance().disable<system::resets::Subsystems::i2c1>();
+        }
+
+        m_flags.reset(std::to_underlying(Flags::initialized));
+    }
+
     /** @} */ // rp2040_i2c
 }
 

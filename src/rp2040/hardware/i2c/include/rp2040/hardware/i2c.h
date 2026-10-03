@@ -35,13 +35,42 @@ namespace rp2040::hardware::i2c {
      * @{
      */
 
+    /**
+     * @brief The I2C controller.
+     *
+     * @tparam base Base address of the I2C controller.
+     */
     template <std::uintptr_t base>
     class I2cType {
         static_assert((base == address::i2c0_base) || (base == address::i2c1_base), "Wrong i2c base address!");
     public:
+        /**
+         * @brief Gets the singleton instance.
+         *
+         * @return I2cType The singleton instance.
+         */
         static I2cType& get_instance();
 
+        /**
+         * @brief Initializes the I2C controller.
+         *
+         * This function deasserts the reset of the I2C controller and allowing access to the register of the I2C
+         * controller.
+         *
+         * @pre None
+         *
+         * @post The I2C controller is initialized and ready to be configured.
+         */
         void init();
+
+        /**
+         * @brief Deinitializes the I2C controller.
+         *
+         * @pre None
+         *
+         * @post The I2C controller is deinitialized and the registers are inaccessible.
+         */
+        void deinit();
 
     private:
         using Registers = I2CRegMap<base>;
