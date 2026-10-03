@@ -36,6 +36,23 @@ namespace rp2040::hardware::i2c {
      */
 
     /**
+     * @brief The speed modes available to the RP2040's I2C controllers.
+     */
+    enum class SpeedMode : std::uint32_t {
+        standard = 0x00U,
+        fast = 0x01U,
+        high_speed = 0x02U
+    };
+
+    /**
+     * @brief The address modes.
+     */
+    enum class AddressMode : std::uint32_t {
+        addr_7bits = 0x00U,
+        addr_10bits = 0x01U,
+    };
+
+    /**
      * @brief Base addresses of the I2C.
      */
     namespace address {
@@ -128,10 +145,7 @@ namespace rp2040::hardware::i2c {
                     /**
                      * @brief The addressing modes when acting as a master.
                      */
-                    enum class value : T {
-                        addr_7bits = 0x00U,
-                        addr_10bits = 0x01U,
-                    };
+                    using value = AddressMode;
                 };
                 using Bits = ctrl_reg::template Bits<BitType>; /**< @brief Object to control the 10_bit_addr_master bit. */
                 using Value = BitType::value; /**< @brief Values of the 10_bit_addr_master bit. */
@@ -155,11 +169,7 @@ namespace rp2040::hardware::i2c {
                     /**
                      * @brief Available speed modes.
                      */
-                    enum class value : T {
-                        standard_mode = 0x00U,
-                        fast_mode = 0x01U,
-                        high_speed_mode = 0x02U,
-                    };
+                    using value = SpeedMode;
                 };
                 using Bits = ctrl_reg::template Bits<BitType>; /**< @brief Object to control the speed bits. */
                 using Value = BitType::value; /**< @brief Values of the speed bits. */
