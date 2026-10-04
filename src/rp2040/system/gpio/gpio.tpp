@@ -38,7 +38,7 @@ namespace rp2040::system::gpio {
      */
 
     template <std::uintptr_t ioBankBase, std::uintptr_t padsBankBase, std::uintptr_t sioBase>
-    GpioType<ioBankBase, padsBankBase, sioBase>& GpioType<ioBankBase, padsBankBase, sioBase>::getInstance() {
+    GpioType<ioBankBase, padsBankBase, sioBase>& GpioType<ioBankBase, padsBankBase, sioBase>::get_instance() {
         static GpioType<ioBankBase, padsBankBase, sioBase> instance;
         return instance;
     }
@@ -97,12 +97,12 @@ namespace rp2040::system::gpio {
         if constexpr (enable) {
             if (!m_output_enabled.test(static_cast<std::uint32_t>(pin))) {
                 pad_t::OutputDisable::Bits::clear();
-                sio_bank::OutputEnable::Set::template Gpio<pin>::set();
+                sio_bank::OutputEnable::Set::template Gpio<pin>::Bits::set();
                 m_output_enabled.set(static_cast<std::uint32_t>(pin));
             }
         } else {
             if (m_output_enabled.test(static_cast<std::uint32_t>(pin))) {
-                sio_bank::OutputEnable::Clear::template Gpio<pin>::clear();
+                sio_bank::OutputEnable::Clear::template Gpio<pin>::Bits::clear();
                 m_output_enabled.reset(static_cast<std::uint32_t>(pin));
             }
         }
@@ -122,9 +122,9 @@ namespace rp2040::system::gpio {
         static_assert(pin < Pins::number_of_gpio, "Invalid GPIO pin!");
 
         if constexpr (high) {
-            sio_bank::Output::Set::template Gpio<pin>::set();
+            sio_bank::Output::Set::template Gpio<pin>::Bits::set();
         } else {
-            sio_bank::Output::Clear::template Gpio<pin>::clear();
+            sio_bank::Output::Clear::template Gpio<pin>::Bits::clear();
         }
         return status::Status::OK;
     }
@@ -140,7 +140,7 @@ namespace rp2040::system::gpio {
         }
         static_assert(pin < Pins::number_of_gpio, "Invalid GPIO pin!");
 
-        sio_bank::Output::Toggle::template Gpio<pin>::toggle();
+        sio_bank::Output::Toggle::template Gpio<pin>::Bits::toggle();
 
         return status::Status::OK;
     }

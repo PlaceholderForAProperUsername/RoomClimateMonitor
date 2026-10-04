@@ -56,7 +56,7 @@ namespace rp2040::system::gpio {
          *
          * @return GpioType& The Singleton instance.
          */
-        static GpioType<ioBankBase, padsBankBase, sioBase>& getInstance();
+        static GpioType<ioBankBase, padsBankBase, sioBase>& get_instance();
 
         /**
          * @brief Initializes the GPIO module by taking it out of reset.
