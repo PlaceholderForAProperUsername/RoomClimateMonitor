@@ -39,9 +39,9 @@ namespace rp2040::hardware::i2c {
      * @brief The speed modes available to the RP2040's I2C controllers.
      */
     enum class SpeedMode : std::uint32_t {
-        standard = 0x00U,
-        fast = 0x01U,
-        high_speed = 0x02U
+        standard = 0x00U, /**< @brief Data rates of <= 100kbps. */
+        fast = 0x01U, /**< @brief Data rates of <= 400kbps. */
+        fast_plus = 0x02U /**< @brief Data rates of <= 1000kbps. */
     };
 
     /**
@@ -79,6 +79,7 @@ namespace rp2040::hardware::i2c {
         static constexpr std::uint32_t fs_scl_lcnt_offset = 0x20U; /**< @brief Fast speed I2C clock SCL low count register offset. */
         static constexpr std::uint32_t enable_offset = 0x6CU; /**< @brief I2C enable register offset. */
         static constexpr std::uint32_t status_offset = 0x70U; /**< @brief I2C status register offset. */
+        static constexpr std::uint32_t sda_hold_offset = 0x7CU; /**< @brief I2C SDA hold register offset. */
         static constexpr std::uint32_t fs_spklen_offset = 0xA0U; /**< @brief I2C SS, FS or FM+ spike suppression limit register offset. */
 
         /**
@@ -677,11 +678,80 @@ namespace rp2040::hardware::i2c {
         };
 
         /**
+         * @brief The SDA hold register.
+         *
+         * Sets the hold time when acting as a receiver (SdaRxHold) or transmitter (SdaTxHold). The bits can only be set
+         * when the I2C controller is disabled. @See IcEnable
+         */
+        struct SdaHold {
+            static constexpr std::uintptr_t addr = base + sda_hold_offset; /**< @brief Address of the SDA hold register. */
+            using sda_hold_reg = reg_access::Reg<addr, reg_access::access_tag::read_write, std::uint32_t>; /**< @brief The SDA hold register. */
+
+            /**
+             * @brief The SDA receive hold register.
+             *
+             * @tparam hold_count The hold time in clock cycles.
+             */
+            template <typename sda_hold_reg::RegType hold_count>
+            struct SdaRxHold {
+                /** @brief Description of the SDA receive hold bits. */
+                struct BitType {
+                    using reg = sda_hold_reg; /**< @brief Alias for the register the bits belongs to. */
+                    using T = reg::RegType; /**< @brief Alias for the underlying data type of the register. */
+                    using bit_access = sda_hold_reg::reg_access; /**< @brief The access tag defining bit operations. */
+
+                    static constexpr T position = 16U; /**< @brief The position of the bit in the register. */
+                    static constexpr T mask = (0xFFU << position); /**< @brief The mask of the bit used in bit operations. */
+
+                    static_assert(hold_count <= mask, "Invalid hold count value");
+
+                    /**
+                     * @brief The SDA hold time in clock cycles.
+                     */
+                    enum class value : T {
+                        val = hold_count,
+                    };
+                };
+                using Bits = sda_hold_reg::template Bits<BitType>; /**< @brief Object to handle the SDA receive hold bit. */
+                using Value = BitType::value; /**< @brief Values of the SDA receive hold bit. */
+            };
+
+            /**
+             * @brief The SDA transmission hold register.
+             *
+             * @tparam hold_count The hold time in clock cycles.
+             */
+            template <typename sda_hold_reg::RegType hold_count>
+            struct SdaTxHold {
+                /** @brief Description of the SDA transmission hold bits. */
+                struct BitType {
+                    using reg = sda_hold_reg; /**< @brief Alias for the register the bits belongs to. */
+                    using T = reg::RegType; /**< @brief Alias for the underlying data type of the register. */
+                    using bit_access = sda_hold_reg::reg_access; /**< @brief The access tag defining bit operations. */
+
+                    static constexpr T position = 0U; /**< @brief The position of the bit in the register. */
+                    static constexpr T mask = (0xFFFFU << position); /**< @brief The mask of the bit used in bit operations. */
+
+                    static_assert(hold_count <= mask, "Invalid hold count value");
+
+                    /**
+                     * @brief The SDA transmission hold time in clock cycles.
+                     */
+                    enum class value : T {
+                        val = hold_count,
+                    };
+                };
+                using Bits = sda_hold_reg::template Bits<BitType>; /**< @brief Object to handle the SDA transmission hold bit. */
+                using Value = BitType::value; /**< @brief Values of the SDA transmission hold bit. */
+            };
+        };
+
+        /**
          * @brief The spike length suppression register.
          */
         struct IcFsSpkLen {
-            static constexpr std::uintptr_t addr = base + fs_spklen_offset;
-            using spk_len_reg = reg_access::Reg<addr, reg_access::access_tag::read_write, std::uint32_t>;
+            static constexpr std::uintptr_t addr = base + fs_spklen_offset; /**< @brief Address of the spike length register. */
+            using spk_len_reg = reg_access::Reg<addr, reg_access::access_tag::read_write, std::uint32_t>; /**< @brief The spike length register. */
 
             /**
              * @brief The spike length suppression bits.
