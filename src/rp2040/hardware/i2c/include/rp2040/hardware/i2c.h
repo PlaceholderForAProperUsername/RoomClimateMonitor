@@ -27,13 +27,27 @@
 
 #include <bitset>
 
+#include "status.h"
 #include "i2c_def.h"
+#include "rp2040/system/pll_def.h"
+
 
 namespace rp2040::hardware::i2c {
     /**
      * @addtogroup rp2040_i2c
      * @{
      */
+
+    /**
+     * @brief Config to configure the I2C controller as a master.
+     */
+    struct MasterConfig {
+        SpeedMode speed_mode;
+        AddressMode address_mode;
+        std::uint32_t sys_clock_hz;
+        constexpr MasterConfig(const SpeedMode speed_mode, const AddressMode address_mode, const std::uint32_t sys_clock_hz) :
+        speed_mode(speed_mode), address_mode(address_mode), sys_clock_hz(sys_clock_hz) {}
+    };
 
     /**
      * @brief The I2C controller.
@@ -72,8 +86,12 @@ namespace rp2040::hardware::i2c {
          */
         void deinit();
 
+        template <MasterConfig config>
+        status::Status configure();
+
     private:
         using Registers = I2CRegMap<base>;
+
 
         I2cType() : m_flags(0) {};
 
