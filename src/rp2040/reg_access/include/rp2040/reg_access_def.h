@@ -20,8 +20,6 @@ namespace rp2040::reg_access {
         struct atomic {};
         /** @brief Tag to enable atomic set operation. */
         struct atomic_set : write, atomic {};
-        /** @brief Specialized Tag to enable atomic set operation where the value is the mask. */
-        struct atomic_set_mask : write, atomic {};
         /** @brief Tag to enable atomic clear operation. */
         struct atomic_clear : write, atomic {};
         /** @brief Tag to enable atomic xor operation. */
@@ -64,9 +62,14 @@ namespace rp2040::reg_access {
     concept BitTypeConcept =
             std::is_same_v<Reg, typename BitType::reg> &&
             std::is_same_v<decltype(BitType::position), const T> &&
-            std::is_same_v<decltype(BitType::mask), const T> &&
-            std::is_enum_v<typename BitType::value> &&
-            std::is_same_v<std::underlying_type_t<typename BitType::value>, T>;
+            std::is_same_v<decltype(BitType::mask), const T>; //&&
+            //std::is_enum_v<typename BitType::value> &&
+            //std::is_same_v<std::underlying_type_t<typename BitType::value>, T>;
+
+    template <typename BitType, typename T>
+    concept HasValueConcept =
+        std::is_enum_v<typename BitType::value> &&
+        std::is_same_v<std::underlying_type_t<typename BitType::value>, T>;
 
 }// rp2040::reg_access
 

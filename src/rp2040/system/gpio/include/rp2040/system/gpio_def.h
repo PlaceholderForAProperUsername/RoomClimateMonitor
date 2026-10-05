@@ -1104,7 +1104,7 @@ namespace rp2040::system::gpio {
              */
             struct Set {
                 static constexpr std::uintptr_t outputSetAddr = output_base_addr + set_offset; /**< @brief Base address of the atomic set register. */
-                using set_reg = reg_access::Reg<outputSetAddr, reg_access::access_tag::atomic_set_mask, std::uint32_t>; /**< @brief The atomic set register. */
+                using set_reg = reg_access::Reg<outputSetAddr, reg_access::access_tag::atomic_set, std::uint32_t>; /**< @brief The atomic set register. */
 
                 /**
                  * @brief GPIO bit of the atomic set register.

@@ -75,7 +75,7 @@ namespace rp2040::system::resets {
         using reset_done_value_t = reset_done_r::template Subsystem<subsystem>::Value;
         using T = reset_done_r::reset_done_reg::RegType;
 
-        return reset_done_bits_t::getValue() == static_cast<T>(reset_done_value_t::enabled);
+        return reset_done_bits_t::get_value() == static_cast<T>(reset_done_value_t::enabled);
     }
 
     /** @} */

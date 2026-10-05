@@ -77,7 +77,7 @@ namespace rp2040::system::pll {
         using lock_bits_t = cs_r::Lock::Bits;
         using lock_value_t = cs_r::Lock::Value;
         // If the PLL is already running with a different frequency, reset the PLL
-        if (lock_bits_t::getValue() == static_cast<cs_r::cs_reg::RegType>(lock_value_t::locked)) {
+        if (lock_bits_t::get_value() == static_cast<cs_r::cs_reg::RegType>(lock_value_t::locked)) {
             if constexpr (pll_addr == address::pll_sys) {
                 resets::Resets::get_instance().reset<resets::Subsystems::pll_sys>();
                 while (!resets::Resets::get_instance().is_enabled<resets::Subsystems::pll_sys>()) {}
@@ -94,7 +94,7 @@ namespace rp2040::system::pll {
         pwr_r::Pd::Bits::clear();
         pwr_r::VcoPd::Bits::clear();
 
-        while (lock_bits_t::getValue() == static_cast<cs_r::cs_reg::RegType>(lock_value_t::unstable)) {}
+        while (lock_bits_t::get_value() == static_cast<cs_r::cs_reg::RegType>(lock_value_t::unstable)) {}
 
         prim_r::template PostDiv1<config.postdiv1>::Bits::set(prim_r::template PostDiv1<config.postdiv1>::Value::val);
         prim_r::template PostDiv2<config.postdiv2>::Bits::set(prim_r::template PostDiv2<config.postdiv2>::Value::val);

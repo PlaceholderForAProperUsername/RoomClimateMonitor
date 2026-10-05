@@ -97,7 +97,7 @@ namespace rp2040::system::gpio {
         if constexpr (enable) {
             if (!m_output_enabled.test(static_cast<std::uint32_t>(pin))) {
                 pad_t::OutputDisable::Bits::clear();
-                sio_bank::OutputEnable::Set::template Gpio<pin>::Bits::set();
+                sio_bank::OutputEnable::Set::template Gpio<pin>::Bits::set_mask();
                 m_output_enabled.set(static_cast<std::uint32_t>(pin));
             }
         } else {
@@ -122,7 +122,7 @@ namespace rp2040::system::gpio {
         static_assert(pin < Pins::number_of_gpio, "Invalid GPIO pin!");
 
         if constexpr (high) {
-            sio_bank::Output::Set::template Gpio<pin>::Bits::set();
+            sio_bank::Output::Set::template Gpio<pin>::Bits::set_mask();
         } else {
             sio_bank::Output::Clear::template Gpio<pin>::Bits::clear();
         }
@@ -182,7 +182,7 @@ namespace rp2040::system::gpio {
         }
         static_assert(pin < Pins::number_of_gpio, "Invalid GPIO pin!");
 
-        bool output_level = sio_bank::output::value::template value_bits<pin>::getValue();
+        bool output_level = sio_bank::output::Value::template GPIO<pin>::Bits::get_value();
 
         return output_level;
     }

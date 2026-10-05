@@ -27,7 +27,6 @@
 #define RP2040_REG_ACCESS_H
 
 #include <cstdint>
-#include <concepts>
 #include <type_traits>
 
 #include "reg_access_def.h"
@@ -71,9 +70,30 @@ namespace rp2040::reg_access {
              * @param[in] bits_value The value to be set.
              * @return None
              */
-            template <typename BitsAccess = BitsAccess_>
+            template <typename BitsAccess = BitsAccess_, typename BitType_ = BitType>
+            requires HasValueConcept<BitType_, RegType>
             static std::enable_if_t<std::is_base_of_v<access_tag::read_write, BitsAccess>, void>
-            set(BitType::value bits_value)
+            set(BitType_::value bits_value)
+            {
+                auto reg_value = read();
+                reg_value &= ~BitType::mask;
+                reg_value |= ((static_cast<T>(bits_value) << BitType::position) & BitType::mask);
+                write(reg_value);
+            }
+
+            /**
+             * @brief Sets the bits to the value.
+             *
+             * This overload is for bits, where the value can't be known at compile time.
+             *
+             * @tparam BitsAccess Access specifier for the bits.
+             * @param[in] bits_value The value to be set.
+             * @return None
+             */
+            template <typename BitsAccess = BitsAccess_, typename BitType_ = BitType>
+            requires (!HasValueConcept<BitType_, RegType>)
+            static std::enable_if_t<std::is_base_of_v<access_tag::read_write, BitsAccess>, void>
+            set(RegType bits_value)
             {
                 auto reg_value = read();
                 reg_value &= ~BitType::mask;
@@ -90,29 +110,43 @@ namespace rp2040::reg_access {
              * @param[in] bits_value The value to be set.
              * @return None
              */
-            template <typename BitsAccess = BitsAccess_>
+            template <typename BitsAccess = BitsAccess_, typename BitType_ = BitType>
+            requires HasValueConcept<BitType_, RegType>
             static std::enable_if_t<std::is_base_of_v<access_tag::atomic_set, BitsAccess>, void>
-            set(BitType::value bits_value)
+            set(BitType_::value bits_value)
             {
                 T reg_value = ((static_cast<T>(bits_value) << BitType::position) & BitType::mask);
                 write(reg_value);
             }
 
             /**
-             * @brief Sets the bits to the value.
-             *
-             * Requires atomic set register. This version is intended where the mask is the only valid value to be set,
-             * where defining an enum with the values and providing the value when calling is unnecessary and clutters the
-             * program.
+             * @brief Sets all the masked bits to one.
              *
              * @tparam BitsAccess Access specifier for the bits.
              * @return None
              */
             template <typename BitsAccess = BitsAccess_>
-            static std::enable_if_t<std::is_base_of_v<access_tag::atomic_set_mask, BitsAccess>, void>
-            set()
+            static std::enable_if_t<std::is_base_of_v<access_tag::read_write, BitsAccess>, void>
+            set_mask()
             {
-                T reg_value =  BitType::mask;
+                auto reg_value = read();
+                reg_value |= BitType::mask;
+                write(reg_value);
+            }
+
+            /**
+             * @brief Sets all the masked bits to one.
+             *
+             * Requires atomic set register.
+             *
+             * @tparam BitsAccess Access specifier for the bits.
+             * @return None
+             */
+            template <typename BitsAccess = BitsAccess_>
+            static std::enable_if_t<std::is_base_of_v<access_tag::atomic_set, BitsAccess>, void>
+            set_mask()
+            {
+                T reg_value = BitType::mask;
                 write(reg_value);
             }
 
@@ -124,7 +158,7 @@ namespace rp2040::reg_access {
              */
             template <typename BitsAccess = BitsAccess_>
             static std::enable_if_t<std::is_base_of_v<access_tag::read, BitsAccess>, T>
-            getBits()
+            get_bits()
             {
                 auto reg_value = read();
                 reg_value &= BitType::mask;
@@ -139,7 +173,7 @@ namespace rp2040::reg_access {
              */
             template <typename BitsAccess = BitsAccess_>
             static std::enable_if_t<std::is_base_of_v<access_tag::read, BitsAccess>, T>
-            getValue()
+            get_value()
             {
                 auto reg_value = read();
                 reg_value &= BitType::mask;
@@ -350,15 +384,6 @@ namespace rp2040::reg_access {
 
         static constexpr T position = Pos; /**< @brief The position of the BitType in the register. */
         static constexpr T mask = (0x1UL << position); /**< @brief The mask of the BitType used in bit operations. */
-
-        /** @brief Empty enum required to make the program compile.
-         *
-         * Even though this BitTypeis intended for the @see set function in @see Regs::Bits without arguments and a concept was used
-         * to only select the @see set function without arguments. The compilation would still fail, as the other set functions,
-         * which take a BitField::value as an argument, even though those functions would be discarded via concept, required
-         * that type to compile. Therefore this dummy enum is needed.
-         */
-        enum class value : T {};
     };
 
 

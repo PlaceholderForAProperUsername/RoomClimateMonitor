@@ -46,7 +46,7 @@ namespace rp2040::system::xosc {
         ctrl_r::Enable::Bits::set(ctrl_r::Enable::Value::enable);
 
         /* Wait until the crystal oscillator is running and stable */
-        while (status_r::Enabled::Bits::getValue() != static_cast<status_r::status_reg::RegType>(status_r::Enabled::Value::enabled)) {}
+        while (status_r::Enabled::Bits::get_value() != static_cast<status_r::status_reg::RegType>(status_r::Enabled::Value::enabled)) {}
 
         this->m_flags.set(static_cast<std::uint32_t>(Flags::is_enabled));
     }
