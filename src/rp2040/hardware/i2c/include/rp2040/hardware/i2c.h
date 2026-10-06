@@ -103,7 +103,7 @@ namespace rp2040::hardware::i2c {
         status::Status configure();
 
         /**
-         * @brief Sends data.
+         * @brief Sends data to the target.
          *
          * @tparam target_addr The address to which the data is to be sent.
          * @param data The data to be sent.
@@ -118,6 +118,19 @@ namespace rp2040::hardware::i2c {
          */
         template <std::uint16_t target_addr>
         status::Status write(std::span<std::uint8_t> data, bool send_stop);
+
+        /**
+         * @brief Reads data from the target.
+         *
+         * @tparam target_addr The address from which the data is read.
+         * @param buffer Buffer to store the data.
+         * @param send_stop Boolean to indicate if a stop is to be sent after the last byte has been read.
+         * @return status::Status The status code.
+         * @retval ERROR_INIT The I2C controller was not configured. @see configure
+         * @retval OK The data has been read successfully.
+         */
+        template <std::uint16_t target_addr>
+        status::Status read(std::span<std::uint8_t> buffer, bool send_stop);
 
     private:
         using Registers = I2CRegMap<base>;
