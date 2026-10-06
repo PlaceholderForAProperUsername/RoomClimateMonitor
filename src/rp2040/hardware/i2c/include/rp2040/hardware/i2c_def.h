@@ -301,59 +301,12 @@ namespace rp2040::hardware::i2c {
             };
 
             /**
-             * @brief Controls whether a restart is issued before the byte is sent or received.
-             */
-            struct Restart {
-                static constexpr data_reg::RegType pos = 10U; /**< @brief Position of the bit in the register. */
-                using BitType = reg_access::BitTypeEnableDisable<data_reg, pos, reg_access::access_tag::self_clear>; /**< @brief Description of the Restart bit. */
-                using Bits = data_reg::template Bits<BitType>; /**< @brief Object to handle the Restart bit. */
-                using Value = BitType::value; /**< @brief Values of the restart bit. */
-            };
-
-            /**
-             * @brief Controls whether a stop is issued after the byte is sent or received.
-             */
-            struct Stop {
-                static constexpr data_reg::RegType pos = 9U; /**< @brief Position of the bit in the register. */
-                using BitType = reg_access::BitTypeEnableDisable<data_reg, pos, reg_access::access_tag::self_clear>; /**< @brief Description of the Stop bit. */
-                using Bits = data_reg::template Bits<BitType>; /**< @brief Object to handle the Stop bit. */
-                using Value = BitType::value; /**< @brief Values of the Stop bit. */
-            };
-
-            /**
-             * @brief The command bit to control if a read or write command is performed.
-             */
-            struct Cmd {
-                /**
-                 * @brief Description of the command bit.
-                 */
-                struct BitType {
-                    using reg = data_reg; /**< @brief Alias for the register the bits belongs to. */
-                    using T = reg::RegType; /**< @brief Alias for the underlying data type of the register. */
-                    using bit_access = reg_access::access_tag::self_clear; /**< @brief The access tag defining bit operations. */
-
-                    static constexpr T position = 8U; /**< @brief The position of the bit in the register. */
-                    static constexpr T mask = (0x01U << position); /**< @brief The mask of the bit used in bit operations. */
-
-                    /**
-                     * @brief Values to select either a write or a read command.
-                     */
-                    enum class value : T {
-                        write = 0x00U, /**< @brief Master performs a write command */
-                        read = 0x01U, /**< @brief Master performs a read command. */
-                    };
-                };
-                using Bits = data_reg::template Bits<BitType>; /**< @brief Object to handle the command bit. */
-                using Value = BitType::value; /**< @brief Values of the command bit. */
-            };
-
-            /**
-             * @brief The data bits to receive or send data.
+             * @brief The data, cmd, stop and restart bits.
              *
-             * @tparam data The data to be sent. Default value intended for read operations, so there is no need to set a template value when reading data.
+             * These bits must be written together, as a write to the DataCmd register start a transaction (both
+             * receiving and transmission).
              */
-            template <typename data_reg::RegType data = 0U>
-            struct Dat {
+            struct DataCommand {
                 /**
                  * @brief Description of the data bits.
                  */
@@ -363,17 +316,20 @@ namespace rp2040::hardware::i2c {
                     using bit_access = reg_access::access_tag::read_write; /**< @brief The access tag defining bit operations. */
 
                     static constexpr T position = 0U; /**< @brief The position of the bit in the register. */
-                    static constexpr T mask = (0xFFU << position); /**< @brief The mask of the bit used in bit operations. */
-
-                    /**
-                     * @brief The data value.
-                     */
-                    enum class value : T {
-                        val = data,
-                    };
+                    static constexpr T mask = (0x7FFU << position); /**< @brief The mask of the bit used in bit operations. */
+                };
+                struct Flags {
+                    static constexpr std::uint8_t write_cmd = 0U;
+                    static constexpr std::uint8_t read_cmd = 1U;
+                    static constexpr std::uint8_t send_stop = 2U;
+                    static constexpr std::uint8_t send_restart = 4U;
                 };
                 using Bits = data_reg::template Bits<BitType>; /**< @brief Object to handle the data bit. */
-                using Value = BitType::value; /**< @brief Values of the data bit. */
+                data_reg::RegType Value = [] (const std::uint8_t data, const std::uint8_t flags = 0) {
+                    static constexpr std::uint32_t flag_pos = 8U;
+                    static constexpr std::uint8_t flag_mask = 0x7U;
+                    return (data & 0xFFU) | ((flags & flag_mask) << flag_pos);
+                };
             };
         };
 

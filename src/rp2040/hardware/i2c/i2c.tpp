@@ -54,6 +54,7 @@ namespace rp2040::hardware::i2c {
         }
 
         m_flags.set(std::to_underlying(Flags::initialized));
+        m_flags.reset(std::to_underlying(Flags::configured));
     }
 
     template <std::uintptr_t base>
@@ -64,7 +65,7 @@ namespace rp2040::hardware::i2c {
             system::resets::Resets::get_instance().disable<system::resets::Subsystems::i2c1>();
         }
 
-        m_flags.reset(std::to_underlying(Flags::initialized));
+        m_flags.reset();
     }
 
     template <std::uintptr_t base>
@@ -140,6 +141,33 @@ namespace rp2040::hardware::i2c {
 
         Registers::IcEnable::Enable::Bits::set(Registers::IcEnable::Enable::Value::enable);
 
+        return status::Status::OK;
+    }
+
+    template <std::uintptr_t base>
+    template <std::uint16_t target_addr>
+    status::Status I2cType<base>::write(const std::span<std::uint8_t> data, const bool send_stop) {
+        if (!m_flags.test(std::to_underlying(Flags::configured))) {
+            return status::Status::ERROR_INIT;
+        }
+        using StatusReg = Registers::Status;
+        using TargetBits = Registers::Tar::template IcTar<target_addr>;
+        // Checks if target address in hardware differs from new target address
+        if (TargetBits::Bits::get_value() != TargetBits::Value::val) {
+            // wait for active transmissions to end
+            while (StatusReg::Activity::Bits::get_value() == StatusReg::Activity::Value::active) {}
+            using EnableBits = Registers::IcEnable::Enable;
+            EnableBits::Bits::clear(); // disabling I2C controller necessary to set new target address
+            TargetBits::Bits::set(TargetBits::Value::val);
+            EnableBits::Bits::set(EnableBits::Value::enable);
+        }
+        for (size_t i {0}; i < data.size(); ++i) {
+            // wait until there is space in the transmit fifo
+            while (StatusReg::Tfnf::Bits::get_value() == StatusReg::Tfnf::Value::full) {}
+            using DataCmdBits = Registers::DataCmd::DataCommand;
+            auto val = DataCmdBits::Value(data[i], DataCmdBits::Flags::write_cmd | (send_stop && (i == (data.size() - 1)) ? DataCmdBits::Flags::send_stop : 0));
+            DataCmdBits::Bits::set(val);
+        }
         return status::Status::OK;
     }
 

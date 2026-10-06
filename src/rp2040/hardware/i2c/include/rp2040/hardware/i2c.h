@@ -26,6 +26,7 @@
 #define RP2040_HARDWARE_I2C_H
 
 #include <bitset>
+#include <span>
 
 #include "status.h"
 #include "i2c_def.h"
@@ -86,8 +87,37 @@ namespace rp2040::hardware::i2c {
          */
         void deinit();
 
+        /**
+         * @brief Configures the I2C controller as a master.
+         *
+         * @tparam config The configuration of the I2C controller.
+         * @return status::Status The status code.
+         * @retval OK The I2C controller was successfully configured and is ready to be used.
+         * @retval ERROR_INIT The I2C controller was not initialized. @see init
+         *
+         * @pre The I2C controller must be initialized. @see init
+         *
+         * @post The I2C controller is configured as a master and is ready to be used.
+         */
         template <MasterConfig config>
         status::Status configure();
+
+        /**
+         * @brief Sends data.
+         *
+         * @tparam target_addr The address to which the data is to be sent.
+         * @param data The data to be sent.
+         * @param send_stop Boolean to indicate if a stop is to be sent after the last byte has been sent.
+         * @return status::Status The status code.
+         * @retval ERROR_INIT The I2C controller was not configured. @see configure
+         * @retval OK The data has been sent successfully.
+         *
+         * @pre The I2C controller must be initialized and configured. @see init @see configure
+         *
+         * @post None
+         */
+        template <std::uint16_t target_addr>
+        status::Status write(std::span<std::uint8_t> data, bool send_stop);
 
     private:
         using Registers = I2CRegMap<base>;
@@ -97,6 +127,7 @@ namespace rp2040::hardware::i2c {
 
         enum class Flags : std::uint32_t {
             initialized = 0U,
+            configured = 1U,
             number_of_flags
         };
         std::bitset<static_cast<std::uint32_t>(Flags::number_of_flags)> m_flags;
