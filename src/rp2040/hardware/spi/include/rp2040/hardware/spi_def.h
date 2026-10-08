@@ -188,6 +188,89 @@ namespace rp2040::hardware::spi {
             };
         };
 
+        /**
+         * @brief Control register 1.
+         */
+        struct Cr1 {
+            static constexpr std::uintptr_t addr = base + Offset::cr1; /**< @brief Address of the control register 1. */
+            using cr1_reg = reg_access::Reg<addr, reg_access::access_tag::read_write, std::uint32_t>; /**< @brief The control register 1. */
+
+            /**
+             * @brief Slave-mode output disable bit.
+             */
+            struct Sod {
+                /**
+                 * @brief Description of the slave-mode output disable bit.
+                 */
+                struct BitType {
+                    using reg = cr1_reg; /**< @brief Alias for the register the bits belongs to. */
+                    using T = reg::RegType; /**< @brief Alias for the underlying data type of the register. */
+                    using bit_access = cr1_reg::reg_access; /**< @brief The access tag defining bit operations. */
+
+                    static constexpr T position = 3U; /**< @brief The position of the bit in the register. */
+                    static constexpr T mask = (0x1U << position); /**< @brief The mask of the bit used in bit operations. */
+
+                    /**
+                     * @brief Values of the slave-mode output disable bit.
+                     */
+                    enum class value : T {
+                        output_enable = 0x0U,
+                        output_disable = 0x1U,
+                    };
+                };
+                using Bits = cr1_reg::template Bits<BitType>; /**< @brief Object to handle the slave-mode output disable bit. */
+                using Value = BitType::value; /**< @brief Values of the slave-mode output disable bit. */
+            };
+
+            /**
+             * @brief Master or slave mode select bit.
+             *
+             * This bit can only be modified, when the controller is disabled. @see Sse
+             */
+            struct Ms {
+                /**
+                 * @brief Description of the master or slave mode select bit.
+                 */
+                struct BitType {
+                    using reg = cr1_reg; /**< @brief Alias for the register the bits belongs to. */
+                    using T = reg::RegType; /**< @brief Alias for the underlying data type of the register. */
+                    using bit_access = cr1_reg::reg_access; /**< @brief The access tag defining bit operations. */
+
+                    static constexpr T position = 2U; /**< @brief The position of the bit in the register. */
+                    static constexpr T mask = (0x1U << position); /**< @brief The mask of the bit used in bit operations. */
+
+                    /**
+                     * @brief Values of the master or slave mode select bit.
+                     */
+                    enum class value : T {
+                        master = 0x0U, /**< @brief I2C controller is configured to be a master. */
+                        slave = 0x1U, /**< @brief I2C controller is configured to be a slave. */
+                    };
+                };
+                using Bits = cr1_reg::template Bits<BitType>; /**< @brief Object to handle the master or slave mode select bit. */
+                using Value = BitType::value; /**< @brief Values of the master or slave mode select bit. */
+            };
+
+            /**
+             * @brief Synchronous serial port enable bit.
+             */
+            struct Sse {
+                static constexpr std::uint32_t pos = 1U; /**< @brief Position of the sse bit in the register. */
+                using BitType = reg_access::BitTypeEnableDisable<cr1_reg, pos>; /**< @brief Description of the sse bit. */
+                using Bits = cr1_reg::template Bits<BitType>; /**< @brief Object to handle the sse bit. */
+                using Value = BitType::value; /**< @brief Values of the sse bit. */
+            };
+
+            /**
+             * @brief Loop back mode bit.
+             */
+            struct Lbm {
+                static constexpr std::uint32_t pos = 0U; /**< @brief Position of the lbm bit in the register. */
+                using BitType = reg_access::BitTypeEnableDisable<cr1_reg, pos>; /**< @brief Description of the lbm bit. */
+                using Bits = cr1_reg::template Bits<BitType>; /**< @brief Object to handle the lbm bit. */
+                using Value = BitType::value; /**< @brief Values of the lbm bit. */
+            };
+        };
     };
 
     /** @}*/ // rp2040_spi
