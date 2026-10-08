@@ -297,6 +297,150 @@ namespace rp2040::hardware::spi {
                 using Bits = data_reg::template Bits<BitType>; /**< @brief Object to handle the data bits. */
             };
         };
+
+        /**
+         * @brief Status register.
+         */
+        struct Sr {
+            static constexpr std::uintptr_t addr = base + Offset::sr; /**< @brief Address of the status register. */
+            using status_reg = reg_access::Reg<addr, reg_access::access_tag::read, std::uint32_t>; /**< @brief The status register. */
+
+            /**
+             * @brief Busy bit.
+             */
+            struct Bsy {
+                /**
+                 * @brief Description of the busy bit.
+                 */
+                struct BitType {
+                    using reg = status_reg; /**< @brief Alias for the register the bits belongs to. */
+                    using T = reg::RegType; /**< @brief Alias for the underlying data type of the register. */
+                    using bit_access = status_reg::reg_access; /**< @brief The access tag defining bit operations. */
+
+                    static constexpr T position = 4U; /**< @brief The position of the bit in the register. */
+                    static constexpr T mask = (0x1U << position); /**< @brief The mask of the bit used in bit operations. */
+
+                    /**
+                     * @brief The values of the busy bit.
+                     */
+                    enum class value : T {
+                        idle = 0x0U,
+                        busy = 0x1U,
+                    };
+                };
+                using Bits = status_reg::template Bits<BitType>; /**< @brief Object to handle the busy bit. */
+                using Value = BitType::value; /**< @brief Values of the busy bit. */
+            };
+
+            /**
+             * @brief Receive FIFO full bit.
+             */
+            struct Rff {
+                /**
+                 * @brief Description of the receive FIFO full bit.
+                 */
+                struct BitType {
+                    using reg = status_reg; /**< @brief Alias for the register the bits belongs to. */
+                    using T = reg::RegType; /**< @brief Alias for the underlying data type of the register. */
+                    using bit_access = status_reg::reg_access; /**< @brief The access tag defining bit operations. */
+
+                    static constexpr T position = 3U; /**< @brief The position of the bit in the register. */
+                    static constexpr T mask = (0x1U << position); /**< @brief The mask of the bit used in bit operations. */
+
+                    /**
+                     * @brief The values of the receive FIFO full bit.
+                     */
+                    enum class value : T {
+                        not_full = 0x0U,
+                        full = 0x1U,
+                    };
+                };
+                using Bits = status_reg::template Bits<BitType>; /**< @brief Object to handle the receive FIFO full bit. */
+                using Value = BitType::value; /**< @brief Values of the receive FIFO full bit. */
+            };
+
+            /**
+             * @brief Receive FIFO not empty bit.
+             */
+            struct Rne {
+                /**
+                 * @brief Description of the receive FIFO not empty bit.
+                 */
+                struct BitType {
+                    using reg = status_reg; /**< @brief Alias for the register the bits belongs to. */
+                    using T = reg::RegType; /**< @brief Alias for the underlying data type of the register. */
+                    using bit_access = status_reg::reg_access; /**< @brief The access tag defining bit operations. */
+
+                    static constexpr T position = 2U; /**< @brief The position of the bit in the register. */
+                    static constexpr T mask = (0x1U << position); /**< @brief The mask of the bit used in bit operations. */
+
+                    /**
+                     * @brief The values of the receive FIFO not empty bit.
+                     */
+                    enum class value : T {
+                        empty = 0x0U,
+                        not_empty = 0x1U,
+                    };
+                };
+                using Bits = status_reg::template Bits<BitType>; /**< @brief Object to handle the receive FIFO not empty bit. */
+                using Value = BitType::value; /**< @brief Values of the receive FIFO not empty bit. */
+            };
+
+            /**
+            * @brief Transmit FIFO not full bit.
+            */
+            struct Tnf {
+                /**
+                 * @brief Description of the transmit FIFO not full bit.
+                 */
+                struct BitType {
+                    using reg = status_reg; /**< @brief Alias for the register the bits belongs to. */
+                    using T = reg::RegType; /**< @brief Alias for the underlying data type of the register. */
+                    using bit_access = status_reg::reg_access; /**< @brief The access tag defining bit operations. */
+
+                    static constexpr T position = 1U; /**< @brief The position of the bit in the register. */
+                    static constexpr T mask = (0x1U << position); /**< @brief The mask of the bit used in bit operations. */
+
+                    /**
+                     * @brief The values of the transmit FIFO not full bit.
+                     */
+                    enum class value : T {
+                        full = 0x0U,
+                        not_full = 0x1U,
+                    };
+                };
+                using Bits = status_reg::template Bits<BitType>; /**< @brief Object to handle the transmit FIFO not full bit. */
+                using Value = BitType::value; /**< @brief Values of the transmit FIFO not full bit. */
+            };
+
+            /**
+            * @brief Transmit FIFO empty bit.
+            */
+            struct Tfe {
+                /**
+                 * @brief Description of the transmit FIFO empty bit.
+                 */
+                struct BitType {
+                    using reg = status_reg; /**< @brief Alias for the register the bits belongs to. */
+                    using T = reg::RegType; /**< @brief Alias for the underlying data type of the register. */
+                    using bit_access = status_reg::reg_access; /**< @brief The access tag defining bit operations. */
+
+                    static constexpr T position = 0U; /**< @brief The position of the bit in the register. */
+                    static constexpr T mask = (0x1U << position); /**< @brief The mask of the bit used in bit operations. */
+
+                    /**
+                     * @brief The values of the transmit FIFO empty bit.
+                     */
+                    enum class value : T {
+                        not_empty = 0x0U,
+                        empty = 0x1U,
+                    };
+                };
+                using Bits = status_reg::template Bits<BitType>; /**< @brief Object to handle the transmit FIFO empty bit. */
+                using Value = BitType::value; /**< @brief Values of the transmit FIFO empty bit. */
+            };
+
+        };
     };
 
     /** @}*/ // rp2040_spi
