@@ -271,6 +271,32 @@ namespace rp2040::hardware::spi {
                 using Value = BitType::value; /**< @brief Values of the lbm bit. */
             };
         };
+
+        /**
+         * @brief Data register.
+         */
+        struct Dr {
+            static constexpr std::uintptr_t addr = base + Offset::dr; /**< @brief Address of the data register. */
+            using data_reg = reg_access::Reg<addr, reg_access::access_tag::read_write, std::uint32_t>; /**< @brief The data register. */
+
+            /**
+             * @brief Data bits.
+             *
+             * The hardware discards unused bits at the top if the data size is less than 16 bits. Therefore there is no
+             * need to check the data for the correct size.
+             */
+            struct Data {
+                struct BitType {
+                    using reg = data_reg; /**< @brief Alias for the register the bits belongs to. */
+                    using T = reg::RegType; /**< @brief Alias for the underlying data type of the register. */
+                    using bit_access = data_reg::reg_access; /**< @brief The access tag defining bit operations. */
+
+                    static constexpr T position = 0U; /**< @brief The position of the bit in the register. */
+                    static constexpr T mask = (0xFFFFU << position); /**< @brief The mask of the bit used in bit operations. */
+                };
+                using Bits = data_reg::template Bits<BitType>; /**< @brief Object to handle the data bits. */
+            };
+        };
     };
 
     /** @}*/ // rp2040_spi
