@@ -439,7 +439,45 @@ namespace rp2040::hardware::spi {
                 using Bits = status_reg::template Bits<BitType>; /**< @brief Object to handle the transmit FIFO empty bit. */
                 using Value = BitType::value; /**< @brief Values of the transmit FIFO empty bit. */
             };
+        };
 
+        /**
+         * @brief Clock prescale register.
+         */
+        struct Cpsr {
+            static constexpr std::uintptr_t addr = base + Offset::cpsr; /**< @brief Address of the clock prescale register. */
+            using cpsr_reg = reg_access::Reg<addr, reg_access::access_tag::read_write, std::uint32_t>; /**< @brief The clock prescale register. */
+
+            /**
+             * @brief Clock prescale divisor bits.
+             *
+             * @tparam clock_prescale Clock prescale divisor value, must be an even number from 2-254
+             */
+            template <std::uint8_t clock_prescale>
+            struct ClockPrescale {
+                /**
+                 * @brief Description of the clock prescale divisor bits.
+                 */
+                struct BitType {
+                    using reg = cpsr_reg; /**< @brief Alias for the register the bits belongs to. */
+                    using T = reg::RegType; /**< @brief Alias for the underlying data type of the register. */
+                    using bit_access = cpsr_reg::reg_access; /**< @brief The access tag defining bit operations. */
+
+                    static constexpr T position = 0U; /**< @brief The position of the bit in the register. */
+                    static constexpr T mask = (0xFFU << position); /**< @brief The mask of the bit used in bit operations. */
+
+                    static_assert((clock_prescale % 2 == 0) && (0 < clock_prescale), "Clock prescale value must be even and greater than 0.");
+
+                    /**
+                     * @brief The values of the clock prescale divisor bits.
+                     */
+                    enum class value : T {
+                        val = clock_prescale,
+                    };
+                };
+                using Bits = cpsr_reg::template Bits<BitType>; /**< @brief Object to handle the clock prescale divisor bits. */
+                using Value = BitType::value; /**< @brief Values of the clock prescale divisor bits. */
+            };
         };
     };
 
