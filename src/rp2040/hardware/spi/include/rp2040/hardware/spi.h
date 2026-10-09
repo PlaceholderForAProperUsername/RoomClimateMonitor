@@ -26,6 +26,8 @@
 #ifndef RP2040_HARDWARE_SPI_H
 #define RP2040_HARDWARE_SPI_H
 
+#include <bitset>
+
 #include "spi_def.h"
 
 namespace rp2040::hardware::spi {
@@ -51,10 +53,26 @@ namespace rp2040::hardware::spi {
          */
         static SpiType& get_instance();
 
+        /**
+         * @brief Initializes the SPI controller by taking it out of reset.
+         *
+         * @pre None
+         *
+         * @post The SPI controller is ready to be configured.
+         */
+        void init();
+
     private:
         using Registers = SpiRegMap<base>;
 
-        SpiType() = default;
+        SpiType() : m_flags(0) {};
+
+        enum class Flags : std::uint32_t {
+            initialized = 0U,
+            number_of_flags
+        };
+
+        std::bitset<std::to_underlying(Flags::number_of_flags)> m_flags;
     };
 
     using Spi0 = SpiType<address::spi0>; /**< @brief SPI0 controller. */

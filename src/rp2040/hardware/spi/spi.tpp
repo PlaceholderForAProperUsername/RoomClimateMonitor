@@ -25,6 +25,7 @@
 #define RP2040_HARDWARE_SPI_TPP
 
 #include "include/rp2040/hardware/spi.h"
+#include "rp2040/system/resets.h"
 
 namespace rp2040::hardware::spi {
     /**
@@ -38,6 +39,20 @@ namespace rp2040::hardware::spi {
         return instance;
     }
 
+    template <std::uintptr_t base>
+    void SpiType<base>::init() {
+        if (m_flags.test(std::to_underlying(Flags::initialized))) {
+            return;
+        }
+
+        if constexpr (base == address::spi0) {
+            system::resets::Resets::get_instance().reset<system::resets::Subsystems::spi0>();
+        } else if constexpr (base == address::spi1) {
+            system::resets::Resets::get_instance().reset<system::resets::Subsystems::spi1>();
+        }
+        
+        m_flags.set(std::to_underlying(Flags::initialized));
+    }
 
     /** @}*/ // rp2040_spi
 }
