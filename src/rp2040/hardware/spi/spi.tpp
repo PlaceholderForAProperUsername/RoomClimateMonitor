@@ -24,11 +24,19 @@
 #ifndef RP2040_HARDWARE_SPI_TPP
 #define RP2040_HARDWARE_SPI_TPP
 
+#include "include/rp2040/hardware/spi.h"
+
 namespace rp2040::hardware::spi {
     /**
      * @addtogroup rp2040_spi
      * @{
      */
+
+    template <std::uintptr_t base>
+    SpiType<base>& SpiType<base>::get_instance() {
+        static SpiType<base> instance;
+        return instance;
+    }
 
 
     /** @}*/ // rp2040_spi

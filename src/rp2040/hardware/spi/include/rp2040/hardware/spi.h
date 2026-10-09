@@ -34,6 +34,31 @@ namespace rp2040::hardware::spi {
      * @{
      */
 
+    /**
+     * @brief The SPI controller
+     *
+     * @tparam base Base address of the SPI controller.
+     */
+    template <std::uintptr_t base>
+    class SpiType {
+        static_assert((base == address::spi0) || (base == address::spi1), "Invalid base address for SPI register map!");
+
+    public:
+        /**
+         * @brief Gets the singleton instance.
+         *
+         * @return SpiType The singleton instance.
+         */
+        static SpiType& get_instance();
+
+    private:
+        using Registers = SpiRegMap<base>;
+
+        SpiType() = default;
+    };
+
+    using Spi0 = SpiType<address::spi0>; /**< @brief SPI0 controller. */
+    using Spi1 = SpiType<address::spi1>; /**< @brief SPI1 controller. */
 
     /** @}*/ // rp2040_spi
 }
