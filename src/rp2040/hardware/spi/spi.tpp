@@ -50,8 +50,19 @@ namespace rp2040::hardware::spi {
         } else if constexpr (base == address::spi1) {
             system::resets::Resets::get_instance().reset<system::resets::Subsystems::spi1>();
         }
-        
+
         m_flags.set(std::to_underlying(Flags::initialized));
+    }
+
+    template <std::uintptr_t base>
+    void SpiType<base>::deinit() {
+        if constexpr (base == address::spi0) {
+            system::resets::Resets::get_instance().disable<system::resets::Subsystems::spi0>();
+        } else if constexpr (base == address::spi1) {
+            system::resets::Resets::get_instance().disable<system::resets::Subsystems::spi1>();
+        }
+
+        m_flags.reset(std::to_underlying(Flags::initialized));
     }
 
     /** @}*/ // rp2040_spi

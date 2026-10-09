@@ -62,6 +62,8 @@ namespace rp2040::hardware::spi {
          */
         void init();
 
+        void deinit();
+
     private:
         using Registers = SpiRegMap<base>;
 
