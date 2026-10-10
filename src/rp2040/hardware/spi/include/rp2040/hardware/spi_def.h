@@ -37,6 +37,34 @@ namespace rp2040::hardware::spi {
      */
 
     /**
+     * @brief The available frame formats.
+     */
+    enum class FrameFormat : std::uint32_t {
+        motorola = 0x0U,
+        ti = 0x1U,
+        national_microwire = 0x2U,
+    };
+
+    /**
+     * @brief The available data sizes.
+     */
+    enum class DataSize : std::uint32_t {
+        data_4bits = 0x3U,
+        data_5bits = 0x4U,
+        data_6bits = 0x5U,
+        data_7bits = 0x6U,
+        data_8bits = 0x7U,
+        data_9bits = 0x8U,
+        data_10bits = 0x9U,
+        data_11bits = 0xAU,
+        data_12bits = 0xBU,
+        data_13bits = 0xCU,
+        data_14bits = 0xDU,
+        data_15bits = 0xEU,
+        data_16bits = 0xFU,
+    };
+
+    /**
      * @brief The base address of the SPI controller.
      */
     namespace address {
@@ -139,11 +167,7 @@ namespace rp2040::hardware::spi {
                     /**
                      * @brief Values of the frame format bits.
                      */
-                    enum class value : T {
-                        motorola = 0x0U,
-                        ti = 0x1U,
-                        national_microwire = 0x2U,
-                    };
+                    using value = FrameFormat;
                 };
                 using Bits = cr0_reg::template Bits<BitType>; /**< @brief Object to handle the frame format bits. */
                 using Value = BitType::value; /**< @brief Values of the frame format bits. */
@@ -167,21 +191,7 @@ namespace rp2040::hardware::spi {
                     /**
                      * @brief Values of the data size select bits.
                      */
-                    enum class value : T {
-                        data_4bits = 0x3U,
-                        data_5bits = 0x4U,
-                        data_6bits = 0x5U,
-                        data_7bits = 0x6U,
-                        data_8bits = 0x7U,
-                        data_9bits = 0x8U,
-                        data_10bits = 0x9U,
-                        data_11bits = 0xAU,
-                        data_12bits = 0xBU,
-                        data_13bits = 0xCU,
-                        data_14bits = 0xDU,
-                        data_15bits = 0xEU,
-                        data_16bits = 0xFU,
-                    };
+                    using value = DataSize;
                 };
                 using Bits = cr0_reg::template Bits<BitType>; /**< @brief Object to handle the data size select bits. */
                 using Value = BitType::value; /**< @brief Values of the data size select bits. */
