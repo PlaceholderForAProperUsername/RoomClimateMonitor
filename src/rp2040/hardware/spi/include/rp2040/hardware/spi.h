@@ -105,6 +105,43 @@ namespace rp2040::hardware::spi {
         template <MasterConfig config>
         status::Status configure();
 
+        /**
+         * @brief Sends data over SPI.
+         *
+         * After putting the data in the transmit FIFO, the function waits until the whole transmission is complete before
+         * returning.
+         *
+         * @param data Data to be sent.
+         * @return status::Status The status code.
+         * @retval OK The data has been successfully sent.
+         * @retval ERROR_INIT The SPI has not been configured. @see configure
+         * @retval ERROR_PARAM The SPI has been configured to use data sizes larger than 8 bit, but the data uses only 8 bit.
+         *
+         * @pre The SPI must be initialized and configured. @see init @see configure
+         *
+         * @post None
+         */
+        status::Status write_blocking(std::span<std::uint8_t> data);
+
+        /**
+         * @brief Sends data over SPI.
+         *
+         * After putting the data in the transmit FIFO, the function waits until the whole transmission is complete before
+         * returning.
+         *
+         * @param data Data to be sent.
+         * @return status::Status The status code.
+         * @retval OK The data has been successfully sent.
+         * @retval ERROR_INIT The SPI has not been configured. @see configure
+         * @retval ERROR_PARAM The SPI has been configured for data sizes less than or equal to 8 bit, but the data size
+         * is 16 bit.
+         *
+         * @pre The SPI must be initialized and configured. @see init @see configure
+         *
+         * @post None
+         */
+        status::Status write_blocking(std::span<std::uint16_t> data);
+
     private:
         using Registers = SpiRegMap<base>;
 
@@ -113,6 +150,7 @@ namespace rp2040::hardware::spi {
         enum class Flags : std::uint32_t {
             initialized = 0U,
             configured = 1U,
+            data_size_greater_than_8bits = 2U,
             number_of_flags
         };
 

@@ -99,8 +99,48 @@ namespace rp2040::hardware::spi {
         Registers::Cr1::Lbm::Bits::clear();
         Registers::Cr1::Sse::Bits::set(Registers::Cr1::Sse::Value::enable);
 
+        if constexpr (config.size > DataSize::data_8bits) {
+            m_flags.set(std::to_underlying(Flags::data_size_greater_than_8bits));
+        } else {
+            m_flags.reset(std::to_underlying(Flags::data_size_greater_than_8bits));
+        }
+
         m_flags.set(std::to_underlying(Flags::configured));
 
+        return status::Status::OK;
+    }
+
+    template <std::uintptr_t base>
+    status::Status SpiType<base>::write_blocking(const std::span<std::uint8_t> data) {
+        if (!m_flags.test(std::to_underlying(Flags::configured))) {
+            return status::Status::ERROR_INIT;
+        }
+        if (m_flags.test(std::to_underlying(Flags::data_size_greater_than_8bits))) {
+            return status::Status::ERROR_PARAM;
+        }
+        for (size_t i {0}; i < data.size(); ++i) {
+            while (Registers::Sr::Tnf::Bits::get_value() == Registers::Sr::Tnf::Value::full) {}
+            Registers::Dr::Data::Bits::set(data[i]);
+        }
+        // wait for transmission to end
+        while (Registers::Sr::Bsy::Bits::get_value() == Registers::Sr::Bsy::Value::busy) {}
+        return status::Status::OK;
+    }
+
+    template <std::uintptr_t base>
+    status::Status SpiType<base>::write_blocking(const std::span<std::uint16_t> data) {
+        if (!m_flags.test(std::to_underlying(Flags::configured))) {
+            return status::Status::ERROR_INIT;
+        }
+        if (!m_flags.test(std::to_underlying(Flags::data_size_greater_than_8bits))) {
+            return status::Status::ERROR_PARAM;
+        }
+        for (size_t i {0}; i < data.size(); ++i) {
+            while (Registers::Sr::Tnf::Bits::get_value() == Registers::Sr::Tnf::Value::full) {}
+            Registers::Dr::Data::Bits::set(data[i]);
+        }
+        // wait for transmission to end
+        while (Registers::Sr::Bsy::Bits::get_value() == Registers::Sr::Bsy::Value::busy) {}
         return status::Status::OK;
     }
 
