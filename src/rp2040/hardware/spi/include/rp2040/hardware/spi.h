@@ -133,8 +133,8 @@ namespace rp2040::hardware::spi {
          * @return status::Status The status code.
          * @retval OK The data has been successfully sent.
          * @retval ERROR_INIT The SPI has not been configured. @see configure
-         * @retval ERROR_PARAM The SPI has been configured for data sizes less than or equal to 8 bit, but the data size
-         * is 16 bit.
+         * @retval ERROR_PARAM The SPI has been configured for data sizes less than or equal to 8 bit, but the data uses
+         * 16 bit.
          *
          * @pre The SPI must be initialized and configured. @see init @see configure
          *
