@@ -39,9 +39,9 @@ namespace rp2040::hardware::i2c {
      * @brief The speed modes available to the RP2040's I2C controllers.
      */
     enum class SpeedMode : std::uint32_t {
-        standard = 0x00U, /**< @brief Data rates of <= 100kbps. */
-        fast = 0x01U, /**< @brief Data rates of <= 400kbps. */
-        fast_plus = 0x02U /**< @brief Data rates of <= 1000kbps. */
+        standard = 0x01U, /**< @brief Data rates of <= 100kbps. */
+        fast = 0x02U, /**< @brief Data rates of <= 400kbps. */
+        fast_plus = 0x03U /**< @brief Data rates of <= 1000kbps. */
     };
 
     /**

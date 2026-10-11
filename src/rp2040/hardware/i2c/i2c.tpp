@@ -85,7 +85,7 @@ namespace rp2040::hardware::i2c {
         }
         // make sure i2c controller is disabled, otherwise some registers cannot be configured.
         Registers::IcEnable::Enable::Bits::clear();
-        static constexpr std::uint32_t min_scl_low_time_ns = [] () {
+        constexpr std::uint32_t min_scl_low_time_ns = [] () {
             if constexpr (config.speed_mode == SpeedMode::standard) {
                 return 4'700;
             } else if constexpr (config.speed_mode == SpeedMode::fast) {
@@ -94,7 +94,7 @@ namespace rp2040::hardware::i2c {
                 return 500;
             }
         } ();
-        static constexpr std::uint32_t min_scl_high_time_ns = [] () {
+        constexpr std::uint32_t min_scl_high_time_ns = [] () {
             if constexpr (config.speed_mode == SpeedMode::standard) {
                 return 4'000;
             } else if constexpr (config.speed_mode == SpeedMode::fast) {
@@ -103,9 +103,12 @@ namespace rp2040::hardware::i2c {
                 return 260;
             }
         } ();
-        static constexpr std::uint32_t low_count = min_scl_low_time_ns * config.sys_clock_hz;
-        static constexpr std::uint32_t high_count = min_scl_high_time_ns * config.sys_clock_hz;
-        static constexpr std::uint32_t sda_tx_hold_count = [] () {
+
+        constexpr std::uint32_t ns_per_hz = 1'000'000'000;
+
+        constexpr std::uint32_t low_count = (static_cast<std::uint64_t>(min_scl_low_time_ns) * config.sys_clock_hz) / ns_per_hz;
+        constexpr std::uint32_t high_count = (static_cast<std::uint64_t>(min_scl_high_time_ns) * config.sys_clock_hz) / ns_per_hz;
+        constexpr std::uint32_t sda_tx_hold_count = [] () {
             if constexpr ((config.speed_mode == SpeedMode::standard) || (config.speed_mode == SpeedMode::fast)) {
                 return (((config.sys_clock_hz * 3) / 10'000'000) + 1);
             } else {
@@ -134,7 +137,7 @@ namespace rp2040::hardware::i2c {
         using SdaTxHoldBits = Registers::SdaHold::template SdaTxHold<sda_tx_hold_count>;
         SdaTxHoldBits::Bits::set(SdaTxHoldBits::Value::val);
 
-        static constexpr std::uint32_t spike_length = (low_count < 16) ? 1 : low_count / 16;
+        constexpr std::uint32_t spike_length = (low_count < 16) ? 1 : low_count / 16;
 
         using SpikeLengthBits = Registers::IcFsSpkLen::template SpkLen<spike_length>;
         SpikeLengthBits::Bits::set(SpikeLengthBits::Value::val);
