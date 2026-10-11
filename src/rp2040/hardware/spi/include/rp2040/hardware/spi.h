@@ -28,6 +28,8 @@
 
 #include <bitset>
 
+#include "status.h"
+
 #include "spi_def.h"
 
 namespace rp2040::hardware::spi {
@@ -35,6 +37,23 @@ namespace rp2040::hardware::spi {
      * @addtogroup rp2040_spi
      * @{
      */
+
+    /**
+     * @brief Configuration to configure the SPI controller as a master.
+     */
+    struct MasterConfig {
+        DataSize size;
+        std::uint8_t clock_rate;
+        std::uint8_t prescale_divisor;
+        FrameFormat format;
+        bool clock_polarity;
+        bool clock_phase;
+
+        constexpr MasterConfig(const DataSize size, const std::uint8_t clock_rate, const std::uint8_t prescale_divisor,
+            const FrameFormat format, const bool clock_polarity = false, const bool clock_phase = false) :
+        size(size), clock_rate(clock_rate), prescale_divisor(prescale_divisor), format(format),
+        clock_polarity(clock_polarity), clock_phase(clock_phase) {}
+    };
 
     /**
      * @brief The SPI controller
@@ -62,7 +81,29 @@ namespace rp2040::hardware::spi {
          */
         void init();
 
+        /**
+         * @brief Deinitializes the SPI controller.
+         *
+         * @pre None
+         *
+         * @post The SPI controller is put in reset and its registers are no longer accessible.
+         */
         void deinit();
+
+        /**
+         * @brief Configures the SPI controller as a master.
+         *
+         * @tparam config The configuration.
+         * @return status::Status The status code.
+         * @retval OK The SPI controller was successfully configured as a master.
+         * @retval ERROR_INIT The SPI controller was not initialized. @see init
+         *
+         * @pre The SPI controller must be initialized. @see init
+         *
+         * @post The SPI controller is configured as a master and ready to be used.
+         */
+        template <MasterConfig config>
+        status::Status configure();
 
     private:
         using Registers = SpiRegMap<base>;
@@ -71,6 +112,7 @@ namespace rp2040::hardware::spi {
 
         enum class Flags : std::uint32_t {
             initialized = 0U,
+            configured = 1U,
             number_of_flags
         };
 
