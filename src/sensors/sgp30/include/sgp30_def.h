@@ -35,11 +35,24 @@ namespace sgp30 {
      */
 
     /**
+     * @brief Checks if the I2C controller type is valid
+     */
+    template <typename I2cControllerType>
+    concept I2cControllerTypeConcept =
+        std::is_class_v<I2cControllerType> &&
+        requires(I2cControllerType controller, std::array<std::uint8_t, 2> dummy)
+    {
+        controller.template write<std::uint8_t, 0x42U>(dummy, true);
+        controller.template read<std::uint8_t, 0x42U>(dummy, true);
+    };
+
+    /**
      * @brief Implemented commands.
      */
     namespace commands {
-        constexpr std::array<std::uint8_t, 2> sgp30_iaq_init {0x20U, 0x03U};
-        constexpr std::array<std::uint8_t, 2> sgp30_measure_iaq {0x20U, 0x08U};
+        constexpr std::array<std::uint8_t, 2> sgp30_iaq_init {0x20U, 0x03U}; /**< @brief Starts the measurement process. */
+        constexpr std::array<std::uint8_t, 2> sgp30_measure_iaq {0x20U, 0x08U}; /**< @brief Gets measurement data. */
+        constexpr std::array<std::uint8_t, 2> get_serial_id {0x36U, 0x82U}; /**< @brief Gets the serial id of the sensor. */
     };
 
     /** @}*/

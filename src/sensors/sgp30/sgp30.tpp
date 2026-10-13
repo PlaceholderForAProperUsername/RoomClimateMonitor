@@ -31,6 +31,23 @@ namespace sgp30 {
      * @{
      */
 
+    template <I2cControllerTypeConcept I2cControllerType>
+    std::uint8_t Sgp30<I2cControllerType>::crc8(const std::span<std::uint8_t, 2> data) {
+        std::uint8_t crc {0xFFU};
+        const std::uint8_t polynomial {0x31U};
+
+        for (size_t i {0}; i < data.size(); ++i) {
+            crc ^= data[i];
+            for (size_t j {0}; j < 8; ++j) {
+                if (crc & 0x80U) {
+                    crc = (crc << 1) ^ polynomial;
+                } else {
+                    crc = (crc << 1);
+                }
+            }
+        }
+        return crc;
+    }
 
     /** @}*/
 }
