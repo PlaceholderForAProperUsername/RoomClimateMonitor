@@ -62,9 +62,7 @@ namespace rp2040::reg_access {
     concept BitTypeConcept =
             std::is_same_v<Reg, typename BitType::reg> &&
             std::is_same_v<decltype(BitType::position), const T> &&
-            std::is_same_v<decltype(BitType::mask), const T>; //&&
-            //std::is_enum_v<typename BitType::value> &&
-            //std::is_same_v<std::underlying_type_t<typename BitType::value>, T>;
+            std::is_same_v<decltype(BitType::mask), const T>;
 
     template <typename BitType, typename T>
     concept HasValueConcept =
