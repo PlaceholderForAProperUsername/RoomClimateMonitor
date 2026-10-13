@@ -4,7 +4,7 @@ add_executable(${TARGET})
 
 target_sources(${TARGET} PRIVATE main.cpp)
 
-target_link_libraries(${TARGET} PRIVATE RP2040 Config_System)
+target_link_libraries(${TARGET} PRIVATE RP2040 Config_System Sensors)
 
 add_subdirectory(config)
 add_subdirectory(rp2040)

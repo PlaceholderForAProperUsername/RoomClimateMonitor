@@ -148,13 +148,14 @@ namespace rp2040::hardware::i2c {
     }
 
     template <std::uintptr_t base>
-    template <std::uint16_t target_addr>
+    template <typename T, T target_addr>
+    requires  std::is_same_v<T, std::uint8_t> || std::is_same_v<T, std::uint16_t>
     status::Status I2cType<base>::write(const std::span<std::uint8_t> data, const bool send_stop) {
         if (!m_flags.test(std::to_underlying(Flags::configured))) {
             return status::Status::ERROR_INIT;
         }
         using StatusReg = Registers::Status;
-        using TargetBits = Registers::Tar::template IcTar<target_addr>;
+        using TargetBits = Registers::Tar::template IcTar<static_cast<std::uint16_t>(target_addr)>;
         // Checks if target address in hardware differs from new target address
         if (TargetBits::Bits::get_value() != TargetBits::Value::val) {
             // wait for active transmissions to end
@@ -175,13 +176,14 @@ namespace rp2040::hardware::i2c {
     }
 
     template <std::uintptr_t base>
-    template <std::uint16_t target_addr>
+    template <typename T, T target_addr>
+    requires  std::is_same_v<T, std::uint8_t> || std::is_same_v<T, std::uint16_t>
     status::Status I2cType<base>::read(std::span<std::uint8_t> buffer, const bool send_stop) {
         if (!m_flags.test(std::to_underlying(Flags::configured))) {
             return status::Status::ERROR_INIT;
         }
         using StatusReg = Registers::Status;
-        using TargetBits = Registers::Tar::template IcTar<target_addr>;
+        using TargetBits = Registers::Tar::template IcTar<static_cast<std::uint16_t>(target_addr)>;
         // Checks if target address in hardware differs from new target address
         if (TargetBits::Bits::get_value() != TargetBits::Value::val) {
             // wait for active transmissions to end

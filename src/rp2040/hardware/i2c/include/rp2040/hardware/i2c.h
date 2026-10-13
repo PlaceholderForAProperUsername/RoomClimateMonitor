@@ -116,7 +116,8 @@ namespace rp2040::hardware::i2c {
          *
          * @post None
          */
-        template <std::uint16_t target_addr>
+        template <typename T, T target_addr>
+        requires  std::is_same_v<T, std::uint8_t> || std::is_same_v<T, std::uint16_t>
         status::Status write(std::span<std::uint8_t> data, bool send_stop);
 
         /**
@@ -129,7 +130,8 @@ namespace rp2040::hardware::i2c {
          * @retval ERROR_INIT The I2C controller was not configured. @see configure
          * @retval OK The data has been read successfully.
          */
-        template <std::uint16_t target_addr>
+        template <typename T, T target_addr>
+        requires  std::is_same_v<T, std::uint8_t> || std::is_same_v<T, std::uint16_t>
         status::Status read(std::span<std::uint8_t> buffer, bool send_stop);
 
     private:
