@@ -325,7 +325,7 @@ namespace rp2040::hardware::i2c {
                     static constexpr std::uint8_t send_restart = 4U;
                 };
                 using Bits = data_reg::template Bits<BitType>; /**< @brief Object to handle the data bit. */
-                data_reg::RegType Value = [] (const std::uint8_t data, const std::uint8_t flags = 0) {
+                static constexpr auto Value = [] (const std::uint8_t data, const std::uint8_t flags = 0) {
                     static constexpr std::uint32_t flag_pos = 8U;
                     static constexpr std::uint8_t flag_mask = 0x7U;
                     return (data & 0xFFU) | ((flags & flag_mask) << flag_pos);

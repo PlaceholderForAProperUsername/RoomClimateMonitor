@@ -157,9 +157,9 @@ namespace rp2040::hardware::i2c {
         using StatusReg = Registers::Status;
         using TargetBits = Registers::Tar::template IcTar<static_cast<std::uint16_t>(target_addr)>;
         // Checks if target address in hardware differs from new target address
-        if (TargetBits::Bits::get_value() != TargetBits::Value::val) {
+        if (TargetBits::Bits::get_value() != std::to_underlying(TargetBits::Value::val)) {
             // wait for active transmissions to end
-            while (StatusReg::Activity::Bits::get_value() == StatusReg::Activity::Value::active) {}
+            while (StatusReg::Activity::Bits::get_value() == std::to_underlying(StatusReg::Activity::Value::active)) {}
             using EnableBits = Registers::IcEnable::Enable;
             EnableBits::Bits::clear(); // disabling I2C controller necessary to set new target address
             TargetBits::Bits::set(TargetBits::Value::val);
@@ -167,7 +167,7 @@ namespace rp2040::hardware::i2c {
         }
         for (size_t i {0}; i < data.size(); ++i) {
             // wait until there is space in the transmit fifo
-            while (StatusReg::Tfnf::Bits::get_value() == StatusReg::Tfnf::Value::full) {}
+            while (StatusReg::Tfnf::Bits::get_value() == std::to_underlying(StatusReg::Tfnf::Value::full)) {}
             using DataCmdBits = Registers::DataCmd::DataCommand;
             auto val = DataCmdBits::Value(data[i], DataCmdBits::Flags::write_cmd | (send_stop && (i == (data.size() - 1)) ? DataCmdBits::Flags::send_stop : 0));
             DataCmdBits::Bits::set(val);
@@ -185,9 +185,9 @@ namespace rp2040::hardware::i2c {
         using StatusReg = Registers::Status;
         using TargetBits = Registers::Tar::template IcTar<static_cast<std::uint16_t>(target_addr)>;
         // Checks if target address in hardware differs from new target address
-        if (TargetBits::Bits::get_value() != TargetBits::Value::val) {
+        if (TargetBits::Bits::get_value() != std::to_underlying(TargetBits::Value::val)) {
             // wait for active transmissions to end
-            while (StatusReg::Activity::Bits::get_value() == StatusReg::Activity::Value::active) {}
+            while (StatusReg::Activity::Bits::get_value() == std::to_underlying(StatusReg::Activity::Value::active)) {}
             using EnableBits = Registers::IcEnable::Enable;
             EnableBits::Bits::clear(); // disabling I2C controller necessary to set new target address
             TargetBits::Bits::set(TargetBits::Value::val);
@@ -197,8 +197,8 @@ namespace rp2040::hardware::i2c {
             using DataCmdBits = Registers::DataCmd::DataCommand;
             auto read_cmd = DataCmdBits::Value(0U, DataCmdBits::Flags::read_cmd | (send_stop && (i == (buffer.size() - 1)) ? DataCmdBits::Flags::send_stop : 0));
             DataCmdBits::Bits::set(read_cmd);
-            while (StatusReg::Rfne::Bits::get_value() == StatusReg::Rfne::Value::empty) {}
-            buffer[i] = (DataCmdBits::Bits::read_value() & 0xFF);
+            while (StatusReg::Rfne::Bits::get_value() == std::to_underlying(StatusReg::Rfne::Value::empty)) {}
+            buffer[i] = (DataCmdBits::Bits::get_value() & 0xFF);
         }
         return status::Status::OK;
     }
