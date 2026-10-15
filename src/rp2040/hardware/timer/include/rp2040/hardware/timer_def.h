@@ -24,11 +24,20 @@
 #ifndef RP204_HARDWARE_TIMER_DEF_H
 #define RP204_HARDWARE_TIMER_DEF_H
 
+#include <cstdint>
+
 namespace rp2040::hardware::timer {
     /**
      * @addtogroup rp2040_timer
      * @{
      */
+
+    /**
+     * @brief The addresses of the timer module.
+     */
+    namespace address {
+        static constexpr std::uintptr_t timer =  0x40054000U; /**< @brief Base address of the timer. */
+    }
 
     /**@]*/
 }
