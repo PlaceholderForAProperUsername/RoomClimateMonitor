@@ -85,6 +85,11 @@ namespace rp2040::hardware::timer {
         template <std::uint32_t offset, typename AccessTag>
         requires std::is_base_of_v<reg_access::access_tag::read, AccessTag> || std::is_base_of_v<reg_access::access_tag::write, AccessTag>
         struct TimerBase {
+            static_assert(
+                    offset == Offset::time_hw || offset == Offset::time_lw || offset == Offset::time_hr || offset == Offset::time_lr
+                    || offset == Offset::alarm0 || offset == Offset::alarm1 || offset == Offset::alarm2 || offset == Offset::alarm3
+                    || offset == Offset::time_rawh || offset == Offset::time_rawl, "Invalid offset for TimerBase!"
+                );
             static constexpr std::uintptr_t addr = base + offset; /**< @brief Address of the timer register. */
             using timer_reg = reg_access::Reg<addr, AccessTag, std::uint32_t>; /**< @brief The timer register. */
 
@@ -244,6 +249,59 @@ namespace rp2040::hardware::timer {
             using Bits = pause_reg::template Bits<BitType>; /**< @brief Object to handle the pause bit. */
             using Value = BitType::value; /**< @brief Values of the pause bit. */
         };
+
+        template <std::uint32_t offset, typename AccessTag>
+        requires std::is_base_of_v<reg_access::access_tag::read, AccessTag> || std::is_base_of_v<reg_access::access_tag::write, AccessTag>
+        struct InterruptBase {
+            static_assert(offset == Offset::intr || offset == Offset::inte || offset == Offset::intf || offset == Offset::ints, "Invalid offset for InterruptBase!");
+            static constexpr std::uintptr_t addr = base + offset; /**< @brief Address of the interrupt register. */
+            using interrupt_reg = reg_access::Reg<addr, AccessTag, std::uint32_t>; /**< @brief The interrupt register. */
+
+            /**
+             * @brief The bits corresponding to alarm 3.
+             */
+            struct Alarm3 {
+                static constexpr std::uint32_t pos = 0x3U; /**< @brief Position of the bit in the register. */
+                using BitType = reg_access::BitTypeHighLow<interrupt_reg, pos>; /**< @brief Description of the alarm 3 bit. */
+                using Bits = interrupt_reg::template Bits<BitType>; /**< @brief Object to handle the alarm 3 bit. */
+                using Value = BitType::value; /**< @brief Values of the alarm 3 bit. */
+            };
+
+            /**
+             * @brief The bits corresponding to alarm 2.
+             */
+            struct Alarm2 {
+                static constexpr std::uint32_t pos = 0x2U; /**< @brief Position of the bit in the register. */
+                using BitType = reg_access::BitTypeHighLow<interrupt_reg, pos>; /**< @brief Description of the alarm 2 bit. */
+                using Bits = interrupt_reg::template Bits<BitType>; /**< @brief Object to handle the alarm 2 bit. */
+                using Value = BitType::value; /**< @brief Values of the alarm 2 bit. */
+            };
+
+            /**
+             * @brief The bits corresponding to alarm 1.
+             */
+            struct Alarm1 {
+                static constexpr std::uint32_t pos = 0x1U; /**< @brief Position of the bit in the register. */
+                using BitType = reg_access::BitTypeHighLow<interrupt_reg, pos>; /**< @brief Description of the alarm 1 bit. */
+                using Bits = interrupt_reg::template Bits<BitType>; /**< @brief Object to handle the alarm 1 bit. */
+                using Value = BitType::value; /**< @brief Values of the alarm 1 bit. */
+            };
+
+            /**
+             * @brief The bits corresponding to alarm 0.
+             */
+            struct Alarm0 {
+                static constexpr std::uint32_t pos = 0x3U; /**< @brief Position of the bit in the register. */
+                using BitType = reg_access::BitTypeHighLow<interrupt_reg, pos>; /**< @brief Description of the alarm 0 bit. */
+                using Bits = interrupt_reg::template Bits<BitType>; /**< @brief Object to handle the alarm 0 bit. */
+                using Value = BitType::value; /**< @brief Values of the alarm 0 bit. */
+            };
+        };
+
+        using IntR = InterruptBase<Offset::intr, reg_access::access_tag::write_clear>; /**< @brief Raw interrupts register. */
+        using IntE = InterruptBase<Offset::inte, reg_access::access_tag::read_write>; /**< @brief Interrupt enable register. */
+        using IntF = InterruptBase<Offset::intf, reg_access::access_tag::read_write>; /**< @brief Interrupt force register. */
+        using IntS = InterruptBase<Offset::ints, reg_access::access_tag::read>; /**< @brief Interrupt status after masking & forcing register. */
     };
 
     /**@]*/
