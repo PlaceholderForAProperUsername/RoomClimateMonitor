@@ -93,7 +93,7 @@ namespace rp2040::reg_access {
             template <typename BitsAccess = BitsAccess_, typename BitType_ = BitType>
             requires (!HasValueConcept<BitType_, RegType>)
             static std::enable_if_t<std::is_base_of_v<access_tag::read_write, BitsAccess>, void>
-            set(RegType bits_value)
+            set(std::uint32_t bits_value)
             {
                 auto reg_value = read();
                 reg_value &= ~BitType::mask;

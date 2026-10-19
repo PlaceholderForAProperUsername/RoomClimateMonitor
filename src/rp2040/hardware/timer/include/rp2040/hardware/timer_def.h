@@ -26,6 +26,8 @@
 
 #include <cstdint>
 
+#include "rp2040/reg_access.h"
+
 namespace rp2040::hardware::timer {
     /**
      * @addtogroup rp2040_timer
@@ -43,11 +45,11 @@ namespace rp2040::hardware::timer {
     /**
      * @brief Registers of the timer module.
      *
-     * @tparam addr Base address of the timer module.
+     * @tparam base Base address of the timer module.
      */
-    template <std::uintptr_t addr>
+    template <std::uintptr_t base>
     struct TimerRegMap {
-        static_assert(addr == address::timer, "Invalid base address for TimerRegMap!");
+        static_assert(base == address::timer, "Invalid base address for TimerRegMap!");
 
         /**
          * @brief Offsets of the registers from the base address.
@@ -62,8 +64,8 @@ namespace rp2040::hardware::timer {
             static constexpr std::uint32_t alarm2 = 0x18U; /**< @brief Offset of the alarm 2 register. */
             static constexpr std::uint32_t alarm3 = 0x1CU; /**< @brief Offset of the alarm 3 register. */
             static constexpr std::uint32_t armed = 0x20U; /**< @brief Offset of the armed register. */
-            static constexpr std::uint32_t timer_rawh = 0x24U; /**< @brief Offset of the raw read high bits register. */
-            static constexpr std::uint32_t timer_rawl = 0x28U; /**< @brief Offset of the raw read low bits register. */
+            static constexpr std::uint32_t time_rawh = 0x24U; /**< @brief Offset of the raw read high bits register. */
+            static constexpr std::uint32_t time_rawl = 0x28U; /**< @brief Offset of the raw read low bits register. */
             static constexpr std::uint32_t dbg_pause = 0x2CU; /**< @brief Offset of the debug pause register. */
             static constexpr std::uint32_t pause = 0x30U; /**< @brief Offset of the pause register. */
             static constexpr std::uint32_t intr = 0x34U; /**< @brief Offset of the raw interrupts register. */
@@ -71,6 +73,136 @@ namespace rp2040::hardware::timer {
             static constexpr std::uint32_t intf = 0x3CU; /**< @biref Offset of the interrupt force register. */
             static constexpr std::uint32_t ints = 0x40U; /**< @brief Offset of the interrupt status register. */
         };
+
+        /**
+         * @brief Base register for the timer registers.
+         *
+         * The timer registers have the same structure, only varying in address and access specifier depending on their purpose.
+         *
+         * @tparam offset Offset of the specific timer register from the base address. @see Offset
+         * @tparam AccessTag Register access tag of the specific timer register.
+         */
+        template <std::uint32_t offset, typename AccessTag>
+        requires std::is_base_of_v<reg_access::access_tag::read, AccessTag> || std::is_base_of_v<reg_access::access_tag::write, AccessTag>
+        struct TimerBase {
+            static constexpr std::uintptr_t addr = base + offset; /**< @brief Address of the timer register. */
+            using timer_reg = reg_access::Reg<addr, AccessTag, std::uint32_t>; /**< @brief The timer register. */
+
+            /**
+             * @brief The timer bits.
+             *
+             * @tparam timer_value The value to which the timer register is to be set. Default value intended for timer read registers.
+             */
+            template <std::uint32_t timer_value = 0>
+            struct Timer {
+                /**
+                 * @brief Description of the timer bits.
+                 */
+                struct BitType {
+                    using reg = timer_reg; /**< @brief Alias for the register the bits belongs to. */
+                    using T = reg::RegType; /**< @brief Alias for the underlying data type of the register. */
+                    using bit_access = timer_reg::reg_access; /**< @brief The access tag defining bit operations. */
+
+                    static constexpr T position = 0U; /**< @brief The position of the bit in the register. */
+                    static constexpr T mask = (0xFFFFFFFFU << position); /**< @brief The mask of the bit used in bit operations. */
+
+                    /**
+                     * @brief Value of the timer bits.
+                     */
+                    enum class value : T {
+                        val = timer_value,
+                    };
+                };
+                using Bits = timer_reg::template Bits<BitType>; /**< @brief Object to handle the timer bits. */
+                using Value = BitType::value; /**< @brief Values of the timer bits. */
+            };
+        };
+
+        /**
+         * @brief Writes bits 63:32 of the timer. Always write @see TimeLW before TimeHW, as writes only get copied when
+         * writing in this order.
+         */
+        using TimeHW = TimerBase<Offset::time_hw, reg_access::access_tag::write_fifo>;
+        /**
+         * @brief Writes bits 31:0 of the timer. Writes to this register must be followed with a write to @see TimeHW, as
+         * writes only gets copied, when writing in this order.
+         */
+        using TimeLW = TimerBase<Offset::time_lw, reg_access::access_tag::write_fifo>;
+        /**
+         * @brief Reads bits 63:32 of the timer. Always read @see TimeLR before TimeHR. For non-latching reads @see TimeRawH
+         */
+        using TimeHR = TimerBase<Offset::time_hr, reg_access::access_tag::read>;
+        /**
+         * @brief Reads bits 31:0 of the timer. Reads to this register latches the timer, requiring a read from TimeHR to
+         * clear the latch. For non-latching reads @see TimeRawL
+         */
+        using TimeLR = TimerBase<Offset::time_lr, reg_access::access_tag::read>;
+        /**
+         * @brief Writes arm alarm 0 and set the time alarm 0 fires. Alarm 0 fires when the value written to this register
+         * equals the value of @see TimeLR. The alarm will disarm itself after firing and can be disabled early with the
+         * @see Armed register.
+         */
+        using Alarm0 = TimerBase<Offset::alarm0, reg_access::access_tag::read_write>;
+        /**
+         * @brief Writes arm alarm 1 and set the time alarm 1 fires. Alarm 1 fires when the value written to this register
+         * equals the value of @see TimeLR. The alarm will disarm itself after firing and can be disabled early with the
+         * @see Armed register.
+         */
+        using Alarm1 = TimerBase<Offset::alarm1, reg_access::access_tag::read_write>;
+        /**
+         * @brief Writes arm alarm 2 and set the time alarm 2 fires. Alarm 2 fires when the value written to this register
+         * equals the value of @see TimeLR. The alarm will disarm itself after firing and can be disabled early with the
+         * @see Armed register.
+         */
+        using Alarm2 = TimerBase<Offset::alarm2, reg_access::access_tag::read_write>;
+        /**
+         * @brief Writes arm alarm 3 and set the time alarm 3 fires. Alarm 3 fires when the value written to this register
+         * equals the value of @see TimeLR. The alarm will disarm itself after firing and can be disabled early with the
+         * @see Armed register.
+         */
+        using Alarm3 = TimerBase<Offset::alarm3, reg_access::access_tag::read_write>;
+
+        /**
+         * @brief Indicates the status of each alarm (armed/disarmed). Alarms can be disarmed before firing by setting the
+         * corresponding bit.
+         */
+        struct Armed {
+            static constexpr std::uintptr_t addr = base + Offset::armed; /**< @brief Address of the armed register. */
+            using armed_reg = reg_access::Reg<addr, reg_access::access_tag::write_clear, std::uint32_t>; /**< @brief The armed register. */
+
+            /**
+             * @brief Description of the armed bits.
+             */
+            struct BitType {
+                using reg = armed_reg; /**< @brief Alias for the register the bits belongs to. */
+                using T = reg::RegType; /**< @brief Alias for the underlying data type of the register. */
+                using bit_access = armed_reg::reg_access; /**< @brief The access tag defining bit operations. */
+
+                static constexpr T position = 0U; /**< @brief The position of the bit in the register. */
+                static constexpr T mask = (0xFU << position); /**< @brief The mask of the bit used in bit operations. */
+
+                /**
+                 * @brief Value of the armed bits.
+                 */
+                enum class value : T {
+                    alarm0 = 0x1U,
+                    alarm1 = 0x2U,
+                    alarm2 = 0x4U,
+                    alarm3 = 0x8U,
+                };
+            };
+            using Bits = armed_reg::template Bits<BitType>; /**< @brief Object to handle the armed bits. */
+            using Value = BitType::value; /**< @brief Values of the armed bits. */
+        };
+
+        /**
+         * @brief Non-latching register to read bits 63:32 of the timer.
+         */
+        using TimeRawH = TimerBase<Offset::time_rawh, reg_access::access_tag::read>;
+        /**
+         * @brief Non-latching register to read bits 31:0 of the timer.
+         */
+        using TimeRawL = TimerBase<Offset::time_rawl, reg_access::access_tag::read>;
     };
 
     /**@]*/
