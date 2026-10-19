@@ -203,6 +203,35 @@ namespace rp2040::hardware::timer {
          * @brief Non-latching register to read bits 31:0 of the timer.
          */
         using TimeRawL = TimerBase<Offset::time_rawl, reg_access::access_tag::read>;
+
+        /**
+         * @brief Enables/disables the pause of the timer when the corresponding debug port is active.
+         */
+        struct DbgPause {
+            static constexpr std::uintptr_t addr = base + Offset::dbg_pause; /**< @brief Address of the debug pause register. */
+            using dbg_pause_reg = reg_access::Reg<addr, reg_access::access_tag::read_write, std::uint32_t>; /**< @brief The debug pause register. */
+
+            /**
+             * @brief Enables pause when processor 1 is in debug mode.
+             */
+            struct Dbg1 {
+                static constexpr std::uint32_t pos = 0x1U; /**< @brief Position of the bit in the register. */
+                using BitType = reg_access::BitTypeEnableDisable<dbg_pause_reg, pos>; /**< @brief Description of the debug pause proc 1 bit.*/
+                using Bits = dbg_pause_reg::template Bits<BitType>; /**< @brief Object to handle the debug pause proc 1 bit. */
+                using Value = BitType::value; /**< @brief Value of the debug pause proc 1 bit. */
+            };
+
+            /**
+             * @brief Enables pause when processor 0 is in debug mode.
+             */
+            struct Dbg0 {
+                static constexpr std::uint32_t pos = 0x0U; /**< @brief Position of the bit in the register. */
+                using BitType = reg_access::BitTypeEnableDisable<dbg_pause_reg, pos>; /**< @brief Description of the debug pause proc 0 bit.*/
+                using Bits = dbg_pause_reg::template Bits<BitType>; /**< @brief Object to handle the debug pause proc 0 bit. */
+                using Value = BitType::value; /**< @brief Value of the debug pause proc 0 bit. */
+            };
+        };
+
     };
 
     /**@]*/
