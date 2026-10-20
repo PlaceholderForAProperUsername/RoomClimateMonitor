@@ -220,7 +220,7 @@ namespace rp2040::hardware::timer {
              * @brief Setting this bit high enabled the pause when processor 1 is in debug mode.
              */
             struct Dbg1 {
-                static constexpr std::uint32_t pos = 0x1U; /**< @brief Position of the bit in the register. */
+                static constexpr std::uint32_t pos = 1U; /**< @brief Position of the bit in the register. */
                 using BitType = reg_access::BitTypeHighLow<dbg_pause_reg, pos>; /**< @brief Description of the debug pause proc 1 bit.*/
                 using Bits = dbg_pause_reg::template Bits<BitType>; /**< @brief Object to handle the debug pause proc 1 bit. */
                 using Value = BitType::value; /**< @brief Value of the debug pause proc 1 bit. */
@@ -230,7 +230,7 @@ namespace rp2040::hardware::timer {
              * @brief Setting this bit high enabled the pause when processor 0 is in debug mode.
              */
             struct Dbg0 {
-                static constexpr std::uint32_t pos = 0x0U; /**< @brief Position of the bit in the register. */
+                static constexpr std::uint32_t pos = 0U; /**< @brief Position of the bit in the register. */
                 using BitType = reg_access::BitTypeHighLow<dbg_pause_reg, pos>; /**< @brief Description of the debug pause proc 0 bit.*/
                 using Bits = dbg_pause_reg::template Bits<BitType>; /**< @brief Object to handle the debug pause proc 0 bit. */
                 using Value = BitType::value; /**< @brief Value of the debug pause proc 0 bit. */
@@ -244,7 +244,7 @@ namespace rp2040::hardware::timer {
             static constexpr std::uintptr_t addr = base + Offset::pause; /**< @brief Address of the pause register. */
             using pause_reg = reg_access::Reg<addr, reg_access::access_tag::read_write, std::uint32_t>; /**< @brief The pause register. */
 
-            static constexpr std::uint32_t pos = 0x0U; /**< @brief Position of the bit in the register. */
+            static constexpr std::uint32_t pos = 0U; /**< @brief Position of the bit in the register. */
             using BitType = reg_access::BitTypeHighLow<pause_reg, pos>; /**< @brief Description of the pause bit.*/
             using Bits = pause_reg::template Bits<BitType>; /**< @brief Object to handle the pause bit. */
             using Value = BitType::value; /**< @brief Values of the pause bit. */
@@ -261,7 +261,7 @@ namespace rp2040::hardware::timer {
              * @brief The bits corresponding to alarm 3.
              */
             struct Alarm3 {
-                static constexpr std::uint32_t pos = 0x3U; /**< @brief Position of the bit in the register. */
+                static constexpr std::uint32_t pos = 3U; /**< @brief Position of the bit in the register. */
                 using BitType = reg_access::BitTypeHighLow<interrupt_reg, pos>; /**< @brief Description of the alarm 3 bit. */
                 using Bits = interrupt_reg::template Bits<BitType>; /**< @brief Object to handle the alarm 3 bit. */
                 using Value = BitType::value; /**< @brief Values of the alarm 3 bit. */
@@ -271,7 +271,7 @@ namespace rp2040::hardware::timer {
              * @brief The bits corresponding to alarm 2.
              */
             struct Alarm2 {
-                static constexpr std::uint32_t pos = 0x2U; /**< @brief Position of the bit in the register. */
+                static constexpr std::uint32_t pos = 2U; /**< @brief Position of the bit in the register. */
                 using BitType = reg_access::BitTypeHighLow<interrupt_reg, pos>; /**< @brief Description of the alarm 2 bit. */
                 using Bits = interrupt_reg::template Bits<BitType>; /**< @brief Object to handle the alarm 2 bit. */
                 using Value = BitType::value; /**< @brief Values of the alarm 2 bit. */
@@ -281,7 +281,7 @@ namespace rp2040::hardware::timer {
              * @brief The bits corresponding to alarm 1.
              */
             struct Alarm1 {
-                static constexpr std::uint32_t pos = 0x1U; /**< @brief Position of the bit in the register. */
+                static constexpr std::uint32_t pos = 1U; /**< @brief Position of the bit in the register. */
                 using BitType = reg_access::BitTypeHighLow<interrupt_reg, pos>; /**< @brief Description of the alarm 1 bit. */
                 using Bits = interrupt_reg::template Bits<BitType>; /**< @brief Object to handle the alarm 1 bit. */
                 using Value = BitType::value; /**< @brief Values of the alarm 1 bit. */
@@ -291,7 +291,7 @@ namespace rp2040::hardware::timer {
              * @brief The bits corresponding to alarm 0.
              */
             struct Alarm0 {
-                static constexpr std::uint32_t pos = 0x3U; /**< @brief Position of the bit in the register. */
+                static constexpr std::uint32_t pos = 0U; /**< @brief Position of the bit in the register. */
                 using BitType = reg_access::BitTypeHighLow<interrupt_reg, pos>; /**< @brief Description of the alarm 0 bit. */
                 using Bits = interrupt_reg::template Bits<BitType>; /**< @brief Object to handle the alarm 0 bit. */
                 using Value = BitType::value; /**< @brief Values of the alarm 0 bit. */
