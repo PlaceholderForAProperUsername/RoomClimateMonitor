@@ -184,6 +184,34 @@ namespace rp2040::hardware::watchdog {
                 using Value = BitType::value; /**< @brief Value of the load bits.*/
             };
         };
+
+        /**
+         * @brief Logs the reason for the last reset.
+         */
+        struct Reason {
+            static constexpr std::uintptr_t addr {base + Offset::reason}; /**< @brief Address of the reason register. */
+            using reason_reg = reg_access::Reg<addr, reg_access::access_tag::read, std::uint32_t>; /**< @brief The reason register. */
+
+            /**
+             * @brief Indicates if a watchdog reset was forced.
+             */
+            struct Force {
+                static constexpr std::uint32_t pos {1U}; /**< @brief Position of the force bit in the register. */
+                using BitType = reg_access::BitTypeHighLow<reason_reg, pos>; /**< @brief Description of the force bit. */
+                using Bits = reason_reg::template Bits<BitType>; /**< @brief Object to handle the force bits. */
+                using Value = BitType::value; /**< @brief Value of the force bit. */
+            };
+
+            /**
+             * @brief Indicates if a watchdog reset was triggered by the timer.
+             */
+            struct Timer {
+                static constexpr std::uint32_t pos {0U}; /**< @brief Position of the timer bit in the register. */
+                using BitType = reg_access::BitTypeHighLow<reason_reg, pos>; /**< @brief Description of the timer bit. */
+                using Bits = reason_reg::template Bits<BitType>; /**< @brief Object to handle the timer bits. */
+                using Value = BitType::value; /**< @brief Value of the timer bit. */
+            };
+        };
     };
 
     /**@}*/ //rp2040_watchdog
