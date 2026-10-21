@@ -27,6 +27,8 @@
 
 #include <cstdint>
 
+#include "rp2040/reg_access.h"
+
 namespace rp2040::hardware::watchdog {
     /**
      * @addtogroup rp2040_watchdog
@@ -60,6 +62,85 @@ namespace rp2040::hardware::watchdog {
             static constexpr std::uint32_t scratch6 {0x24U}; /**< @brief Offset of the scratch6 register. */
             static constexpr std::uint32_t scratch7 {0x28U}; /**< @brief Offset of the scratch7 register. */
             static constexpr std::uint32_t tick {0x2CU}; /**< @brief Offset of the tick register. */
+        };
+
+        /**
+         * @brief Watchdog control register.
+         */
+        struct Ctrl {
+            static constexpr std::uintptr_t addr {base + Offset::ctrl}; /**< @brief Address of the watchdog register. */
+            using ctrl_reg = reg_access::Reg<addr, reg_access::access_tag::mixed_access, std::uint32_t>; /**< @brief The watchdog register. */
+
+            /**
+             * @brief Triggers a watchdog reset.
+             */
+            struct Trigger {
+                static constexpr std::uint32_t pos {31U}; /**< @brief Position of the bit in the register. */
+                using BitType = reg_access::BitTypeEnableDisable<ctrl_reg, pos, reg_access::access_tag::self_clear>; /**< @brief Description of the trigger bit. */
+                using Bits = ctrl_reg::template Bits<BitType>; /**< @brief Object to handle the trigger bits. */
+                using Value = BitType::value; /**< @brief Values of the trigger bits. */
+            };
+
+            /**
+             * @brief Enables the watchdog timer.
+             */
+            struct Enable {
+                static constexpr std::uint32_t pos {30U}; /**< @brief Position of the bit in the register. */
+                using BitType = reg_access::BitTypeEnableDisable<ctrl_reg, pos, reg_access::access_tag::read_write>; /**< @brief Description of the enable bit. */
+                using Bits = ctrl_reg::template Bits<BitType>; /**< @brief Object to handle the enable bits. */
+                using Value = BitType::value; /**< @brief Values of the enable bits. */
+            };
+
+            /**
+             * @brief Pause debug 1 bit enables the pause mode when processor 1 is in debug mode.
+             */
+            struct PauseDbg1 {
+                static constexpr std::uint32_t pos {26U}; /**< @brief Position of the bit in the register. */
+                using BitType = reg_access::BitTypeHighLow<ctrl_reg, pos, reg_access::access_tag::read_write>; /**< @brief Description of the pause debug 1 bit. */
+                using Bits = ctrl_reg::template Bits<BitType>; /**< @brief Object to handle the pause debug 1 bits. */
+                using Value = BitType::value; /**< @brief Values of the pause debug 1 bits. */
+            };
+
+            /**
+             * @brief Pause debug 0 bit enables the pause mode when processor 0 is in debug mode.
+             */
+            struct PauseDbg0 {
+                static constexpr std::uint32_t pos {25U}; /**< @brief Position of the bit in the register. */
+                using BitType = reg_access::BitTypeHighLow<ctrl_reg, pos, reg_access::access_tag::read_write>; /**< @brief Description of the pause debug 0 bit. */
+                using Bits = ctrl_reg::template Bits<BitType>; /**< @brief Object to handle the pause debug 0 bits. */
+                using Value = BitType::value; /**< @brief Values of the pause debug 0 bits. */
+            };
+
+            /**
+             * @brief Pause JTAG bit enables the pause mode when JTAG is accessing the bus fabric.
+             */
+            struct PauseJtag {
+                static constexpr std::uint32_t pos {25U}; /**< @brief Position of the bit in the register. */
+                using BitType = reg_access::BitTypeHighLow<ctrl_reg, pos, reg_access::access_tag::read_write>; /**< @brief Description of the pause JTAG bit. */
+                using Bits = ctrl_reg::template Bits<BitType>; /**< @brief Object to handle the pause JTAG bits. */
+                using Value = BitType::value; /**< @brief Values of the pause JTAG bits. */
+            };
+
+            /**
+             * @brief Indicates the number of ticks before a watchdog reset will be triggered.
+             *
+             * Due to logic error, the counter is decremented twice per tick, meaning the value of the time bits must be
+             * divided by 2 to get the actual remaining time.
+             */
+            struct Time {
+                /**
+                 * @brief Description of the time bits.
+                 */
+                struct BitType {
+                    using reg = ctrl_reg; /**< @brief Alias for the register the bits belongs to. */
+                    using T = reg::RegType; /**< @brief Alias for the underlying data type of the register. */
+                    using bit_access = reg_access::access_tag::read; /**< @brief The access tag defining bit operations. */
+
+                    static constexpr T position = 0U; /**< @brief The position of the bit in the register. */
+                    static constexpr T mask = (0xFFFFFFU << position); /**< @brief The mask of the bit used in bit operations. */
+                };
+                using Bits = ctrl_reg::template Bits<BitType>; /**< @brief Object to handle the time bits. */
+            };
         };
     };
 
