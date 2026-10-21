@@ -142,6 +142,48 @@ namespace rp2040::hardware::watchdog {
                 using Bits = ctrl_reg::template Bits<BitType>; /**< @brief Object to handle the time bits. */
             };
         };
+
+        /**
+         * @brief The load register to set the watchdog timer.
+         */
+        struct Load {
+            static constexpr std::uintptr_t addr {base + Offset::load}; /**< @brief Address of the load register. */
+            using load_reg = reg_access::Reg<addr, reg_access::access_tag::write_fifo, std::uint32_t>; /**< @brief The load register. */
+
+            /**
+             * @brief The load value bits.
+             *
+             * Due to a logic error,the counter is decremented twice per tick, meaning the actual time is only half of
+             * the load value.
+             *
+             * @tparam load_value The time divided by 2 it takes for the watchdog triggers a reset.
+             */
+            template <std::uint32_t load_value>
+            struct LoadValue {
+                /**
+                 * @brief Description of the load value bits.
+                 */
+                struct BitType {
+                    using reg = load_reg; /**< @brief Alias for the register the bits belongs to. */
+                    using T = reg::RegType; /**< @brief Alias for the underlying data type of the register. */
+                    using bit_access = load_reg::reg_access; /**< @brief The access tag defining bit operations. */
+
+                    static constexpr T position = 0U; /**< @brief The position of the bit in the register. */
+                    static constexpr T mask = (0xFFFFFFU << position); /**< @brief The mask of the bit used in bit operations. */
+
+                    static_assert(load_value <= mask, "Invalid value for load register!");
+
+                    /**
+                     * @brief The value of the load bits.
+                     */
+                    enum class value : T {
+                        val = load_value
+                    };
+                };
+                using Bits = load_reg::template Bits<BitType>; /**< @brief Object to handle the load bits. */
+                using Value = BitType::value; /**< @brief Value of the load bits.*/
+            };
+        };
     };
 
     /**@}*/ //rp2040_watchdog
