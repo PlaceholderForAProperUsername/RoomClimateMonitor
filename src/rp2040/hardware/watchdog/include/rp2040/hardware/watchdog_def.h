@@ -272,6 +272,85 @@ namespace rp2040::hardware::watchdog {
         using Scratch5 = ScratchBase<Offset::scratch5>; /**< @brief Scratch register 5. */
         using Scratch6 = ScratchBase<Offset::scratch6>; /**< @brief Scratch register 6. */
         using Scratch7 = ScratchBase<Offset::scratch7>; /**< @brief Scratch register 7. */
+
+        /**
+         * @brief Controls the tick generator.
+         */
+        struct Tick {
+            static constexpr std::uintptr_t addr {base + Offset::tick}; /**< @brief Address of the tick register. */
+            using tick_reg = reg_access::Reg<addr, reg_access::access_tag::mixed_access, std::uint32_t>; /**< @brief The tick register. */
+
+            /**
+             * @brief Count down timer showing the remaining number clk_tick cycles before the next tick is generated.
+             */
+            struct Count {
+                /**
+                 * @brief Description of the count bits.
+                 */
+                struct BitType {
+                    using reg = tick_reg; /**< @brief Alias for the register the bits belongs to. */
+                    using T = reg::RegType; /**< @brief Alias for the underlying data type of the register. */
+                    using bit_access = reg_access::access_tag::read; /**< @brief The access tag defining bit operations. */
+
+                    static constexpr T position = 11U; /**< @brief The position of the bit in the register. */
+                    static constexpr T mask = (0x1FFU << position); /**< @brief The mask of the bit used in bit operations. */
+                };
+                using Bits = tick_reg::template Bits<BitType>; /**< @brief Object to handle the count bits. */
+            };
+
+            /**
+             * @brief Indicates if the tick generator is running.
+             */
+            struct Running {
+                static constexpr std::uint32_t pos {10U}; /**< @brief Position of the bit in the register. */
+                using BitType = reg_access::BitTypeEnableDisable<tick_reg, pos, reg_access::access_tag::read>; /**< @brief Description of the running bit. */
+                using Bits = tick_reg::template Bits<BitType>; /**< @brief Object to handle the running bit. */
+                using Value = BitType::value; /**< @brief Values of the running bit. */
+            };
+
+            /**
+             * @brief Starts/stops the tick generation.
+             */
+            struct Enable {
+                static constexpr std::uint32_t pos {9U}; /**< @brief Position of the bit in the register. */
+                using BitType = reg_access::BitTypeEnableDisable<tick_reg, pos, reg_access::access_tag::read_write>; /**< @brief Description of the enable bit. */
+                using Bits = tick_reg::template Bits<BitType>; /**< @brief Object to handle the enable bit. */
+                using Value = BitType::value; /**< @brief Values of the enable bit. */
+            };
+
+            /**
+             * @brief Sets the number of clk_tick cycles before the next tick.
+             *
+             * The default value is when the XOSC is set as the reference clock to generate ticks of 1us intervals.
+             *
+             * @tparam cycles The number of clock cycles before the next tick.
+             */
+            template <std::uint16_t cycles = 12U>
+            struct Cycles {
+                /**
+                 * @brief Description of the cycles bit.
+                 */
+                struct BitType {
+                    using reg = tick_reg; /**< @brief Alias for the register the bits belongs to. */
+                    using T = reg::RegType; /**< @brief Alias for the underlying data type of the register. */
+                    using bit_access = reg_access::access_tag::read_write; /**< @brief The access tag defining bit operations. */
+
+                    static constexpr T position = 0U; /**< @brief The position of the bit in the register. */
+                    static constexpr T mask = (0x1FFU << position); /**< @brief The mask of the bit used in bit operations. */
+
+                    static_assert(cycles <= mask, "Invalid value for scratch register!");
+
+                    /**
+                     * @brief The value of the cycles bits.
+                     */
+                    enum class value : T {
+                        val = cycles
+                    };
+                };
+                using Bits = tick_reg::template Bits<BitType>; /**< @brief Object to handle the cycles bits. */
+                using Value = BitType::value; /**< @brief Value of the cycles bits.*/
+            };
+        };
     };
 
     /**@}*/ //rp2040_watchdog
