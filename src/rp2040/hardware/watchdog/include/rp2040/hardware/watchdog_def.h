@@ -212,6 +212,66 @@ namespace rp2040::hardware::watchdog {
                 using Value = BitType::value; /**< @brief Value of the timer bit. */
             };
         };
+
+        /**
+         * @brief Base register layout of the scratch register 0-7.
+         *
+         * The information in the scratch register persists through a soft reset of the chip.
+         *
+         * @tparam scratch_offset The offset address of the scratch register.
+         */
+        template <std::uint32_t scratch_offset>
+        struct ScratchBase {
+            static_assert(
+                scratch_offset == Offset::scratch0 || scratch_offset == Offset::scratch1 ||
+                scratch_offset == Offset::scratch2 || scratch_offset == Offset::scratch3 ||
+                scratch_offset == Offset::scratch4 || scratch_offset == Offset::scratch5 ||
+                scratch_offset == Offset::scratch6 || scratch_offset == Offset::scratch7, "Invalid scratch offset!"
+                );
+
+            static constexpr std::uintptr_t addr {base + scratch_offset}; /**< @brief Address of the scratch register. */
+            using scratch_reg = reg_access::Reg<addr, reg_access::access_tag::read_write, std::uint32_t>; /**< @brief The scratch register. */
+
+            /**
+             * @brief The bits of the scratch register.
+             *
+             * @tparam scratch_value The value of the scratch bits.
+             */
+            template <std::uint32_t scratch_value>
+            struct ScratchValue {
+                /**
+                 * @brief Description of the scratch bits.
+                 */
+                struct BitType {
+                    using reg = scratch_reg; /**< @brief Alias for the register the bits belongs to. */
+                    using T = reg::RegType; /**< @brief Alias for the underlying data type of the register. */
+                    using bit_access = scratch_reg::reg_access; /**< @brief The access tag defining bit operations. */
+
+                    static constexpr T position = 0U; /**< @brief The position of the bit in the register. */
+                    static constexpr T mask = (0xFFFFFFFFU << position); /**< @brief The mask of the bit used in bit operations. */
+
+                    static_assert(scratch_value <= mask, "Invalid value for scratch register!");
+
+                    /**
+                     * @brief The value of the scratch bits.
+                     */
+                    enum class value : T {
+                        val = scratch_value
+                    };
+                };
+                using Bits = scratch_reg::template Bits<BitType>; /**< @brief Object to handle the scratch bits. */
+                using Value = BitType::value; /**< @brief Value of the scratch bits.*/
+            };
+        };
+
+        using Scratch0 = ScratchBase<Offset::scratch0>; /**< @brief Scratch register 0. */
+        using Scratch1 = ScratchBase<Offset::scratch1>; /**< @brief Scratch register 1. */
+        using Scratch2 = ScratchBase<Offset::scratch2>; /**< @brief Scratch register 2. */
+        using Scratch3 = ScratchBase<Offset::scratch3>; /**< @brief Scratch register 3. */
+        using Scratch4 = ScratchBase<Offset::scratch4>; /**< @brief Scratch register 4. */
+        using Scratch5 = ScratchBase<Offset::scratch5>; /**< @brief Scratch register 5. */
+        using Scratch6 = ScratchBase<Offset::scratch6>; /**< @brief Scratch register 6. */
+        using Scratch7 = ScratchBase<Offset::scratch7>; /**< @brief Scratch register 7. */
     };
 
     /**@}*/ //rp2040_watchdog
