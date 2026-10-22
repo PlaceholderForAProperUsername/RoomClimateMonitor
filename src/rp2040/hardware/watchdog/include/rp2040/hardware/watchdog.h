@@ -21,6 +21,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 #ifndef RP2040_HARDWARE_WATCHDOG_H
 #define RP2040_HARDWARE_WATCHDOG_H
 
@@ -32,6 +33,24 @@ namespace rp2040::hardware::watchdog {
      * @{
      */
 
+    /**
+     * @brief The watchdog controller.
+     */
+    template <std::uintptr_t base>
+    class WatchdogType {
+        static_assert(base == address::watchdog, "Invalid watchdog base address!");
+
+    public:
+        /**
+         * @brief Getter function to get the singleton instance.
+         *
+         * @return WatchdogType& The watchdog controller instance.
+         */
+        static WatchdogType& get_instance();
+
+    private:
+        WatchdogType() = default;
+    };
 
     /**@}*/ //rp2040_watchdog
 }

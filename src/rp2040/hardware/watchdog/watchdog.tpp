@@ -32,6 +32,11 @@ namespace rp2040::hardware::watchdog {
      * @addtogroup rp2040_watchdog
      * @{
      */
+    template <std::uintptr_t base>
+    WatchdogType<base>& WatchdogType<base>::get_instance() {
+        static WatchdogType<base> instance;
+        return instance;
+    }
 
 
     /**@}*/ //rp2040_watchdog
