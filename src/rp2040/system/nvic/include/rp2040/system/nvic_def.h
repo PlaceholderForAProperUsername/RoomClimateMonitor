@@ -26,6 +26,9 @@
 #define RP2040_SYSTEM_NVIC_DEF_H
 
 #include <cstdint>
+#include <utility>
+
+#include "rp2040/reg_access.h"
 
 namespace rp2040::system::nvic {
     /**
@@ -36,7 +39,7 @@ namespace rp2040::system::nvic {
     /**
      * @brief Available interrupts of the RP2040.
      */
-    enum class Interrupts : std::uint8_t {
+    enum class Interrupts : std::uint32_t {
         timer_irq_0 = 0U,
         timer_irq_1 = 1U,
         timer_irq_2 = 2U,
@@ -91,6 +94,31 @@ namespace rp2040::system::nvic {
             static constexpr std::uint32_t ispr {0x100U}; /**< @brief Offset of the interrupt set-pending register. */
             static constexpr std::uint32_t icpr {0x180U}; /**< @brief Offset of the interrupt clear-pending register. */
             static constexpr std::uint32_t ipr_base {0x300U}; /**< @brief Offset of the base interrupt priority registers. */
+        };
+
+        /**
+         * @brief Interrupt set-enable register.
+         *
+         * If an interrupt is pending and then gets enabled, the NVIC activates the interrupt based on its priority.
+         */
+        struct Iser {
+            static constexpr std::uintptr_t addr {base + Offset::iser}; /**< @brief Address of the interrupt set-enable register. */
+            using iser_reg = reg_access::Reg<addr, reg_access::access_tag::read_write, std::uint32_t>; /**< @brief The interrupt set-enable register. */
+
+            /**
+             * @brief Set enable bits.
+             *
+             * The interrupt can only be enabled with a write. To disable an interrupt @see Icer
+             *
+             * @tparam interrupt The interrupt to be enabled.
+             */
+            template <Interrupts interrupt>
+            struct SetEnable {
+                static constexpr auto pos {std::to_underlying(interrupt)}; /**< @brief Position of the interrupt in the register. */
+                using BitType = reg_access::BitTypeEnableDisable<iser_reg, pos>; /**< @brief Description of the interrupt set enable bit. */
+                using Bits = iser_reg::template Bits<BitType>; /**< @brief Object to handle the interrupt set enable bit. */
+                using Value = BitType::value; /**< @brief Value of the interrupt set enable bit. */
+            };
         };
     };
 
