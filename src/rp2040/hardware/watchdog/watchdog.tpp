@@ -41,13 +41,18 @@ namespace rp2040::hardware::watchdog {
     template <std::uintptr_t base>
     template <std::uint16_t cycles>
     void WatchdogType<base>::start_tick_generator() {
-        if (Registers::Tick::Running::Bits::get_value() == Registers::Tick::Running::Value::enable) {
+        if (is_tick_generator_running()) {
             Registers::Tick::Enable::Bits::set(Registers::Tick::Enable::Value::disable);
         }
         using CyclesBits = Registers::Tick::template Cycles<cycles>;
         CyclesBits::Bits::set(CyclesBits::Value::val);
 
         Registers::Tick::Enable::set(Registers::Tick::Enable::Value::enable);
+    }
+
+    template <std::uintptr_t base>
+    bool WatchdogType<base>::is_tick_generator_running() {
+        return (Registers::Tick::Running::Bits::get_value() == Registers::Tick::Running::Value::enable);
     }
 
     /**@}*/ //rp2040_watchdog

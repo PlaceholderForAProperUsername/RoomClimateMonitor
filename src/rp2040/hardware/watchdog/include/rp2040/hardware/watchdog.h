@@ -63,6 +63,17 @@ namespace rp2040::hardware::watchdog {
         template <std::uint16_t cycles = 12U>
         void start_tick_generator();
 
+        /**
+         * @brief Checks if the tick generator is running.
+         *
+         * @return Boolean True if the tick generator is running and false if not.
+         *
+         * @pre None
+         *
+         * @post None
+         */
+        bool is_tick_generator_running();
+
     private:
         using Registers = RegMap<base>;
 
