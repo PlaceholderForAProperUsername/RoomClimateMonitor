@@ -34,6 +34,39 @@ namespace rp2040::system::nvic {
      */
 
     /**
+     * @brief Available interrupts of the RP2040.
+     */
+    enum class Interrupts : std::uint8_t {
+        timer_irq_0 = 0U,
+        timer_irq_1 = 1U,
+        timer_irq_2 = 2U,
+        timer_irq_3 = 3U,
+        pwm_irq_wrap = 4U,
+        usbctrl_irq = 5U,
+        xip_irq = 6U,
+        pio0_irq_0 = 7U,
+        pio0_irq_1 = 8U,
+        pio1_irq_0 = 9U,
+        pio1_irq_1 = 10U,
+        dma_irq_0 = 11U,
+        dma_irq_1 = 12U,
+        io_irq_bank0 = 13U,
+        io_irq_qspi = 14U,
+        sio_irq_proc0 = 15U,
+        sio_irq_proc1 = 16U,
+        clocks_irq = 17U,
+        spio0_irq = 18U,
+        spio1_irq = 19U,
+        uart0_irq = 20U,
+        uart1_irq = 21U,
+        adc_irq_fifo = 22U,
+        i2c0_irq = 23U,
+        i2c1_irq = 24U,
+        rtc_irq = 25U,
+        number_of_interrupts
+    };
+
+    /**
      * @brief Base addresses of the NVIC module.
      */
     namespace address {
