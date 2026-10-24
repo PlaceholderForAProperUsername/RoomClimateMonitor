@@ -25,11 +25,20 @@
 #ifndef RP2040_SYSTEM_NVIC_DEF_H
 #define RP2040_SYSTEM_NVIC_DEF_H
 
+#include <cstdint>
+
 namespace rp2040::system::nvic {
     /**
      * @addtogroup rp2040_nvic
      * @{
      */
+
+    /**
+     * @brief Base addresses of the NVIC module.
+     */
+    namespace address {
+        constexpr std::uintptr_t nvic { 0xE000E100U}; /**< @brief Base address of the NVIC. */
+    }
 
     /**@}*/
 }
