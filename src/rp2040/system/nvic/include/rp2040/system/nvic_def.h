@@ -126,10 +126,10 @@ namespace rp2040::system::nvic {
          */
         struct Icer {
             static constexpr std::uintptr_t addr {base + Offset::icer}; /**< @brief Address of the interrupt clear-enable register. */
-            using iser_reg = reg_access::Reg<addr, reg_access::access_tag::read_write, std::uint32_t>; /**< @brief The interrupt clear-enable register. */
+            using icer_reg = reg_access::Reg<addr, reg_access::access_tag::read_write, std::uint32_t>; /**< @brief The interrupt clear-enable register. */
 
             /**
-             * @brief Set enable bits.
+             * @brief Clear enable bits.
              *
              * The interrupt can only be disabled with a write. To enable an interrupt @see Iser
              * Note: writing a 1 disables an interrupt but reading a 1 means the interrupt is enabled. The interrupt is disabled
@@ -140,9 +140,33 @@ namespace rp2040::system::nvic {
             template <Interrupts interrupt>
             struct ClearEnable {
                 static constexpr auto pos {std::to_underlying(interrupt)}; /**< @brief Position of the interrupt in the register. */
-                using BitType = reg_access::BitTypeHighLow<iser_reg, pos>; /**< @brief Description of the interrupt clear enable bit. */
-                using Bits = iser_reg::template Bits<BitType>; /**< @brief Object to handle the interrupt clear enable bit. */
+                using BitType = reg_access::BitTypeHighLow<icer_reg, pos>; /**< @brief Description of the interrupt clear enable bit. */
+                using Bits = icer_reg::template Bits<BitType>; /**< @brief Object to handle the interrupt clear enable bit. */
                 using Value = BitType::value; /**< @brief Value of the interrupt clear enable bit. */
+            };
+        };
+
+        /**
+         * @brief Interrupt set-pending register.
+         */
+        struct Ispr {
+            static constexpr std::uintptr_t addr {base + Offset::ispr}; /**< @brief Address of the interrupt set-pending register. */
+            using ispr_reg = reg_access::Reg<addr, reg_access::access_tag::read_write, std::uint32_t>; /**< @brief The interrupt set-pending register. */
+
+            /**
+             * @brief Set pending bits.
+             *
+             * Writing a 1 set the interrupt to be pending while writing a 0 has no effect. Reading a 1 means the interrupt
+             * is already pending and reading 0 means the interrupt is not pending.
+             *
+             * @tparam interrupt The interrupt to be set to be pending.
+             */
+            template <Interrupts interrupt>
+            struct SetPending {
+                static constexpr auto pos {std::to_underlying(interrupt)}; /**< @brief Position of the interrupt in the register. */
+                using BitType = reg_access::BitTypeHighLow<ispr_reg, pos>; /**< @brief Description of the interrupt set pending bit. */
+                using Bits = ispr_reg::template Bits<BitType>; /**< @brief Object to handle the interrupt set pending bit. */
+                using Value = BitType::value; /**< @brief Value of the interrupt set pending bit. */
             };
         };
     };
