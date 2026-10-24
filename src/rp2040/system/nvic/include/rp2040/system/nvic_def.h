@@ -73,6 +73,27 @@ namespace rp2040::system::nvic {
         constexpr std::uintptr_t nvic { 0xE000E100U}; /**< @brief Base address of the NVIC. */
     }
 
+    /**
+     * @brief The register map of the NVIC module.
+     *
+     * @tparam base The base address of the NVIC.
+     */
+    template <std::uintptr_t base>
+    struct RegMap {
+        static_assert(base == address::nvic, "Invalid base address for NVIC register map!");
+
+        /**
+         * @brief Offsets from the NVIC base address.
+         */
+        struct Offset {
+            static constexpr std::uint32_t iser {0x000U}; /**< @brief Offset of the interrupt set-enable register. */
+            static constexpr std::uint32_t icer {0x080U}; /**< @brief Offset of the interrupt clear-enable register. */
+            static constexpr std::uint32_t ispr {0x100U}; /**< @brief Offset of the interrupt set-pending register. */
+            static constexpr std::uint32_t icpr {0x180U}; /**< @brief Offset of the interrupt clear-pending register. */
+            static constexpr std::uint32_t ipr_base {0x300U}; /**< @brief Offset of the base interrupt priority registers. */
+        };
+    };
+
     /**@}*/
 }
 
