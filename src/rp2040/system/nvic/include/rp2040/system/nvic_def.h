@@ -169,6 +169,30 @@ namespace rp2040::system::nvic {
                 using Value = BitType::value; /**< @brief Value of the interrupt set pending bit. */
             };
         };
+
+        /**
+         * @brief Interrupt clear-pending register.
+         */
+        struct Icpr {
+            static constexpr std::uintptr_t addr {base + Offset::ispr}; /**< @brief Address of the interrupt clear-pending register. */
+            using icpr_reg = reg_access::Reg<addr, reg_access::access_tag::read_write, std::uint32_t>; /**< @brief The interrupt clear-pending register. */
+
+            /**
+             * @brief Set pending bits.
+             *
+             * Writing a 1 removes the interrupt pending state while writing a 0 has no effect. Reading a 1 means the interrupt
+             * is already pending and reading 0 means the interrupt is not pending.
+             *
+             * @tparam interrupt The interrupt to be cleared from pending.
+             */
+            template <Interrupts interrupt>
+            struct SetPending {
+                static constexpr auto pos {std::to_underlying(interrupt)}; /**< @brief Position of the interrupt in the register. */
+                using BitType = reg_access::BitTypeHighLow<icpr_reg, pos>; /**< @brief Description of the interrupt clear pending bit. */
+                using Bits = icpr_reg::template Bits<BitType>; /**< @brief Object to handle the interrupt clear pending bit. */
+                using Value = BitType::value; /**< @brief Value of the interrupt clear pending bit. */
+            };
+        };
     };
 
     /**@}*/
