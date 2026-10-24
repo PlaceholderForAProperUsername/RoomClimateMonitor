@@ -120,6 +120,31 @@ namespace rp2040::system::nvic {
                 using Value = BitType::value; /**< @brief Value of the interrupt set enable bit. */
             };
         };
+
+        /**
+         * @brief Interrupt clear-enable register.
+         */
+        struct Icer {
+            static constexpr std::uintptr_t addr {base + Offset::icer}; /**< @brief Address of the interrupt clear-enable register. */
+            using iser_reg = reg_access::Reg<addr, reg_access::access_tag::read_write, std::uint32_t>; /**< @brief The interrupt clear-enable register. */
+
+            /**
+             * @brief Set enable bits.
+             *
+             * The interrupt can only be disabled with a write. To enable an interrupt @see Iser
+             * Note: writing a 1 disables an interrupt but reading a 1 means the interrupt is enabled. The interrupt is disabled
+             * when a read returns 0 for the corresponding bit.
+             *
+             * @tparam interrupt The interrupt to be disabled.
+             */
+            template <Interrupts interrupt>
+            struct ClearEnable {
+                static constexpr auto pos {std::to_underlying(interrupt)}; /**< @brief Position of the interrupt in the register. */
+                using BitType = reg_access::BitTypeHighLow<iser_reg, pos>; /**< @brief Description of the interrupt clear enable bit. */
+                using Bits = iser_reg::template Bits<BitType>; /**< @brief Object to handle the interrupt clear enable bit. */
+                using Value = BitType::value; /**< @brief Value of the interrupt clear enable bit. */
+            };
+        };
     };
 
     /**@}*/
