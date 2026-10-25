@@ -77,6 +77,9 @@ namespace rp2040::system::nvic {
         template <Interrupts interrupt>
         void set_pending();
 
+        template <Interrupts interrupt>
+        void clear_pending();
+
     private:
         using Registers = RegMap<base>;
 

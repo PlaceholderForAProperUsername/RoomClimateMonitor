@@ -57,8 +57,15 @@ namespace rp2040::system::nvic {
     template <std::uintptr_t base>
     template <Interrupts interrupt>
     void NvicType<base>::set_pending() {
-        using SetPendingBits = Registers::Icpr::template SetPending<interrupt>;
+        using SetPendingBits = Registers::Ispr::template SetPending<interrupt>;
         SetPendingBits::Bits::set(SetPendingBits::Value::high);
+    }
+
+    template <std::uintptr_t base>
+    template <Interrupts interrupt>
+    void NvicType<base>::clear_pending() {
+        using ClearPendingBits = Registers::Icpr::template ClearPending<interrupt>;
+        ClearPendingBits::Bits::set(ClearPendingBits::Value::high);
     }
     /**@}*/
 }
