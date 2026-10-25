@@ -48,7 +48,7 @@ namespace rp2040::system::nvic {
          *
          * @return NvicType& The Singleton instance.
          */
-        NvicType& get_instance();
+        static NvicType& get_instance();
 
         /**
          * @brief Enables a specific interrupt.
@@ -60,6 +60,9 @@ namespace rp2040::system::nvic {
          */
         template <Interrupts interrupt>
         void enable_interrupt();
+
+        template <Interrupts interrupt>
+        void disable_interrupt();
 
     private:
         using Registers = RegMap<base>;
