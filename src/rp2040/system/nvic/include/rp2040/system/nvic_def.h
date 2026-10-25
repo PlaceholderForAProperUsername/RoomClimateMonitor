@@ -193,6 +193,44 @@ namespace rp2040::system::nvic {
                 using Value = BitType::value; /**< @brief Value of the interrupt clear pending bit. */
             };
         };
+
+        /**
+         * @brief The interrupt priority register.
+         *
+         * Sets the priority level for interrupts with 0 being the highest priority and 3 the lowest.
+         *
+         * There are 8 interrupt priority registers in total, each containing 4 interrupts starting from interrupt 0 in
+         * interrupt priority register 0 going to interrupt 31 in interrupt priority register 7. A byte is reserved for
+         * each interrupt and the priority bits are located in the higher two bits.
+         *
+         * @tparam interrupt The interrupt for which the priority is to be set.
+         */
+        template <Interrupts interrupt>
+        struct IprBase {
+            static constexpr std::uint32_t interrupts_per_register {4U}; /**< @brief The number of interrupts within a register. */
+            static constexpr std::uint32_t register_size_bytes {4U}; /**< @brief The size of the register in bytes. */
+            static constexpr std::uint32_t reg_offset {register_size_bytes * (std::to_underlying(interrupt) / interrupts_per_register)}; /**< @brief The interrupt priority register offset from the first interrupt priority register. */
+            static constexpr std::uintptr_t addr {base + Offset::ipr_base + reg_offset}; /**< @brief The address of the interrupt priority register of the interrupt for which the priority is to be set. */
+            using ipr_reg = reg_access::Reg<addr, reg_access::access_tag::read_write, std::uint32_t>; /**< @brief The interrupt priority register of the interrupt for which the priority is to be set. */
+
+            /**
+             * @brief The priority bits of the interrupt.
+             *
+             * @tparam priority The priority of the interrupt with 0 being highest priority and 3 the lowest priority.
+             */
+            template <std::uint32_t priority>
+            struct Priority {
+                static constexpr std::uint32_t bits_reserved_per_interrupt {8U}; /**< @brief A byte is reserved for each interrupt. */
+                static constexpr std::uint32_t interrupt_bits_offset {6U}; /**< @brief The priority bits are located in the two highest bits of the reserved byte. */
+                static constexpr std::uint32_t pos {(bits_reserved_per_interrupt * (std::to_underlying(interrupt) % interrupts_per_register)) + interrupt_bits_offset}; /**< @brief The bit position of the priority bits. */
+
+                static constexpr std::uint32_t mask {0x03U}; /**< @brief The mask of the priority bits. */
+
+                using BitType = reg_access::BitTypeValues<priority, ipr_reg, mask, pos>; /**< @brief Description of the priority bits. */
+                using Bits = ipr_reg::template Bits<BitType>; /**< @brief Object to handle the priority bits. */
+                using Value = BitType::value; /**< @brief Value of the priority bits. */
+            };
+        };
     };
 
     /**@}*/
