@@ -80,6 +80,8 @@ namespace rp2040::hardware::watchdog {
         WatchdogType() = default;
     };
 
+    using Watchdog = WatchdogType<address::watchdog>;
+
     /**@}*/ //rp2040_watchdog
 }
 
