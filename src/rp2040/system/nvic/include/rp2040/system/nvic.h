@@ -69,6 +69,14 @@ namespace rp2040::system::nvic {
         template <Interrupts interrupt>
         void disable_interrupt();
 
+        /**
+         * @brief Sets the status of an interrupt to pending.
+         *
+         * @tparam interrupt The interrupt which status is to be set to pending.
+         */
+        template <Interrupts interrupt>
+        void set_pending();
+
     private:
         using Registers = RegMap<base>;
 
