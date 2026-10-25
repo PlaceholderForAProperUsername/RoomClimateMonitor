@@ -33,6 +33,30 @@ namespace rp2040::hardware::timer {
      * @{
      */
 
+    /**
+     * @brief The timer peripheral.
+     *
+     * @tparam base Base address of the timer peripheral.
+     */
+    template <std::uintptr_t base>
+    class TimerType {
+        static_assert(base == address::timer, "Invalid base address for TimerType!");
+    public:
+        /**
+         * @brief Getter function to get the Singleton instance.
+         *
+         * @return TimerType& The singleton instance.
+         */
+        static TimerType& get_instance();
+
+    private:
+        using Registers = TimerRegMap<base>;
+
+        TimerType() = default;
+    };
+
+    using Timer = TimerType<address::timer>;
+
     /**@]*/
 }
 

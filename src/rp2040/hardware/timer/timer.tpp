@@ -25,11 +25,19 @@
 #ifndef RP2040_HARDWARE_TIMER_TPP
 #define RP2040_HARDWARE_TIMER_TPP
 
+#include "rp2040/hardware/timer.h"
+
 namespace rp2040::hardware::timer {
     /**
      * @addtogroup rp2040_timer
      * @{
      */
+
+    template <std::uintptr_t base>
+    TimerType<base>& TimerType<base>::get_instance() {
+        static TimerType<base> instance;
+        return instance;
+    }
 
     /**@]*/
 }
