@@ -47,6 +47,13 @@ namespace rp2040::system::nvic {
         EnableBits::Bits::set(EnableBits::Value::enable);
     }
 
+    template <std::uintptr_t base>
+    template <Interrupts interrupt>
+    void NvicType<base>::disable_interrupt() {
+        using ClearEnableBits = Registers::Icer::template ClearEnable<interrupt>;
+        ClearEnableBits::Bits::set(ClearEnableBits::Value::high);
+    }
+
     /**@}*/
 }
 

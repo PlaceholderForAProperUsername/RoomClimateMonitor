@@ -61,6 +61,11 @@ namespace rp2040::system::nvic {
         template <Interrupts interrupt>
         void enable_interrupt();
 
+        /**
+         * @brief Disables a specific interrupt.
+         *
+         * @tparam interrupt The interrupt to be disabled.
+         */
         template <Interrupts interrupt>
         void disable_interrupt();
 
