@@ -77,6 +77,11 @@ namespace rp2040::system::nvic {
         template <Interrupts interrupt>
         void set_pending();
 
+        /**
+         * @brief Removes pending status from an interrupt.
+         *
+         * @tparam interrupt The interrupt for which the pending status is to be cleared.
+         */
         template <Interrupts interrupt>
         void clear_pending();
 
