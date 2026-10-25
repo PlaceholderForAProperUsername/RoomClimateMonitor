@@ -33,6 +33,22 @@ namespace rp2040::system::nvic {
      * @{
      */
 
+    template <std::uintptr_t base>
+    class NvicType {
+        static_assert(base == address::nvic, "Invalid base address for NVIC!");
+
+    public:
+        /**
+         * @brief Getter function to get the Singleton instance.
+         *
+         * @return NvicType& The Singleton instance.
+         */
+        NvicType& get_instance();
+
+    private:
+        NvicType() = default;
+    };
+
     /**@}*/
 }
 

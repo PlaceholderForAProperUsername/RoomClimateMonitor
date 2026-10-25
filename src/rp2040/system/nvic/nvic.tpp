@@ -34,6 +34,12 @@ namespace rp2040::system::nvic {
      * @{
      */
 
+    template <std::uintptr_t base>
+    NvicType<base>& NvicType<base>::get_instance() {
+        static NvicType<base> instance;
+        return instance;
+    }
+
     /**@}*/
 }
 
