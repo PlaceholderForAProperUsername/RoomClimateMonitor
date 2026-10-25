@@ -40,6 +40,13 @@ namespace rp2040::system::nvic {
         return instance;
     }
 
+    template <std::uintptr_t base>
+    template <Interrupts interrupt>
+    void NvicType<base>::enable_interrupt() {
+        using EnableBits = Registers::Iser::template SetEnable<interrupt>;
+        EnableBits::Bits::set(EnableBits::Value::enable);
+    }
+
     /**@}*/
 }
 

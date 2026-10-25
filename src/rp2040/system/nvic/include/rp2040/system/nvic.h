@@ -50,7 +50,20 @@ namespace rp2040::system::nvic {
          */
         NvicType& get_instance();
 
+        /**
+         * @brief Enables a specific interrupt.
+         *
+         * A pending interrupt is activated based on its priority. To prevent this, clear the pending status before
+         * enabling the interrupt. @see clear_pending()
+         *
+         * @tparam interrupt The interrupt to be enabled.
+         */
+        template <Interrupts interrupt>
+        void enable_interrupt();
+
     private:
+        using Registers = RegMap<base>;
+
         NvicType() = default;
     };
 
