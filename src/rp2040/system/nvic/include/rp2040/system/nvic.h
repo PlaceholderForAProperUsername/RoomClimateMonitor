@@ -33,6 +33,11 @@ namespace rp2040::system::nvic {
      * @{
      */
 
+    /**
+     * @brief Nested vectored interrupt controller (NVIC) controller.
+     *
+     * @tparam base Base address of the NVIC controller.
+     */
     template <std::uintptr_t base>
     class NvicType {
         static_assert(base == address::nvic, "Invalid base address for NVIC!");
@@ -49,6 +54,7 @@ namespace rp2040::system::nvic {
         NvicType() = default;
     };
 
+    using NVIC = NvicType<address::nvic>; /**< @brief The NVIC controller. */
     /**@}*/
 }
 
