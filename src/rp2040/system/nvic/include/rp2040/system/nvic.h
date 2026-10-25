@@ -85,6 +85,18 @@ namespace rp2040::system::nvic {
         template <Interrupts interrupt>
         void clear_pending();
 
+        /**
+         * @brief Sets the priority of an interrupt.
+         *
+         * Highest priority: 0
+         * Lowest priority: 3
+         *
+         * @tparam interrupt The interrupt for which the priority is to be set.
+         * @tparam priority The priority of the interrupt.
+         */
+        template <Interrupts interrupt, std::uint8_t priority>
+        void set_priority();
+
     private:
         using Registers = RegMap<base>;
 

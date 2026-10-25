@@ -67,6 +67,13 @@ namespace rp2040::system::nvic {
         using ClearPendingBits = Registers::Icpr::template ClearPending<interrupt>;
         ClearPendingBits::Bits::set(ClearPendingBits::Value::high);
     }
+
+    template <std::uintptr_t base>
+    template <Interrupts interrupt, std::uint8_t priority>
+    void NvicType<base>::set_priority() {
+        using PriorityBits = Registers::template IprBase<interrupt>::template Priority<priority>;
+        PriorityBits::Bits::set(PriorityBits::Value::val);
+    }
     /**@}*/
 }
 
