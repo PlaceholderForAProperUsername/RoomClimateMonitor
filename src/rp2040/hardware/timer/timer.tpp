@@ -58,6 +58,17 @@ namespace rp2040::hardware::timer {
         this->m_flags.reset();
     }
 
+    template <std::uintptr_t base>
+    std::expected<std::uint32_t, status::Status> TimerType<base>::get_time_32bit() {
+        if (!this->m_flags.test(std::to_underlying(Flags::initialized))) {
+            return std::unexpected(status::Status::ERROR_INIT);
+        }
+        if (!rp2040::hardware::watchdog::Watchdog::get_instance().is_tick_generator_running()) {
+            return std::unexpected(status::Status::ERROR_RESOURCE);
+        }
+        return Registers::TimeRawL::template Timer<>::Bits::get_value();
+    }
+
     /**@]*/
 }
 

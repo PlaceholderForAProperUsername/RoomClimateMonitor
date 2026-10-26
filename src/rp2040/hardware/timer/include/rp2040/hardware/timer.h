@@ -26,6 +26,9 @@
 #define RP2040_HARDWARE_TIMER_H
 
 #include <bitset>
+#include <expected>
+
+#include "status.h"
 
 #include "timer_def.h"
 
@@ -37,6 +40,8 @@ namespace rp2040::hardware::timer {
 
     /**
      * @brief The timer peripheral.
+     *
+     * In order to use the timer peripheral, the tick generator must be running. @see Watchdog
      *
      * @tparam base Base address of the timer peripheral.
      */
@@ -68,6 +73,16 @@ namespace rp2040::hardware::timer {
          * @post The timer module is disabled.
          */
         void deinit();
+
+        /**
+         * @brief Gets the lower 32 bits of the timer value.
+         *
+         * @return std::expected<std::uint32_t, status::Status> The lower 32 bits of the timer or a status code in case of error.
+         * @retval std::uint32_t The lower 32 bits of the timer.
+         * @retval status::Status::INIT The timer module was not initialized. @see init
+         * @retval status::Status::RESOURCE The tick generator is not running. @see Watchdog
+         */
+        std::expected<std::uint32_t, status::Status> get_time_32bit();
 
     private:
         using Registers = TimerRegMap<base>;
