@@ -60,6 +60,15 @@ namespace rp2040::hardware::timer {
          */
         void init();
 
+        /**
+         * @brief Deinitializes the timer module.
+         *
+         * @pre None
+         *
+         * @post The timer module is disabled.
+         */
+        void deinit();
+
     private:
         using Registers = TimerRegMap<base>;
 

@@ -52,6 +52,12 @@ namespace rp2040::hardware::timer {
         }
     }
 
+    template <std::uintptr_t base>
+    void TimerType<base>::deinit() {
+        rp2040::system::resets::Resets::get_instance().disable<rp2040::system::resets::Subsystems::timer>();
+        this->m_flags.reset();
+    }
+
     /**@]*/
 }
 
