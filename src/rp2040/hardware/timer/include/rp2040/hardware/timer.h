@@ -25,6 +25,8 @@
 #ifndef RP2040_HARDWARE_TIMER_H
 #define RP2040_HARDWARE_TIMER_H
 
+#include <bitset>
+
 #include "timer_def.h"
 
 namespace rp2040::hardware::timer {
@@ -49,10 +51,26 @@ namespace rp2040::hardware::timer {
          */
         static TimerType& get_instance();
 
+        /**
+         * @brief Initializes the timer module.
+         *
+         * @pre None
+         *
+         * @post The timer module is ready to be configured.
+         */
+        void init();
+
     private:
         using Registers = TimerRegMap<base>;
 
-        TimerType() = default;
+        enum class Flags : std::uint8_t {
+            initialized = 0U,
+            number_of_flags
+        };
+
+        std::bitset<std::to_underlying(Flags::number_of_flags)> m_flags;
+
+        TimerType() : m_flags(0) {};
     };
 
     using Timer = TimerType<address::timer>;

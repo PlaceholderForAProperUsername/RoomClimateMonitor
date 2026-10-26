@@ -25,7 +25,11 @@
 #ifndef RP2040_HARDWARE_TIMER_TPP
 #define RP2040_HARDWARE_TIMER_TPP
 
+#include <ranges>
+
 #include "rp2040/hardware/timer.h"
+#include "rp2040/hardware/watchdog.h"
+#include "rp2040/system/resets.h"
 
 namespace rp2040::hardware::timer {
     /**
@@ -37,6 +41,15 @@ namespace rp2040::hardware::timer {
     TimerType<base>& TimerType<base>::get_instance() {
         static TimerType<base> instance;
         return instance;
+    }
+
+    template <std::uintptr_t base>
+    void TimerType<base>::init() {
+        if (!this->m_flags.test(std::to_underlying(Flags::initialized))) {
+            this->m_flags.reset();
+            rp2040::system::resets::Resets::get_instance().reset<rp2040::system::resets::Subsystems::timer>();
+            this->m_flags.set(std::to_underlying(Flags::initialized));
+        }
     }
 
     /**@]*/
