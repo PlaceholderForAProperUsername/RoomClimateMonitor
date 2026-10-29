@@ -235,7 +235,7 @@ namespace rp2040::hardware::timer {
              * @brief Setting this bit high enabled the pause when processor 1 is in debug mode.
              */
             struct Dbg1 {
-                static constexpr std::uint32_t pos = 1U; /**< @brief Position of the bit in the register. */
+                static constexpr std::uint32_t pos = 2U; /**< @brief Position of the bit in the register. */
                 using BitType = reg_access::BitTypeHighLow<dbg_pause_reg, pos>; /**< @brief Description of the debug pause proc 1 bit.*/
                 using Bits = dbg_pause_reg::template Bits<BitType>; /**< @brief Object to handle the debug pause proc 1 bit. */
                 using Value = BitType::value; /**< @brief Value of the debug pause proc 1 bit. */
@@ -245,7 +245,7 @@ namespace rp2040::hardware::timer {
              * @brief Setting this bit high enabled the pause when processor 0 is in debug mode.
              */
             struct Dbg0 {
-                static constexpr std::uint32_t pos = 0U; /**< @brief Position of the bit in the register. */
+                static constexpr std::uint32_t pos = 1U; /**< @brief Position of the bit in the register. */
                 using BitType = reg_access::BitTypeHighLow<dbg_pause_reg, pos>; /**< @brief Description of the debug pause proc 0 bit.*/
                 using Bits = dbg_pause_reg::template Bits<BitType>; /**< @brief Object to handle the debug pause proc 0 bit. */
                 using Value = BitType::value; /**< @brief Value of the debug pause proc 0 bit. */
