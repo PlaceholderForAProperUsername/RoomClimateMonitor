@@ -42,6 +42,7 @@ namespace rp2040::hardware::timer {
      * @brief The timer peripheral.
      *
      * In order to use the timer peripheral, the tick generator must be running. @see Watchdog
+     * The timer expects the tick generator to generate a tick every 1us.
      *
      * @tparam base Base address of the timer peripheral.
      */
@@ -79,10 +80,34 @@ namespace rp2040::hardware::timer {
          *
          * @return std::expected<std::uint32_t, status::Status> The lower 32 bits of the timer or a status code in case of error.
          * @retval std::uint32_t The lower 32 bits of the timer.
-         * @retval status::Status::INIT The timer module was not initialized. @see init
-         * @retval status::Status::RESOURCE The tick generator is not running. @see Watchdog
+         * @retval status::Status::ERROR_INIT The timer module was not initialized. @see init
+         * @retval status::Status::ERROR_RESOURCE The tick generator is not running. @see Watchdog
          */
         std::expected<std::uint32_t, status::Status> get_time_32bit();
+
+        /**
+         * @brief Pauses the program.
+         *
+         * @param delay_us The delay in microseconds for up to 4'000'000'000 microseconds.
+         * @return status::Status The status code
+         * @retval status::Status::OK The function executed normally.
+         * @retval status::Status::ERROR_INIT The timer module was not initialized. @see init
+         * @retval status::Status::ERROR_RESOURCE The tick generator is not running. @see Watchdog
+         * @retval status::Status::ERROR_PARAM A higher wait time than 4'000'000'000 microseconds was requested.
+         */
+        status::Status busy_wait_us_32(std::uint32_t delay_us);
+
+        /**
+         * @brief Pauses the program.
+         *
+         * @param delay_ms The delay in milliseconds for up to 4'000'000 milliseconds.
+         * @return status::Status The status code
+         * @retval status::Status::OK The function executed normally.
+         * @retval status::Status::ERROR_INIT The timer module was not initialized. @see init
+         * @retval status::Status::ERROR_RESOURCE The tick generator is not running. @see Watchdog
+         * @retval status::Status::ERROR_PARAM A higher wait time than 4'000'000 milliseconds was requested.
+         */
+        status::Status busy_wait_ms_32(std::uint32_t delay_ms);
 
     private:
         using Registers = TimerRegMap<base>;

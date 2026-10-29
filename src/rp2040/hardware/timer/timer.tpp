@@ -48,6 +48,11 @@ namespace rp2040::hardware::timer {
         if (!this->m_flags.test(std::to_underlying(Flags::initialized))) {
             this->m_flags.reset();
             rp2040::system::resets::Resets::get_instance().reset<rp2040::system::resets::Subsystems::timer>();
+            // enables the timers when compiled with cmake build type "Debug"
+#ifdef DEBUG_WITH_TIMERS
+            Registers::DbgPause::Dbg0::Bits::clear();
+            Registers::DbgPause::Dbg1::Bits::clear();
+#endif
             this->m_flags.set(std::to_underlying(Flags::initialized));
         }
     }
@@ -69,6 +74,39 @@ namespace rp2040::hardware::timer {
         return Registers::TimeRawL::template Timer<>::Bits::get_value();
     }
 
+    /**
+     * @internal
+     * The function only supports wait time of up to 4'000'000'000 microseconds, as values close to the maximum value may
+     * not be counted correctly by the while loop.
+     */
+    template<std::uintptr_t base>
+    status::Status TimerType<base>::busy_wait_us_32(std::uint32_t delay_us) {
+        if (delay_us > 4'000'000'000 ) {
+            return status::Status::ERROR_PARAM;
+        }
+        // get_time_32bit is called in this step for error checkings. The error checkings are not needed in the inner while loop
+        // and only waste time
+        if (auto start = this->get_time_32bit(); start.has_value()) {
+            while ((Registers::TimeRawL::template Timer<>::Bits::get_value() - start.value()) < delay_us) {
+                asm volatile ("nop");
+            }
+        }
+        else {
+            return start.error();
+        }
+
+        return status::Status::OK;
+    }
+
+    template<std::uintptr_t base>
+    status::Status TimerType<base>::busy_wait_ms_32(std::uint32_t delay_ms) {
+        if (delay_ms > 4'000'000 ) {
+            return status::Status::ERROR_PARAM;
+        }
+        constexpr std::uint32_t us_to_ms_factor {1000};
+        std::uint32_t delay_us {delay_ms * us_to_ms_factor};
+        return this->busy_wait_us_32(delay_us);
+    }
     /**@]*/
 }
 
