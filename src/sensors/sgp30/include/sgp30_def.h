@@ -57,6 +57,18 @@ namespace sgp30 {
         timer.busy_wait_us_32(delay);
     };
 
+
+    struct CmdType {
+        std::array<std::uint8_t, 2> cmd;
+        std::uint32_t delay_us;
+        std::uint8_t parameter_length;
+        std::uint8_t response_length;
+
+        constexpr CmdType(const std::array<std::uint8_t, 2> cmd_, const std::uint32_t delay_us_,
+            const std::uint8_t parameter_length_, const std::uint8_t response_length_) :
+            cmd{ cmd_ }, delay_us(delay_us_), parameter_length(parameter_length_), response_length(response_length_) {}
+    };
+
     /**
      * @brief Implemented commands.
      *
@@ -64,9 +76,9 @@ namespace sgp30 {
      * std::pair<cmd, delay_us>.
      */
     namespace commands {
-        constexpr std::pair<std::array<std::uint8_t, 2>, std::uint32_t> sgp30_iaq_init {{0x20U, 0x03U}, 10'000}; /**< @brief Starts the measurement process. */
-        constexpr std::pair<std::array<std::uint8_t, 2>, std::uint32_t> sgp30_measure_iaq {{0x20U, 0x08U}, 12'000}; /**< @brief Gets measurement data. */
-        constexpr std::pair<std::array<std::uint8_t, 2>, std::uint32_t> get_serial_id {{0x36U, 0x82U}, 500}; /**< @brief Gets the serial id of the sensor. */
+        constexpr CmdType sgp30_iaq_init  {{0x20U, 0x03U}, 10'000, 0, 0}; /**< @brief Starts the measurement process. */
+        constexpr CmdType sgp30_measure_iaq {{0x20U, 0x08U}, 12'000, 0, 6}; /**< @brief Gets measurement data. */
+        constexpr CmdType get_serial_id {{0x36U, 0x82U}, 500, 0, 9}; /**< @brief Gets the serial id of the sensor. */
     };
 
     /** @}*/

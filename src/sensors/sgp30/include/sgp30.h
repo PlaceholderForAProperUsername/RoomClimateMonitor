@@ -26,6 +26,7 @@
 #define SGP30_H
 
 #include <bitset>
+#include <expected>
 
 #include "status.h"
 
@@ -39,6 +40,13 @@ namespace sgp30 {
 
     /**
      * @brief The Sensirion sgp30 sensor.
+     *
+     * The sgp30 measures total volatile organic compounds (TVOC) and equivalent CO2 (CO2eq) within following ranges:
+     *  TVOC: 0 ppb - 60,000 ppb
+     *  CO2eq: 400 ppm - 60,000 ppm
+     *
+     * After the initializing process has finished, the measurement command should be sent every seconds to achieve the
+     * best measurement results.
      *
      * @tparam I2cControllerType Type of the I2C controller used to communicate with this sensor.
      * @tparam TimerType Type of the timer used for delays.
@@ -75,6 +83,16 @@ namespace sgp30 {
          * CO2eq and 0ppb TVOC when sending the sgp30_measure_iaq command.
          */
         void measurement_init();
+
+        /**
+         * @brief Sends the measurement command and gets the measurement result.
+         *
+         * @return std::expected<std::pair<std::uint16_t, std::uint16_t>, status::Status> The measurement values in case of success or an error code.
+         * @retval std::pair<std::uint16_t, std::uint16_t> The measurement data in the std::pair<co2eq, tvoc> format.
+         * @retval status::Status::ERROR_INIT The sgp30 sensor has not been initialized. @see measurement_init
+         * @retval status::Status::ERROR_GENERIC The crc check of the data failed.
+         */
+        std::expected<std::pair<std::uint16_t, std::uint16_t>, status::Status> conduct_measurement();
 
     private:
         I2cControllerType& m_i2c; /**< @brief The I2C controller used to communicate with the sensor. */

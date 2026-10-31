@@ -51,11 +51,11 @@ namespace sgp30 {
 
     template <I2cControllerTypeConcept I2cControllerType, TimerTypeConcept TimerType>
     status::Status Sgp30<I2cControllerType, TimerType>::probe() {
-        auto [get_serial_cmd, delay_us] = commands::get_serial_id;
-        this->m_i2c.template write<m_addr>(get_serial_cmd, false);
-        this->m_timer.busy_wait_us_32(delay_us);
-        std::array<std::uint8_t, 9> serial_id {};
-        m_i2c.template read<m_addr>(serial_id, true);
+        constexpr auto cmd {commands::get_serial_id};
+        this->m_i2c.template write<m_addr>(cmd.cmd, false);
+        this->m_timer.busy_wait_us_32(cmd.delay_us);
+        std::array<std::uint8_t, cmd.response_length> serial_id {};
+        this->m_i2c.template read<m_addr>(serial_id, true);
         for (size_t i {0}; i < serial_id.size(); i = i + 3) {
             std::array<std::uint8_t, 2> segment {serial_id[i], serial_id[i + 1]};
             if (crc8(segment) != serial_id[i + 2]) {
@@ -67,11 +67,32 @@ namespace sgp30 {
 
     template <I2cControllerTypeConcept I2cControllerType, TimerTypeConcept TimerType>
     void Sgp30<I2cControllerType, TimerType>::measurement_init() {
-        auto [init_cmd, delay_us] = commands::sgp30_iaq_init;
-        this->m_i2c.template write<m_addr>(init_cmd, true);
-        this->m_timer.busy_wait_us_32(delay_us);
+        constexpr auto cmd {commands::sgp30_iaq_init};
+        this->m_i2c.template write<m_addr>(cmd.cmd, true);
+        this->m_timer.busy_wait_us_32(cmd.delay_us);
 
         this->m_flags.set(std::to_underlying(Flags::measurement_initialized));
+    }
+
+    template <I2cControllerTypeConcept I2cControllerType, TimerTypeConcept TimerType>
+    std::expected<std::pair<std::uint16_t, std::uint16_t>, status::Status> Sgp30<I2cControllerType, TimerType>::conduct_measurement() {
+        if (!this->m_flags.test(std::to_underlying(Flags::measurement_initialized))) {
+            return std::unexpected(status::Status::ERROR_INIT);
+        }
+        constexpr auto cmd {commands::sgp30_measure_iaq};
+        this->m_i2c.template write<m_addr>(cmd.cmd, false);
+        this->m_timer.busy_wait_us_32(cmd.delay_us);
+        std::array<std::uint8_t, cmd.response_length> measurement_data {};
+        this->m_i2c.template read<m_addr>(measurement_data, true);
+        for (size_t i {0}; i < cmd.response_length; i = i + 3) {
+            std::array<std::uint8_t, 2> segment {measurement_data[i], measurement_data[i + 1]};
+            if (crc8(segment) != measurement_data[i + 2]) {
+                return std::unexpected(status::Status::ERROR_GENERIC);
+            }
+        }
+        std::uint16_t co2_data = static_cast<std::uint16_t>(measurement_data[0]) << 8U | static_cast<std::uint16_t>(measurement_data[1]);
+        std::uint16_t tvoc_data = static_cast<std::uint16_t>(measurement_data[3]) << 8U | static_cast<std::uint16_t>(measurement_data[4]);
+        return std::make_pair(co2_data, tvoc_data);
     }
 
     /** @}*/
