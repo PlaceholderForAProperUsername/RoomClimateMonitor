@@ -144,20 +144,21 @@ namespace rp2040::hardware::i2c {
 
         Registers::IcEnable::Enable::Bits::set(Registers::IcEnable::Enable::Value::enable);
 
+        m_flags.set(std::to_underlying(Flags::configured));
+
         return status::Status::OK;
     }
 
     template <std::uintptr_t base>
-    template <typename T, T target_addr>
-    requires  std::is_same_v<T, std::uint8_t> || std::is_same_v<T, std::uint16_t>
-    status::Status I2cType<base>::write(const std::span<std::uint8_t> data, const bool send_stop) {
-        if (!m_flags.test(std::to_underlying(Flags::configured))) {
+    template <std::uint8_t target_addr>
+    status::Status I2cType<base>::write(std::span<std::uint8_t> data, bool send_stop) {
+        if (!m_flags.test(static_cast<std::uint32_t>(Flags::configured))) {
             return status::Status::ERROR_INIT;
         }
         using StatusReg = Registers::Status;
         using TargetBits = Registers::Tar::template IcTar<static_cast<std::uint16_t>(target_addr)>;
         // Checks if target address in hardware differs from new target address
-        if (TargetBits::Bits::get_value() != std::to_underlying(TargetBits::Value::val)) {
+        if (TargetBits::Bits::get_value() != target_addr) {
             // wait for active transmissions to end
             while (StatusReg::Activity::Bits::get_value() == std::to_underlying(StatusReg::Activity::Value::active)) {}
             using EnableBits = Registers::IcEnable::Enable;
@@ -165,19 +166,18 @@ namespace rp2040::hardware::i2c {
             TargetBits::Bits::set(TargetBits::Value::val);
             EnableBits::Bits::set(EnableBits::Value::enable);
         }
-        for (size_t i {0}; i < data.size(); ++i) {
+        for (size_t i = 0; i < data.size(); ++i) {
             // wait until there is space in the transmit fifo
             while (StatusReg::Tfnf::Bits::get_value() == std::to_underlying(StatusReg::Tfnf::Value::full)) {}
             using DataCmdBits = Registers::DataCmd::DataCommand;
-            auto val = DataCmdBits::Value(data[i], DataCmdBits::Flags::write_cmd | (send_stop && (i == (data.size() - 1)) ? DataCmdBits::Flags::send_stop : 0));
+            std::uint32_t val = (data[i] & 0xFFU) | ((send_stop && (i == data.size() - 1)) ? (1U << 9U) : 0);
             DataCmdBits::Bits::set(val);
         }
         return status::Status::OK;
     }
 
     template <std::uintptr_t base>
-    template <typename T, T target_addr>
-    requires  std::is_same_v<T, std::uint8_t> || std::is_same_v<T, std::uint16_t>
+    template <std::uint8_t target_addr>
     status::Status I2cType<base>::read(std::span<std::uint8_t> buffer, const bool send_stop) {
         if (!m_flags.test(std::to_underlying(Flags::configured))) {
             return status::Status::ERROR_INIT;
@@ -195,7 +195,7 @@ namespace rp2040::hardware::i2c {
         }
         for (size_t i {0}; i < buffer.size(); ++i) {
             using DataCmdBits = Registers::DataCmd::DataCommand;
-            auto read_cmd = DataCmdBits::Value(0U, DataCmdBits::Flags::read_cmd | (send_stop && (i == (buffer.size() - 1)) ? DataCmdBits::Flags::send_stop : 0));
+            volatile std::uint32_t read_cmd = (1U << 8U) | ((send_stop && (i == buffer.size() - 1)) ? (1U << 9U) : 0);
             DataCmdBits::Bits::set(read_cmd);
             while (StatusReg::Rfne::Bits::get_value() == std::to_underlying(StatusReg::Rfne::Value::empty)) {}
             buffer[i] = (DataCmdBits::Bits::get_value() & 0xFF);

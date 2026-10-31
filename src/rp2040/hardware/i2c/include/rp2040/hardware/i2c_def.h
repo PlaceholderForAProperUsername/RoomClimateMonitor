@@ -242,7 +242,7 @@ namespace rp2040::hardware::i2c {
              *
              * @tparam target_address The address of the target.
              */
-            template <typename tar_reg::RegType target_address>
+            template <std::uint16_t target_address>
             struct IcTar {
                 /**
                  * @brief Description of the target address bits.
@@ -318,18 +318,7 @@ namespace rp2040::hardware::i2c {
                     static constexpr T position = 0U; /**< @brief The position of the bit in the register. */
                     static constexpr T mask = (0x7FFU << position); /**< @brief The mask of the bit used in bit operations. */
                 };
-                struct Flags {
-                    static constexpr std::uint8_t write_cmd = 0U;
-                    static constexpr std::uint8_t read_cmd = 1U;
-                    static constexpr std::uint8_t send_stop = 2U;
-                    static constexpr std::uint8_t send_restart = 4U;
-                };
                 using Bits = data_reg::template Bits<BitType>; /**< @brief Object to handle the data bit. */
-                static constexpr auto Value = [] (const std::uint8_t data, const std::uint8_t flags = 0) {
-                    static constexpr std::uint32_t flag_pos = 8U;
-                    static constexpr std::uint8_t flag_mask = 0x7U;
-                    return (data & 0xFFU) | ((flags & flag_mask) << flag_pos);
-                };
             };
         };
 
