@@ -65,6 +65,15 @@ namespace sgp30 {
         return status::Status::OK;
     }
 
+    template <I2cControllerTypeConcept I2cControllerType, TimerTypeConcept TimerType>
+    void Sgp30<I2cControllerType, TimerType>::measurement_init() {
+        auto [init_cmd, delay_us] = commands::sgp30_iaq_init;
+        this->m_i2c.template write<m_addr>(init_cmd, true);
+        this->m_timer.busy_wait_us_32(delay_us);
+
+        this->m_flags.set(std::to_underlying(Flags::measurement_initialized));
+    }
+
     /** @}*/
 }
 #endif // SGP30_TPP

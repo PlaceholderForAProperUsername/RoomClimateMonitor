@@ -25,6 +25,8 @@
 #ifndef SGP30_H
 #define SGP30_H
 
+#include <bitset>
+
 #include "status.h"
 
 #include "sgp30_def.h"
@@ -44,7 +46,7 @@ namespace sgp30 {
     template <I2cControllerTypeConcept I2cControllerType, TimerTypeConcept TimerType>
     class Sgp30 {
     public:
-        explicit Sgp30(I2cControllerType &i2cController, TimerType &timer) : m_i2c(i2cController), m_timer(timer) {}
+        explicit Sgp30(I2cControllerType &i2cController, TimerType &timer) : m_i2c(i2cController), m_timer(timer), m_flags(0) {}
 
         /**
          * @brief Calculates the 8bit crc checksum.
@@ -65,9 +67,28 @@ namespace sgp30 {
          * @retval statsu::Status::GENERIC The crc check of the message failed.
          */
         status::Status probe();
+
+        /**
+         * @brief Initializes the measurement process.
+         *
+         * The initialization phase may take up to 15s. During that time frame, the sensor returns fixed values of 400ppm
+         * CO2eq and 0ppb TVOC when sending the sgp30_measure_iaq command.
+         */
+        void measurement_init();
+
     private:
         I2cControllerType& m_i2c; /**< @brief The I2C controller used to communicate with the sensor. */
         TimerType m_timer; /**< @brief The timer to provide needed wait functions. */
+
+        /**
+         * @brief The status flags.
+         */
+        enum class Flags : std::uint8_t {
+            measurement_initialized = 0U,
+            number_of_flags
+        };
+
+        std::bitset<std::to_underlying(Flags::number_of_flags)> m_flags; /**< @brief Status flags of the sgp30. */
 
         // The sgp30 has only one address, therefore it gets hardcoded
         static constexpr std::uint8_t m_addr {0x58U}; /**< @brief I2C address of the sensor. */
