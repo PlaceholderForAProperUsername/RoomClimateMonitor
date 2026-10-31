@@ -42,17 +42,31 @@ namespace sgp30 {
         std::is_class_v<I2cControllerType> &&
         requires(I2cControllerType controller, std::array<std::uint8_t, 2> dummy)
     {
-        controller.template write<std::uint8_t, 0x42U>(dummy, true);
-        controller.template read<std::uint8_t, 0x42U>(dummy, true);
+        controller.template write<0x42U>(dummy, true);
+        controller.template read<0x42U>(dummy, true);
+    };
+
+    /**
+     * @brief Checks if the timer type provides the requirement functions.
+     */
+    template <typename TimerType>
+    concept TimerTypeConcept =
+        std::is_class_v<TimerType> &&
+        requires(TimerType timer, std::uint32_t delay)
+    {
+        timer.busy_wait_us_32(delay);
     };
 
     /**
      * @brief Implemented commands.
+     *
+     * Each command needs time to process before the sgp30 can send a response. The command is therefore in the format
+     * std::pair<cmd, delay>.
      */
     namespace commands {
-        constexpr std::array<std::uint8_t, 2> sgp30_iaq_init {0x20U, 0x03U}; /**< @brief Starts the measurement process. */
-        constexpr std::array<std::uint8_t, 2> sgp30_measure_iaq {0x20U, 0x08U}; /**< @brief Gets measurement data. */
-        constexpr std::array<std::uint8_t, 2> get_serial_id {0x36U, 0x82U}; /**< @brief Gets the serial id of the sensor. */
+        constexpr std::pair<std::array<std::uint8_t, 2>, std::uint32_t> sgp30_iaq_init {{0x20U, 0x03U}, 10'000}; /**< @brief Starts the measurement process. */
+        constexpr std::pair<std::array<std::uint8_t, 2>, std::uint32_t> sgp30_measure_iaq {{0x20U, 0x08U}, 12'000}; /**< @brief Gets measurement data. */
+        constexpr std::pair<std::array<std::uint8_t, 2>, std::uint32_t> get_serial_id {{0x36U, 0x82U}, 500}; /**< @brief Gets the serial id of the sensor. */
     };
 
     /** @}*/

@@ -31,8 +31,8 @@ namespace sgp30 {
      * @{
      */
 
-    template <I2cControllerTypeConcept I2cControllerType>
-    std::uint8_t Sgp30<I2cControllerType>::crc8(const std::span<std::uint8_t, 2> data) {
+    template <I2cControllerTypeConcept I2cControllerType, TimerTypeConcept TimerType>
+    std::uint8_t Sgp30<I2cControllerType, TimerType>::crc8(const std::span<std::uint8_t, 2> data) {
         std::uint8_t crc {0xFFU};
         const std::uint8_t polynomial {0x31U};
 
@@ -47,6 +47,22 @@ namespace sgp30 {
             }
         }
         return crc;
+    }
+
+    template <I2cControllerTypeConcept I2cControllerType, TimerTypeConcept TimerType>
+    status::Status Sgp30<I2cControllerType, TimerType>::probe() {
+        auto [get_serial_cmd, delay_us] = commands::get_serial_id;
+        this->m_i2c.template write<m_addr>(get_serial_cmd, false);
+        this->m_timer.busy_wait_us_32(delay_us);
+        std::array<std::uint8_t, 9> serial_id {};
+        m_i2c.template read<m_addr>(serial_id, true);
+        for (size_t i {0}; i < serial_id.size(); i = i + 3) {
+            std::array<std::uint8_t, 2> segment {serial_id[i], serial_id[i + 1]};
+            if (crc8(segment) != serial_id[i + 2]) {
+                return status::Status::ERROR_GENERIC;
+            }
+        }
+        return status::Status::OK;
     }
 
     /** @}*/

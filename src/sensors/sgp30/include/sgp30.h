@@ -25,6 +25,8 @@
 #ifndef SGP30_H
 #define SGP30_H
 
+#include "status.h"
+
 #include "sgp30_def.h"
 
 namespace sgp30 {
@@ -37,11 +39,12 @@ namespace sgp30 {
      * @brief The Sensirion sgp30 sensor.
      *
      * @tparam I2cControllerType Type of the I2C controller used to communicate with this sensor.
+     * @tparam TimerType Type of the timer used for delays.
      */
-    template <I2cControllerTypeConcept I2cControllerType>
+    template <I2cControllerTypeConcept I2cControllerType, TimerTypeConcept TimerType>
     class Sgp30 {
     public:
-        explicit Sgp30(I2cControllerType &i2cController) : m_controller(i2cController) {}
+        explicit Sgp30(I2cControllerType &i2cController, TimerType &timer) : m_i2c(i2cController), m_timer(timer) {}
 
         /**
          * @brief Calculates the 8bit crc checksum.
@@ -53,11 +56,21 @@ namespace sgp30 {
          * @return std::uint8_t The crc checksum.
          */
         static std::uint8_t crc8(std::span<std::uint8_t, 2> data);
-    private:
-        I2cControllerType& m_controller;
-        // The sgp30 has only one address
-        std::uint8_t m_addr = 0x58U;
 
+        /**
+         * @brief Checks if a sgp30 sensor is present and responding.
+         *
+         * @return status::Status The status code
+         * @retval status::Status::OK The sensor is present and responding.
+         * @retval statsu::Status::GENERIC The crc check of the message failed.
+         */
+        status::Status probe();
+    private:
+        I2cControllerType& m_i2c; /**< @brief The I2C controller used to communicate with the sensor. */
+        TimerType m_timer; /**< @brief The timer to provide needed wait functions. */
+
+        // The sgp30 has only one address, therefore it gets hardcoded
+        static constexpr std::uint8_t m_addr {0x58U}; /**< @brief I2C address of the sensor. */
     };
 
     /** @}*/
