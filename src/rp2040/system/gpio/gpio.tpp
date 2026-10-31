@@ -45,32 +45,32 @@ namespace rp2040::system::gpio {
 
     template <std::uintptr_t ioBankBase, std::uintptr_t padsBankBase, std::uintptr_t sioBase>
     void GpioType<ioBankBase, padsBankBase, sioBase>::init() {
-        if (m_flags.test(static_cast<std::uint32_t>(Flags::Initialized))) {
+        if (m_flags.test(std::to_underlying(Flags::Initialized))) {
             return;
         }
 
         resets::Resets::get_instance().reset<resets::Subsystems::io_bank0>();
         resets::Resets::get_instance().reset<resets::Subsystems::pads_bank0>();
 
-        m_flags.set(static_cast<std::uint32_t>(Flags::Initialized));
+        m_flags.set(std::to_underlying(Flags::Initialized));
     }
 
     template <std::uintptr_t ioBankBase, std::uintptr_t padsBankBase, std::uintptr_t sioBase>
     void GpioType<ioBankBase, padsBankBase, sioBase>::deinit() {
-        if (!m_flags.test(static_cast<std::uint32_t>(Flags::Initialized))) {
+        if (!m_flags.test(std::to_underlying(Flags::Initialized))) {
             return;
         }
 
         resets::Resets::get_instance().disable<resets::Subsystems::io_bank0>();
         resets::Resets::get_instance().disable<resets::Subsystems::pads_bank0>();
 
-        m_flags.reset(static_cast<std::uint32_t>(Flags::Initialized));
+        m_flags.reset(std::to_underlying(Flags::Initialized));
     }
 
     template <std::uintptr_t ioBankBase, std::uintptr_t padsBankBase, std::uintptr_t sioBase>
     template <Pins pin, FuncSelect func>
     status::Status GpioType<ioBankBase, padsBankBase, sioBase>::set_function() {
-        if (!m_flags.test(static_cast<std::uint32_t>(Flags::Initialized))) {
+        if (!m_flags.test(std::to_underlying(Flags::Initialized))) {
             return status::Status::ERROR_INIT;
         }
 
@@ -87,7 +87,7 @@ namespace rp2040::system::gpio {
     template <std::uintptr_t ioBankBase, std::uintptr_t padsBankBase, std::uintptr_t sioBase>
     template <Pins pin, bool enable>
     status::Status GpioType<ioBankBase, padsBankBase, sioBase>::enable_output() {
-        if (!m_flags.test(static_cast<std::uint32_t>(Flags::Initialized))) {
+        if (!m_flags.test(std::to_underlying(Flags::Initialized))) {
             return status::Status::ERROR_INIT;
         }
         static_assert(pin < Pins::number_of_gpio, "Invalid GPIO pin!");
@@ -113,7 +113,7 @@ namespace rp2040::system::gpio {
     template <std::uintptr_t ioBankBase, std::uintptr_t padsBankBase, std::uintptr_t sioBase>
     template <Pins pin, bool high>
     status::Status GpioType<ioBankBase, padsBankBase, sioBase>::set_output() {
-        if (!m_flags.test(static_cast<std::uint32_t>(Flags::Initialized))) {
+        if (!m_flags.test(std::to_underlying(Flags::Initialized))) {
             return status::Status::ERROR_INIT;
         }
         if (!m_output_enabled.test(static_cast<std::uint32_t>(pin))) {
@@ -132,7 +132,7 @@ namespace rp2040::system::gpio {
     template <std::uintptr_t ioBankBase, std::uintptr_t padsBankBase, std::uintptr_t sioBase>
     template <Pins pin>
     status::Status GpioType<ioBankBase, padsBankBase, sioBase>::toggle_output() {
-        if (!m_flags.test(static_cast<std::uint32_t>(Flags::Initialized))) {
+        if (!m_flags.test(std::to_underlying(Flags::Initialized))) {
             return status::Status::ERROR_INIT;
         }
         if (!m_output_enabled.test(static_cast<std::uint32_t>(pin))) {
@@ -148,7 +148,7 @@ namespace rp2040::system::gpio {
     template <std::uintptr_t ioBankBase, std::uintptr_t padsBankBase, std::uintptr_t sioBase>
     template <Pins pin, bool enable>
     status::Status GpioType<ioBankBase, padsBankBase, sioBase>::enable_input() {
-        if (!m_flags.test(static_cast<std::uint32_t>(Flags::Initialized))) {
+        if (!m_flags.test(std::to_underlying(Flags::Initialized))) {
             return status::Status::ERROR_INIT;
         }
 
@@ -174,7 +174,7 @@ namespace rp2040::system::gpio {
     template <std::uintptr_t ioBankBase, std::uintptr_t padsBankBase, std::uintptr_t sioBase>
     template <Pins pin>
     std::expected<bool, status::Status> GpioType<ioBankBase, padsBankBase, sioBase>::get_input() {
-        if (!m_flags.test(static_cast<std::uint32_t>(Flags::Initialized))) {
+        if (!m_flags.test(std::to_underlying(Flags::Initialized))) {
             return std::unexpected(status::Status::ERROR_INIT);
         }
         if (!m_input_enabled.test(static_cast<std::uint32_t>(pin))) {
@@ -190,7 +190,7 @@ namespace rp2040::system::gpio {
     template <std::uintptr_t ioBankBase, std::uintptr_t padsBankBase, std::uintptr_t sioBase>
     template <Pins pin, bool enable>
     status::Status GpioType<ioBankBase, padsBankBase, sioBase>::enable_pull_up() {
-        if (!m_flags.test(static_cast<std::uint32_t>(Flags::Initialized))) {
+        if (!m_flags.test(std::to_underlying(Flags::Initialized))) {
             return status::Status::ERROR_INIT;
         }
 
@@ -211,7 +211,7 @@ namespace rp2040::system::gpio {
     template <std::uintptr_t ioBankBase, std::uintptr_t padsBankBase, std::uintptr_t sioBase>
     template <Pins pin, bool enable>
     status::Status GpioType<ioBankBase, padsBankBase, sioBase>::enable_pull_down() {
-        if (!m_flags.test(static_cast<std::uint32_t>(Flags::Initialized))) {
+        if (!m_flags.test(std::to_underlying(Flags::Initialized))) {
             return status::Status::ERROR_INIT;
         }
 
@@ -232,7 +232,7 @@ namespace rp2040::system::gpio {
     template <std::uintptr_t ioBankBase, std::uintptr_t padsBankBase, std::uintptr_t sioBase>
     template <Pins pin, bool enable>
     status::Status GpioType<ioBankBase, padsBankBase, sioBase>::enable_schmitt_trigger() {
-        if (!m_flags.test(static_cast<std::uint32_t>(Flags::Initialized))) {
+        if (!m_flags.test(std::to_underlying(Flags::Initialized))) {
             return status::Status::ERROR_INIT;
         }
 
@@ -254,18 +254,47 @@ namespace rp2040::system::gpio {
     template <Pins pin, bool enable_fast_mode>
     status::Status GpioType<ioBankBase, padsBankBase, sioBase>::set_slew_rate()
     {
-        if (!m_flags.test(static_cast<std::uint32_t>(Flags::Initialized))) {
+        if (!m_flags.test(std::to_underlying(Flags::Initialized))) {
             return status::Status::ERROR_INIT;
         }
 
         static_assert(pin < Pins::number_of_gpio, "Invalid GPIO pin!");
 
-        using pad_t = pad_bank::template padX<static_cast<Pads>(std::to_underlying(pin))>;
+        using pad_t = pad_bank::template Pad<static_cast<Pads>(std::to_underlying(pin))>;
 
         if constexpr (enable_fast_mode) {
-            pad_t::SlewFast::Bits::set(pad_t::SlewFast::Value::Fast);
+            pad_t::SlewFast::Bits::set(pad_t::SlewFast::Value::fast);
         } else {
-            pad_t::SlewFast::Bits::set(pad_t::SlewFast::Value::Slow);
+            pad_t::SlewFast::Bits::set(pad_t::SlewFast::Value::slow);
+        }
+
+        return status::Status::OK;
+    }
+
+    template <std::uintptr_t ioBankBase, std::uintptr_t padsBankBase, std::uintptr_t sioBase>
+    template <Pins pin>
+    status::Status GpioType<ioBankBase, padsBankBase, sioBase>::configure_pin_i2c() {
+        if (!m_flags.test(std::to_underlying(Flags::Initialized))) {
+            return status::Status::ERROR_INIT;
+        }
+        static_assert(pin < Pins::number_of_gpio, "Invalid GPIO pin!");
+
+        // Even though at the time of implementation all these function only check if the GPIO module is initialized
+        // (like this function does), in case this changes, these changes will be caught and returned.
+        if (auto status = enable_schmitt_trigger<pin, true>(); status != status::Status::OK) {
+            return status;
+        }
+        if (auto status = set_slew_rate<pin, false>(); status != status::Status::OK) {
+            return status;
+        }
+        if (auto status = enable_pull_up<pin, true>(); status != status::Status::OK) {
+            return status;
+        }
+        if (auto status = enable_pull_down<pin, false>(); status != status::Status::OK) {
+            return status;
+        }
+        if (auto status = set_function<pin, FuncSelect::i2c>(); status != status::Status::OK) {
+            return status;
         }
 
         return status::Status::OK;

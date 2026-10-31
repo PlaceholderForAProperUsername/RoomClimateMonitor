@@ -238,6 +238,24 @@ namespace rp2040::system::gpio {
         template <Pins pin, bool enable_fast_mode>
         status::Status set_slew_rate();
 
+        /**
+         * @brief Configures the GPIO pin to be used for I2C communication.
+         *
+         * Note: If any function called by this function adds another error case, the error message will be returned
+         * by this function. Meaning an additional error message may be returned in the future. Checks should therefore
+         * only be made against status::Status:OK.
+         *
+         * For reference, the following functions are called: @see enable_schmitt_trigger @see set_slew_rate @see enable_pull_up
+         * @see enable_pull_down @see set_function
+         *
+         * @tparam pin The pin to be configured to be used for I2C.
+         * @return status::Status The status code.
+         * @retval status::Status:OK The pin has been successfully configured.
+         * @retval status::Status::ERROR_INIT The I2C module was not initialized. @see init
+         */
+        template <Pins pin>
+        status::Status configure_pin_i2c();
+
     private:
         GpioType() : m_flags(0), m_output_enabled(0) {
             m_input_enabled.set(); // The input is enabled for all GPIO at reset.
