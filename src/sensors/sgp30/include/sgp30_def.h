@@ -61,7 +61,7 @@ namespace sgp30 {
      * @brief Implemented commands.
      *
      * Each command needs time to process before the sgp30 can send a response. The command is therefore in the format
-     * std::pair<cmd, delay>.
+     * std::pair<cmd, delay_us>.
      */
     namespace commands {
         constexpr std::pair<std::array<std::uint8_t, 2>, std::uint32_t> sgp30_iaq_init {{0x20U, 0x03U}, 10'000}; /**< @brief Starts the measurement process. */
