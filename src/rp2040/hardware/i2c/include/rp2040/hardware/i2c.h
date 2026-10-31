@@ -117,7 +117,7 @@ namespace rp2040::hardware::i2c {
          * @post None
          */
         template <std::uint8_t target_addr>
-        status::Status write(std::span<std::uint8_t> data, bool send_stop);
+        status::Status write(std::span<const std::uint8_t> data, bool send_stop);
 
         /**
          * @brief Reads data from the target.

@@ -151,7 +151,7 @@ namespace rp2040::hardware::i2c {
 
     template <std::uintptr_t base>
     template <std::uint8_t target_addr>
-    status::Status I2cType<base>::write(std::span<std::uint8_t> data, bool send_stop) {
+    status::Status I2cType<base>::write(const std::span<const std::uint8_t> data, bool send_stop) {
         if (!m_flags.test(static_cast<std::uint32_t>(Flags::configured))) {
             return status::Status::ERROR_INIT;
         }
