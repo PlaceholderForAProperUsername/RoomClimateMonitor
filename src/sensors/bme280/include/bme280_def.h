@@ -78,6 +78,17 @@ namespace bme280 {
     };
 
     /**
+     * @brief The filter coefficients of the iir filter.
+     */
+    enum class Filter : std::uint8_t {
+        disabled = 0x0U, /**< @brief The filter is disabled. */
+        coefficient_2 = 0x1U, /**< @brief Coefficient value of 2. */
+        coefficient_4 = 0x2U, /**< @brief Coefficient value of 4. */
+        coefficient_8 = 0x3U, /**< @brief Coefficient value of 8. */
+        coefficient_16 = 0x4U, /**< @brief Coefficient value of 16. */
+    };
+
+    /**
      * @brief The I2C addresses of the bme280.
      */
     enum class I2cAddress : std::uint8_t {
