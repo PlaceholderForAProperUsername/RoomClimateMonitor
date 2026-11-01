@@ -57,7 +57,24 @@ namespace bme280 {
     enum class Mode : std::uint8_t {
         sleep = 0x0U, /**< @brief The sensor is in sleep mode. */
         force = 0x1U, /**< @brief The sensor does a single measurement and goes back to sleep. */
-        normal = 0x3U /**< @brief The sensor measures in specific intervals determined by measurement and standby time. */
+        normal = 0x3U /**< @brief The sensor measures in specific intervals determined by measurement and standby time. @see Standby */
+    };
+
+    /**
+     * @brief Options for the idle times in milliseconds between measurements in normal mode.
+     *
+     * The naming format is ms_integer_fractional, if a fractional part exist or just ms_integer, if not. For example a
+     * idle time of 0.5ms is written as ms_0_5.
+     */
+    enum class Standby : std::uint8_t {
+        ms_0_5 = 0x0U, /**< @brief Standby time of 0.5ms. */
+        ms_62_5 = 0x1U, /**< @brief Standby time of 62.5ms. */
+        ms_125 = 0x2U, /**< @brief Standby time of 125ms. */
+        ms_250 = 0x3U, /**< @brief Standby time of 250ms. */
+        ms_500 = 0x4U, /**< @brief Standby time of 500ms. */
+        ms_1000 = 0x5U, /**< @brief Standby time of 1000ms. */
+        ms_10 = 0x6U, /**< @brief Standby time of 10ms. */
+        ms_20 = 0x7U, /**< @brief Standby time of 20ms. */
     };
 
     /**
