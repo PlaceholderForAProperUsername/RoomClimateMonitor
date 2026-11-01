@@ -52,6 +52,15 @@ namespace bme280 {
     };
 
     /**
+     * @brief The measurement modes of the bme280.
+     */
+    enum class Mode : std::uint8_t {
+        sleep = 0x0U, /**< @brief The sensor is in sleep mode. */
+        force = 0x1U, /**< @brief The sensor does a single measurement and goes back to sleep. */
+        normal = 0x3U /**< @brief The sensor measures in specific intervals determined by measurement and standby time. */
+    };
+
+    /**
      * @brief The I2C addresses of the bme280.
      */
     enum class I2cAddress : std::uint8_t {
