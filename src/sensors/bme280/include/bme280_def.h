@@ -42,7 +42,7 @@ namespace bme280 {
     /**
      * @brief The oversampling factor to control humidity, pressure and temperature measurement.
      */
-    enum class Oversampling : std::uint8_t {
+    enum class OversamplingFactor : std::uint8_t {
         disabled = 0x0U, /**< @brief Measurement is disabled. */
         factor_1 = 0x1U, /**< @brief Sets oversampling factor to 1. */
         factor_2 = 0x2U, /**< @brief Sets oversampling factor to 2. */
@@ -54,7 +54,7 @@ namespace bme280 {
     /**
      * @brief The measurement modes of the bme280.
      */
-    enum class Mode : std::uint8_t {
+    enum class MeasurementMode : std::uint8_t {
         sleep = 0x0U, /**< @brief The sensor is in sleep mode. */
         force = 0x1U, /**< @brief The sensor does a single measurement and goes back to sleep. */
         normal = 0x3U /**< @brief The sensor measures in specific intervals determined by measurement and standby time. @see Standby */
@@ -66,7 +66,7 @@ namespace bme280 {
      * The naming format is ms_integer_fractional, if a fractional part exist or just ms_integer, if not. For example a
      * idle time of 0.5ms is written as ms_0_5.
      */
-    enum class Standby : std::uint8_t {
+    enum class StandbyTime : std::uint8_t {
         ms_0_5 = 0x0U, /**< @brief Standby time of 0.5ms. */
         ms_62_5 = 0x1U, /**< @brief Standby time of 62.5ms. */
         ms_125 = 0x2U, /**< @brief Standby time of 125ms. */
@@ -80,7 +80,7 @@ namespace bme280 {
     /**
      * @brief The filter coefficients of the iir filter.
      */
-    enum class Filter : std::uint8_t {
+    enum class FilterCoefficient : std::uint8_t {
         disabled = 0x0U, /**< @brief The filter is disabled. */
         coefficient_2 = 0x1U, /**< @brief Coefficient value of 2. */
         coefficient_4 = 0x2U, /**< @brief Coefficient value of 4. */
