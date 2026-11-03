@@ -25,6 +25,8 @@
 #ifndef BME280_TPP
 #define BME280_TPP
 
+#include "bme280.h"
+
 namespace bme280 {
     /**
      * @addtogroup bme280

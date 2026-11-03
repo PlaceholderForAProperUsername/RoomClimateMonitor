@@ -25,13 +25,32 @@
 #ifndef BME280_H
 #define BME280_H
 
+#include "bme280_def.h"
+
 namespace bme280 {
     /**
      * @addtogroup bme280
      * @{
      */
 
+    /**
+     * @brief The BME280 sensor to measure temperature, humidity and pressure.
+     *
+     * @tparam address The i2c address of the sensor.
+     * @tparam I2cControllerType The type of the I2C controller.
+     */
+    template <I2cAddress address, I2cControllerTypeConcept I2cControllerType>
+    class Bme280 {
+    public:
+        explicit Bme280(const I2cControllerType& i2c) : m_i2c(i2c) {}
+    private:
+        static constexpr std::uint8_t s_addr {std::to_underlying(address)};
+        I2cControllerType m_i2c;
+    };
+
     /**@}*/
 }
+
+#include "../bme280.tpp"
 
 #endif // BME280_H
