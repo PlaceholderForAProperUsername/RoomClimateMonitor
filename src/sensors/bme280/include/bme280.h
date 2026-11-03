@@ -79,13 +79,25 @@ namespace bme280 {
          */
         status::Status init();
 
+        /**
+         * @brief Configures the sensor.
+         *
+         * @param config The configuration parameter of the sensor.
+         * @return status::Status The status code
+         * @retval status::Status::OK The sensor has been configured.
+         * @retval status::Status::ERROR_INIT The firmware has not been initialized. @see init
+         */
+        status::Status configure(Config config);
+
     private:
         static constexpr std::uint8_t s_addr {std::to_underlying(address)};
         I2cControllerType m_i2c;
 
         enum class Flags : std::uint8_t {
             initialized = 0U,
-            configured = 1U,
+            hum_meas_enabled = 1U,
+            temp_meas_enabled = 2U,
+            press_meas_enabled = 3U,
             number_of_flags
         };
 

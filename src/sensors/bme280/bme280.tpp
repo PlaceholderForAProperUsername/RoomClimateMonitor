@@ -87,6 +87,36 @@ namespace bme280 {
         return status::Status::OK;
     }
 
+    template <I2cAddress address, I2cControllerTypeConcept I2cControllerType>
+    status::Status Bme280<address, I2cControllerType>::configure(const Config config) {
+        if (!this->m_flags.test(std::to_underlying(Flags::initialized))) {
+            return status::Status::ERROR_INIT;
+        }
+
+        std::array<std::uint8_t, 2> config_humidity {registers::ctrl_hum.first, std::to_underlying(config.humidity)};
+        this->m_i2c.template write<s_addr>(config_humidity, true);
+
+        const std::uint8_t ctrl_meas_val {static_cast<std::uint8_t>(std::to_underlying(config.temperature) << 5 | std::to_underlying(config.pressure) << 2 | std::to_underlying(config.mode))};
+        std::array<std::uint8_t, 2> config_measurement {registers::ctrl_meas.first, ctrl_meas_val};
+        this->m_i2c.template write<s_addr>(config_measurement, true);
+
+        const std::uint8_t config_val {static_cast<std::uint8_t>(std::to_underlying(config.time_ms) << 5 | std::to_underlying(config.filter_coefficient) << 2)};
+        std::array<std::uint8_t, 2> config_config {registers::config.first, config_val};
+        this->m_i2c.template write<s_addr>(config_config, true);
+
+        if (config.humidity != OversamplingFactor::disabled) {
+            this->m_flags.set(std::to_underlying(Flags::hum_meas_enabled));
+        }
+        if (config.temperature != OversamplingFactor::disabled) {
+            this->m_flags.set(std::to_underlying(Flags::temp_meas_enabled));
+        }
+        if (config.pressure != OversamplingFactor::disabled) {
+            this->m_flags.set(std::to_underlying(Flags::press_meas_enabled));
+        }
+
+        return status::Status::OK;
+    }
+
     /**@}*/
 }
 
