@@ -25,6 +25,8 @@
 #ifndef BME280_H
 #define BME280_H
 
+#include <bitset>
+
 #include "status.h"
 
 #include "bme280_def.h"
@@ -36,6 +38,18 @@ namespace bme280 {
      */
 
     /**
+     * @brief The parameters to configure the bme280 sensor.
+     */
+    struct Config {
+        OversamplingFactor temperature {OversamplingFactor::disabled};
+        OversamplingFactor humidity {OversamplingFactor::disabled};
+        OversamplingFactor pressure {OversamplingFactor::disabled};
+        FilterCoefficient filter_coefficient {FilterCoefficient::disabled};
+        StandbyTime time_ms {StandbyTime::ms_1000}; // takes only effect when measurement mode is set to normal
+        MeasurementMode mode {MeasurementMode::sleep};
+    };
+
+    /**
      * @brief The BME280 sensor to measure temperature, humidity and pressure.
      *
      * @tparam address The i2c address of the sensor.
@@ -44,7 +58,7 @@ namespace bme280 {
     template <I2cAddress address, I2cControllerTypeConcept I2cControllerType>
     class Bme280 {
     public:
-        explicit Bme280(const I2cControllerType& i2c) : m_i2c(i2c) {}
+        explicit Bme280(const I2cControllerType& i2c) : m_i2c(i2c), m_flags(0), m_compensation_parameters()  {}
 
         /**
          * @brief Checks if the sensor is present and responding.
@@ -54,9 +68,65 @@ namespace bme280 {
          * @retval status::Status::ERROR_RESOURCE The sensor is either not present or not responding.
          */
         status::Status probe();
+
+        /**
+         * @brief Initializes the firmware by verifying the presence of the sensor via @see probe and getting the sensor
+         * specific compensation parameters.
+         *
+         * @return status::Status The status code.
+         * @retval status::Status::OK The firmware is initialized
+         * @retval status::Status::ERROR_RESOURCE The sensor is either not present or not responding.
+         */
+        status::Status init();
+
     private:
         static constexpr std::uint8_t s_addr {std::to_underlying(address)};
         I2cControllerType m_i2c;
+
+        enum class Flags : std::uint8_t {
+            initialized = 0U,
+            configured = 1U,
+            number_of_flags
+        };
+
+        std::bitset<std::to_underlying(Flags::number_of_flags)> m_flags;
+
+        /**
+         * @brief Compensation parameters needed to calculate the correct measurement value.
+         *
+         * This values are sensor specific. Due to the amount af parameters, theses values will be read once during firmware
+         * initialization and stored in these structs.
+         */
+        struct CompensationParameters {
+            struct Temperature {
+                std::uint16_t t1;
+                std::int16_t t2;
+                std::int16_t t3;
+            };
+            Temperature temperature;
+            struct Pressure {
+                std::uint16_t p1;
+                std::int16_t p2;
+                std::int16_t p3;
+                std::int16_t p4;
+                std::int16_t p5;
+                std::int16_t p6;
+                std::int16_t p7;
+                std::int16_t p8;
+                std::int16_t p9;
+            };
+            Pressure pressure;
+            struct Humidity {
+                std::uint8_t h1;
+                std::int16_t h2;
+                std::uint8_t h3;
+                std::int16_t h4;
+                std::int16_t h5;
+                std::int8_t h6;
+            };
+            Humidity humidity;
+        };
+        CompensationParameters m_compensation_parameters;
     };
 
     /**@}*/

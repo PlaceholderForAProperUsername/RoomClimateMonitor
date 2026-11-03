@@ -114,7 +114,7 @@ namespace bme280 {
         constexpr std::pair<std::uint8_t, std::size_t> calib_block_0 {0x88U, 26U}; /**< @brief Calibration registers 0 to 25. */
         constexpr std::pair<std::uint8_t, std::size_t> id {0xD0U, 1U}; /**< @brief Chip id register. */
         constexpr std::pair<std::uint8_t, std::size_t> reset {0xE0U, 1U}; /**< @brief The reset register. */
-        constexpr std::pair<std::uint8_t, std::size_t> calib_block_1 {0xE1U, 16U}; /**< @brief Calibration register 26 to 41. */
+        constexpr std::pair<std::uint8_t, std::size_t> calib_block_1 {0xE1U, 7U}; /**< @brief Calibration register 26 to 32. */
         constexpr std::pair<std::uint8_t, std::size_t> ctrl_hum {0xF2U, 1U}; /**< @brief Controls humidity measurement. */
         constexpr std::pair<std::uint8_t, std::size_t> status {0xF3U, 1U}; /**< @brief The status register. */
         constexpr std::pair<std::uint8_t, std::size_t> ctrl_meas {0xF4U, 1U}; /**< @brief Controls pressure and temperature measurement and set the measurement mode. */
