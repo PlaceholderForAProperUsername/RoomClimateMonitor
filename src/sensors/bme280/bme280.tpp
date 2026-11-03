@@ -33,6 +33,18 @@ namespace bme280 {
      * @{
      */
 
+    template <I2cAddress address, I2cControllerTypeConcept I2cControllerType>
+    status::Status Bme280<address, I2cControllerType>::probe() {
+        constexpr std::array<std::uint8_t, 1> cmd {registers::id.first};
+        this->m_i2c.template write<s_addr>(cmd, false);
+        std::array<uint8_t, registers::id.second> received_chip_id {};
+        this->m_i2c.template read<s_addr>(received_chip_id, true);
+        if (constexpr std::uint8_t chip_id {0x60U}; chip_id != received_chip_id[0]) {
+            return status::Status::ERROR_RESOURCE;
+        }
+        return status::Status::OK;
+    }
+
     /**@}*/
 }
 

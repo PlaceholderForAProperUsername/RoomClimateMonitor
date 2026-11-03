@@ -48,11 +48,6 @@ namespace bme280 {
     };
 
     /**
-     * @brief Chip id value.
-     */
-    constexpr std::uint8_t chip_id {0x60U};
-
-    /**
      * @brief The oversampling factor to control humidity, pressure and temperature measurement.
      */
     enum class OversamplingFactor : std::uint8_t {

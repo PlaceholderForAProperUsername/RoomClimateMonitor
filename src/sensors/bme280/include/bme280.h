@@ -25,6 +25,8 @@
 #ifndef BME280_H
 #define BME280_H
 
+#include "status.h"
+
 #include "bme280_def.h"
 
 namespace bme280 {
@@ -43,6 +45,15 @@ namespace bme280 {
     class Bme280 {
     public:
         explicit Bme280(const I2cControllerType& i2c) : m_i2c(i2c) {}
+
+        /**
+         * @brief Checks if the sensor is present and responding.
+         *
+         * @return status::Status The status code
+         * @retval status::Status::OK The sensor is present and responding.
+         * @retval status::Status::ERROR_RESOURCE The sensor is either not present or not responding.
+         */
+        status::Status probe();
     private:
         static constexpr std::uint8_t s_addr {std::to_underlying(address)};
         I2cControllerType m_i2c;
