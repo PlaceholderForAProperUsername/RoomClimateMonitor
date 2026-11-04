@@ -163,6 +163,14 @@ namespace bme280 {
          * @return std::uint32_t The compensated pressure data in Pa.
          */
         std::uint32_t compensate_pressure(std::int32_t raw_pressure);
+
+        /**
+         * @brief Compensates the raw humidity data and returns it in %RH in Q22.10 format (22 integer and 10 fractional bits).
+         *
+         * @param raw_humidity The raw humidity data as read from the sensor.
+         * @return std::uint32_t The compensated pressure data in %RH.
+         */
+        std::uint32_t compensate_humidity(std::int32_t raw_humidity);
     };
 
     /**@}*/

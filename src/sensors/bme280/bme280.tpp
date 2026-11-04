@@ -161,6 +161,21 @@ namespace bme280 {
         return static_cast<std::uint32_t>(pressure);
     }
 
+    /**
+     * @internal
+     * This function was adapted from the BME280 datasheet as provided by Bosch Sensortec. For bug fixing, consult datasheet
+     * for correctness of function.
+     */
+    template <I2cAddress address, I2cControllerTypeConcept I2cControllerType>
+    std::uint32_t Bme280<address, I2cControllerType>::compensate_humidity(const std::int32_t raw_humidity) {
+        std::uint32_t humidity = this->m_temperature_compensation - 76'800;
+        humidity = (((((raw_humidity << 14U) - ((static_cast<std::int32_t>(this->m_compensation_parameters.humidity.t4)) << 20U) - ((static_cast<std::int32_t>(this->m_compensation_parameters.humidity.h5)) * humidity))
+            + (16'384)) >> 15U) * (((((((humidity * (static_cast<std::int32_t>(this->m_compensation_parameters.humidity.h6))) >> 10U) * (((humidity * (static_cast<std::int32_t>(this->m_compensation_parameters.humidity.h3))) >> 11U) +
+                (32'768))) >> 10U) + (2'097'152)) * (static_cast<std::int32_t>(this->m_compensation_parameters.humidity.h2)) + 8'192) >> 14U));
+        humidity = (humidity - (((((humidity >> 15U) * (humidity >> 15U)) >> 7U) * (static_cast<std::int32_t>(this->m_compensation_parameters.humidity.h1))) >> 4U));
+        humidity = (humidity > 419430400 ? 419430400 : humidity);
+        return static_cast<std::uint32_t>(humidity >> 12U);
+    }
     /**@}*/
 }
 
