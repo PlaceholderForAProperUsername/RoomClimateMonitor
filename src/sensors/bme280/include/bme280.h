@@ -139,6 +139,16 @@ namespace bme280 {
             Humidity humidity;
         };
         CompensationParameters m_compensation_parameters;
+
+        /**
+         * @brief Compensates the raw temperature data and returns it in °C.
+         *
+         * The resolution is 0.01 °C, meaning a return value of "5123" equals 51.23 °C.
+         *
+         * @param raw_temperature The raw temperature as read from the sensor.
+         * @return std::int32_t The compensated temperature data in °C.
+         */
+        std::int32_t compensate_temperature(std::int32_t raw_temperature);
     };
 
     /**@}*/

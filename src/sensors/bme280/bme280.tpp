@@ -117,6 +117,23 @@ namespace bme280 {
         return status::Status::OK;
     }
 
+    /**
+     * @internal
+     * This function was adapted from the BME280 datasheet as provided by Bosch Sensortec. For bugfixing, consult datasheet
+     * for correctness of function.
+     */
+    template <I2cAddress address, I2cControllerTypeConcept I2cControllerType>
+    std::int32_t Bme280<address, I2cControllerType>::compensate_temperature(const std::int32_t raw_temperature) {
+        std::int32_t tmp1 = (((raw_temperature >> 3U) - (static_cast<std::int32_t>(m_compensation_parameters.temperature.t1) << 1U)) *
+            static_cast<std::int32_t>(m_compensation_parameters.temperature.t2)) >> 11U;
+        std::int32_t tmp2 = ((((raw_temperature >> 4U) - (static_cast<std::int32_t>(m_compensation_parameters.temperature.t1))) *
+            ((raw_temperature >> 4U) - (static_cast<std::int32_t>(m_compensation_parameters.temperature.t1))) >> 12U) *
+                (static_cast<std::int32_t>(m_compensation_parameters.temperature.t3))) >> 14U;
+        std::int32_t temperature = ((tmp1 + tmp2) * 5 + 128) >> 8U;
+
+        return temperature;
+    }
+
     /**@}*/
 }
 
