@@ -141,6 +141,12 @@ namespace bme280 {
         CompensationParameters m_compensation_parameters;
 
         /**
+         * @brief Used to adjust pressure and humidity compensation. The initial compensation value represents 20 °C and
+         * gets updated when compensating temperature data. @see compensate_temperature
+         */
+        std::int32_t m_temperature_compensation {102'375};
+
+        /**
          * @brief Compensates the raw temperature data and returns it in °C.
          *
          * The resolution is 0.01 °C, meaning a return value of "5123" equals 51.23 °C.
@@ -149,6 +155,14 @@ namespace bme280 {
          * @return std::int32_t The compensated temperature data in °C.
          */
         std::int32_t compensate_temperature(std::int32_t raw_temperature);
+
+        /**
+         * @brief Compensates the raw pressure data and returns it in Pa in format Q24.8 (24 integer bits and 8 fractional bits.
+         *
+         * @param raw_pressure The raw pressure data as read from the sensor.
+         * @return std::uint32_t The compensated pressure data in Pa.
+         */
+        std::uint32_t compensate_pressure(std::int32_t raw_pressure);
     };
 
     /**@}*/

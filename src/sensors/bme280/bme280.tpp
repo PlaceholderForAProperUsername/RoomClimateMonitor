@@ -119,19 +119,46 @@ namespace bme280 {
 
     /**
      * @internal
-     * This function was adapted from the BME280 datasheet as provided by Bosch Sensortec. For bugfixing, consult datasheet
+     * This function was adapted from the BME280 datasheet as provided by Bosch Sensortec. For bug fixing, consult datasheet
      * for correctness of function.
      */
     template <I2cAddress address, I2cControllerTypeConcept I2cControllerType>
     std::int32_t Bme280<address, I2cControllerType>::compensate_temperature(const std::int32_t raw_temperature) {
-        std::int32_t tmp1 = (((raw_temperature >> 3U) - (static_cast<std::int32_t>(m_compensation_parameters.temperature.t1) << 1U)) *
-            static_cast<std::int32_t>(m_compensation_parameters.temperature.t2)) >> 11U;
-        std::int32_t tmp2 = ((((raw_temperature >> 4U) - (static_cast<std::int32_t>(m_compensation_parameters.temperature.t1))) *
-            ((raw_temperature >> 4U) - (static_cast<std::int32_t>(m_compensation_parameters.temperature.t1))) >> 12U) *
-                (static_cast<std::int32_t>(m_compensation_parameters.temperature.t3))) >> 14U;
-        std::int32_t temperature = ((tmp1 + tmp2) * 5 + 128) >> 8U;
+        std::int32_t tmp1 = (((raw_temperature >> 3U) - (static_cast<std::int32_t>(this->m_compensation_parameters.temperature.t1) << 1U)) *
+            static_cast<std::int32_t>(this->m_compensation_parameters.temperature.t2)) >> 11U;
+        std::int32_t tmp2 = ((((raw_temperature >> 4U) - (static_cast<std::int32_t>(this->m_compensation_parameters.temperature.t1))) *
+            ((raw_temperature >> 4U) - (static_cast<std::int32_t>(this->m_compensation_parameters.temperature.t1))) >> 12U) *
+                (static_cast<std::int32_t>(this->m_compensation_parameters.temperature.t3))) >> 14U;
+        this->m_temperature_compensation = tmp1 + tmp2;
+        std::int32_t temperature = ((this->m_temperature_compensation) * 5 + 128) >> 8U;
 
         return temperature;
+    }
+
+    /**
+     * @internal
+     * This function was adapted from the BME280 datasheet as provided by Bosch Sensortec. For bug fixing, consult datasheet
+     * for correctness of function.
+     */
+    template <I2cAddress address, I2cControllerTypeConcept I2cControllerType>
+    std::uint32_t Bme280<address, I2cControllerType>::compensate_pressure(const std::int32_t raw_pressure) {
+        std::int64_t tmp1 = static_cast<std::int64_t>(this->m_temperature_compensation) - 128'000;
+        std::int64_t tmp2 = tmp1 * tmp1 * static_cast<std::int64_t>(this->m_compensation_parameters.pressure.p6);
+        tmp2 = tmp2 + ((tmp1 * static_cast<std::int64_t>(this->m_compensation_parameters.pressure.p5)) << 17U);
+        tmp2 = tmp2 + ((static_cast<std::int64_t>(this->m_compensation_parameters.pressure.p4)) << 35U);
+        tmp1 = ((tmp1 * tmp1 * static_cast<std::int64_t>(this->m_compensation_parameters.pressure.p3)) >> 8U) +
+            ((tmp1 * static_cast<std::int64_t>(this->m_compensation_parameters.pressure.p2)) << 12U);
+        tmp1 = (((static_cast<std::int64_t>(1) << 47U) + tmp1) * static_cast<std::int64_t>(this->m_compensation_parameters.pressure.p1)) >> 33U;
+        if (tmp1 == 0) {
+            return 0; // avoid exception caused by division by zero
+        }
+        std::int64_t pressure = 1'048'576 - raw_pressure;
+        pressure = (((pressure << 31U) - tmp2) * 3'125) / tmp1;
+        tmp1 = (static_cast<std::int64_t>(this->m_compensation_parameters.pressure.p9) * (pressure >> 13U) * (pressure >> 13U)) >> 25U;
+        tmp2 = (static_cast<std::int64_t>(this->m_compensation_parameters.pressure.p8) * pressure) >> 19U;
+        pressure = ((pressure + tmp1 + tmp2) >> 8U) + (static_cast<std::int64_t>(this->m_compensation_parameters) << 4U);
+
+        return static_cast<std::uint32_t>(pressure);
     }
 
     /**@}*/
