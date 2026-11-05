@@ -188,6 +188,16 @@ namespace bme280 {
         humidity = (humidity > 419430400 ? 419430400 : humidity);
         return static_cast<std::uint32_t>(humidity >> 12U);
     }
+
+    template <I2cAddress address, I2cControllerTypeConcept I2cControllerType>
+    bool Bme280<address, I2cControllerType>::is_measuring() {
+        constexpr std::array<std::uint8_t, 1> get_status_reg {registers::status.first};
+        this->m_i2c.template write<s_addr>(get_status_reg, false);
+        std::array<std::uint8_t, registers::status.second> status_reg {};
+        this->m_i2c.template read<s_addr>(status_reg, true);
+        constexpr std::uint8_t measuring_bit {1U << 3};
+        return (status_reg[0] & measuring_bit);
+    }
     /**@}*/
 }
 

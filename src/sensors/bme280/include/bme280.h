@@ -184,6 +184,13 @@ namespace bme280 {
          * @return std::uint32_t The compensated pressure data in %RH.
          */
         std::uint32_t compensate_humidity(std::int32_t raw_humidity);
+
+        /**
+         * @brief Checks if the sensor is currently measuring or if the data is available.
+         *
+         * @return Boolean True if a conversion is running and false if the data is available.
+         */
+        bool is_measuring();
     };
 
     /**@}*/
