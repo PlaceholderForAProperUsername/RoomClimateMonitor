@@ -58,7 +58,9 @@ namespace bme280 {
     template <I2cAddress address, I2cControllerTypeConcept I2cControllerType>
     class Bme280 {
     public:
-        explicit Bme280(const I2cControllerType& i2c) : m_i2c(i2c), m_flags(0), m_compensation_parameters()  {}
+        explicit Bme280(const I2cControllerType& i2c) : m_i2c(i2c), m_flags(0), m_compensation_parameters() {
+            set_compensation_temperature(20.0f);
+        }
 
         /**
          * @brief Checks if the sensor is present and responding.
@@ -88,6 +90,16 @@ namespace bme280 {
          * @retval status::Status::ERROR_INIT The firmware has not been initialized. @see init
          */
         status::Status configure(Config config);
+
+        /**
+         * @brief Sets the fine resolution temperature value used in pressure and humidity compensation.
+         *
+         * Note: This value is initialized to a default value of 20.0°C and is automatically updated by @see compensate_temperature
+         * and should only be set when temperature measurement is disabled.
+         *
+         * @param temperature The temperature in °C.
+         */
+        void set_compensation_temperature(float temperature);
 
     private:
         static constexpr std::uint8_t s_addr {std::to_underlying(address)};
@@ -141,10 +153,11 @@ namespace bme280 {
         CompensationParameters m_compensation_parameters;
 
         /**
-         * @brief Used to adjust pressure and humidity compensation. The initial compensation value represents 20 °C and
-         * gets updated when compensating temperature data. @see compensate_temperature
+         * @brief Used to adjust pressure and humidity compensation. This value is initialized to a standard value of 20.0°C
+         * and can manually set by @see set_compensation_temperature. This is only needed when temperature measurement is
+         * disabled, as this value is automatically adjusted by @see compensate_temperature.
          */
-        std::int32_t m_temperature_compensation {102'375};
+        std::int32_t m_fine_resolution_temp;
 
         /**
          * @brief Compensates the raw temperature data and returns it in °C.

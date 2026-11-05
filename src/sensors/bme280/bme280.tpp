@@ -119,6 +119,18 @@ namespace bme280 {
 
     /**
      * @internal
+     * This function is basically the reversal of the steps in @see compensate_temperature, where the actual temperature
+     * is calculated from the compensation temperature used in humidity and pressure compensation.
+     */
+    template <I2cAddress address, I2cControllerTypeConcept I2cControllerType>
+    void Bme280<address, I2cControllerType>::set_compensation_temperature(const float temperature) {
+        // The factor of 100 is added, because the temperature is in a pure integer format with a resolution of 0.01°C,
+        // meaning 12.34°C are represented by the integer value 1234, or multiplied by 100.
+        this->m_fine_resolution_temp = ((static_cast<std::int32_t>(temperature * 100) << 8) - 128) / 5;
+    }
+
+    /**
+     * @internal
      * This function was adapted from the BME280 datasheet as provided by Bosch Sensortec. For bug fixing, consult datasheet
      * for correctness of function.
      */
@@ -129,8 +141,8 @@ namespace bme280 {
         std::int32_t tmp2 = ((((raw_temperature >> 4U) - (static_cast<std::int32_t>(this->m_compensation_parameters.temperature.t1))) *
             ((raw_temperature >> 4U) - (static_cast<std::int32_t>(this->m_compensation_parameters.temperature.t1))) >> 12U) *
                 (static_cast<std::int32_t>(this->m_compensation_parameters.temperature.t3))) >> 14U;
-        this->m_temperature_compensation = tmp1 + tmp2;
-        std::int32_t temperature = ((this->m_temperature_compensation) * 5 + 128) >> 8U;
+        this->m_fine_resolution_temp = tmp1 + tmp2;
+        const std::int32_t temperature = ((this->m_fine_resolution_temp) * 5 + 128) >> 8U;
 
         return temperature;
     }
@@ -142,7 +154,7 @@ namespace bme280 {
      */
     template <I2cAddress address, I2cControllerTypeConcept I2cControllerType>
     std::uint32_t Bme280<address, I2cControllerType>::compensate_pressure(const std::int32_t raw_pressure) {
-        std::int64_t tmp1 = static_cast<std::int64_t>(this->m_temperature_compensation) - 128'000;
+        std::int64_t tmp1 = static_cast<std::int64_t>(this->m_fine_resolution_temp) - 128'000;
         std::int64_t tmp2 = tmp1 * tmp1 * static_cast<std::int64_t>(this->m_compensation_parameters.pressure.p6);
         tmp2 = tmp2 + ((tmp1 * static_cast<std::int64_t>(this->m_compensation_parameters.pressure.p5)) << 17U);
         tmp2 = tmp2 + ((static_cast<std::int64_t>(this->m_compensation_parameters.pressure.p4)) << 35U);
@@ -168,7 +180,7 @@ namespace bme280 {
      */
     template <I2cAddress address, I2cControllerTypeConcept I2cControllerType>
     std::uint32_t Bme280<address, I2cControllerType>::compensate_humidity(const std::int32_t raw_humidity) {
-        std::uint32_t humidity = this->m_temperature_compensation - 76'800;
+        std::uint32_t humidity = this->m_fine_resolution_temp - 76'800;
         humidity = (((((raw_humidity << 14U) - ((static_cast<std::int32_t>(this->m_compensation_parameters.humidity.t4)) << 20U) - ((static_cast<std::int32_t>(this->m_compensation_parameters.humidity.h5)) * humidity))
             + (16'384)) >> 15U) * (((((((humidity * (static_cast<std::int32_t>(this->m_compensation_parameters.humidity.h6))) >> 10U) * (((humidity * (static_cast<std::int32_t>(this->m_compensation_parameters.humidity.h3))) >> 11U) +
                 (32'768))) >> 10U) + (2'097'152)) * (static_cast<std::int32_t>(this->m_compensation_parameters.humidity.h2)) + 8'192) >> 14U));
