@@ -129,6 +129,16 @@ namespace bme280 {
         this->m_fine_resolution_temp = ((static_cast<std::int32_t>(temperature * 100) << 8) - 128) / 5;
     }
 
+    template <I2cAddress address, I2cControllerTypeConcept I2cControllerType>
+    bool Bme280<address, I2cControllerType>::is_measuring() {
+        constexpr std::array<std::uint8_t, 1> get_status_reg {registers::status.first};
+        this->m_i2c.template write<s_addr>(get_status_reg, false);
+        std::array<std::uint8_t, registers::status.second> status_reg {};
+        this->m_i2c.template read<s_addr>(status_reg, true);
+        constexpr std::uint8_t measuring_bit {1U << 3};
+        return (status_reg[0] & measuring_bit);
+    }
+
     /**
      * @internal
      * This function was adapted from the BME280 datasheet as provided by Bosch Sensortec. For bug fixing, consult datasheet
@@ -187,16 +197,6 @@ namespace bme280 {
         humidity = (humidity - (((((humidity >> 15U) * (humidity >> 15U)) >> 7U) * (static_cast<std::int32_t>(this->m_compensation_parameters.humidity.h1))) >> 4U));
         humidity = (humidity > 419430400 ? 419430400 : humidity);
         return static_cast<std::uint32_t>(humidity >> 12U);
-    }
-
-    template <I2cAddress address, I2cControllerTypeConcept I2cControllerType>
-    bool Bme280<address, I2cControllerType>::is_measuring() {
-        constexpr std::array<std::uint8_t, 1> get_status_reg {registers::status.first};
-        this->m_i2c.template write<s_addr>(get_status_reg, false);
-        std::array<std::uint8_t, registers::status.second> status_reg {};
-        this->m_i2c.template read<s_addr>(status_reg, true);
-        constexpr std::uint8_t measuring_bit {1U << 3};
-        return (status_reg[0] & measuring_bit);
     }
     /**@}*/
 }

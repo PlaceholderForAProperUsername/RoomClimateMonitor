@@ -101,6 +101,13 @@ namespace bme280 {
          */
         void set_compensation_temperature(float temperature);
 
+        /**
+         * @brief Checks if the sensor is currently measuring or if the data is available.
+         *
+         * @return Boolean True if a conversion is running and false if the data is available.
+         */
+        bool is_measuring();
+
     private:
         static constexpr std::uint8_t s_addr {std::to_underlying(address)};
         I2cControllerType m_i2c;
@@ -118,7 +125,7 @@ namespace bme280 {
         /**
          * @brief Compensation parameters needed to calculate the correct measurement value.
          *
-         * This values are sensor specific. Due to the amount af parameters, theses values will be read once during firmware
+         * These values are sensor specific. Due to the amount af parameters, these values will be read once during firmware
          * initialization and stored in these structs.
          */
         struct CompensationParameters {
@@ -184,13 +191,6 @@ namespace bme280 {
          * @return std::uint32_t The compensated pressure data in %RH.
          */
         std::uint32_t compensate_humidity(std::int32_t raw_humidity);
-
-        /**
-         * @brief Checks if the sensor is currently measuring or if the data is available.
-         *
-         * @return Boolean True if a conversion is running and false if the data is available.
-         */
-        bool is_measuring();
     };
 
     /**@}*/
