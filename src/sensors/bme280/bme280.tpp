@@ -153,6 +153,20 @@ namespace bme280 {
         return this->compensate_temperature(raw_temperature);
     }
 
+    template <I2cAddress address, I2cControllerTypeConcept I2cControllerType>
+    std::expected<std::uint32_t, status::Status> Bme280<address, I2cControllerType>::get_pressure() {
+        if (!this->m_flags.test(std::to_underlying(Flags::press_meas_enabled))) {
+            return std::unexpected(status::Status::ERROR_CONFIG);
+        }
+        while (this->is_measuring()) {}
+        constexpr std::array<std::uint8_t, 1> get_raw_pressure_cmd {registers::pressure_data.first};
+        this->m_i2c.template write<s_addr>(get_raw_pressure_cmd, false);
+        std::array<std::uint8_t, registers::pressure_data.second> raw_pressure_data {};
+        this->m_i2c.template read<s_addr>(raw_pressure_data, true);
+        const std::int32_t raw_pressure {raw_pressure_data[0] << 12 | raw_pressure_data[1] << 4 | raw_pressure_data[2] >> 4};
+        return this->compensate_pressure(raw_pressure);
+    }
+
     /**
      * @internal
      * This function was adapted from the BME280 datasheet as provided by Bosch Sensortec. For bug fixing, consult datasheet

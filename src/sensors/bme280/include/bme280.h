@@ -121,6 +121,18 @@ namespace bme280 {
          */
         std::expected<std::int32_t, status::Status> get_temperature();
 
+        /**
+         * @brief Gets the compensated pressure data.
+         *
+         * The pressure is in Pa in Q24.8 format, meaning 24 integer bits and 8 fractional bits. A value of 24674867
+         * represents a value of 24674867/256 = 96386.2 Pa
+         *
+         * @return std::expected<std::uint32_t, status::Status> Either the compensated pressure data or a status code in case of error.
+         * @retval std::uint32_t The compensated pressure data in Pa.
+         * @retval status::Status::ERROR_CONFIG The sensor is not configured for temperature measurement.
+         */
+        std::expected<std::uint32_t, status::Status> get_pressure();
+
     private:
         static constexpr std::uint8_t s_addr {std::to_underlying(address)};
         I2cControllerType m_i2c;
