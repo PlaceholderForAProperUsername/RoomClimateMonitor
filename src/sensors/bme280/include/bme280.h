@@ -26,6 +26,7 @@
 #define BME280_H
 
 #include <bitset>
+#include <expected>
 
 #include "status.h"
 
@@ -107,6 +108,18 @@ namespace bme280 {
          * @return Boolean True if a conversion is running and false if the data is available.
          */
         bool is_measuring();
+
+        /**
+         * @brief Returns the compensated temperature data.
+         *
+         * The compensated temperature is in °C with a resolution of 0.01°C as an integer, meaning 12.34°C will be returned
+         * as 1234.
+         *
+         * @return std::expected<std::int32_t, status::Status> Either the compensated temperature or a status code.
+         * @retval std::int32_t The compensated temperature data in °C.
+         * @retval status::Status::ERROR_CONFIG The sensor is not configured for temperature measurement.
+         */
+        std::expected<std::int32_t, status::Status> get_temperature();
 
     private:
         static constexpr std::uint8_t s_addr {std::to_underlying(address)};

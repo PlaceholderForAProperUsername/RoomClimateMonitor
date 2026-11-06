@@ -47,7 +47,8 @@ namespace status {
         ERROR_INIT              = 8U,   /**< @brief Not initialized error. */
         ERROR_STATE             = 9U,   /**< @brief Erroneous state occurred. */
         ERROR_NOT_IMPLEMENTED   = 10U,  /**< @brief Resource not implemented error. */
-        PENDING                 = 11U   /**< @brief Resource is pending. */
+        ERROR_CONFIG            = 11U,  /**< @brief Resource is not configured for that operation. */
+        PENDING                 = 12U   /**< @brief Resource is pending. */
     };
 
 } // utils::status
