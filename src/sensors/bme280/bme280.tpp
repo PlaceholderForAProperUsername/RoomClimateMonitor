@@ -181,6 +181,29 @@ namespace bme280 {
         return this->compensate_humidity(raw_humidity);
     }
 
+    template <I2cAddress address, I2cControllerTypeConcept I2cControllerType>
+    status::Status Bme280<address, I2cControllerType>::do_forced_measurement() {
+        if (!this->m_flags.test(std::to_underlying(Flags::initialized))) {
+            return status::Status::ERROR_INIT;
+        }
+        if (
+            !this->m_flags.test(std::to_underlying(Flags::temp_meas_enabled)) |
+            !this->m_flags.test(std::to_underlying(Flags::hum_meas_enabled))  |
+            !this->m_flags.test(std::to_underlying(Flags::press_meas_enabled))
+            ) {
+            return status::Status::ERROR_CONFIG;
+        }
+        constexpr std::array<std::uint8_t, 1> get_ctrl_meas_reg {registers::ctrl_meas.first};
+        this->m_i2c.template write<s_addr>(get_ctrl_meas_reg, false);
+        std::array<std::uint8_t, registers::ctrl_meas.second> ctrl_meas_data {};
+        this->m_i2c.template read<s_addr>(ctrl_meas_data, true);
+        ctrl_meas_data[0] &= ~0x03U;
+        ctrl_meas_data[0] |= std::to_underlying(MeasurementMode::force) << 0U;
+        std::array<std::uint8_t, 2> set_ctrl_meas_reg {registers::ctrl_meas.first, ctrl_meas_data[0]};
+        this->m_i2c.template write<s_addr>(set_ctrl_meas_reg, true);
+        return status::Status::OK;
+    }
+
     /**
      * @internal
      * This function was adapted from the BME280 datasheet as provided by Bosch Sensortec. For bug fixing, consult datasheet

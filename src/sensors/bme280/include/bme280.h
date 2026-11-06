@@ -145,6 +145,19 @@ namespace bme280 {
          */
         std::expected<std::uint32_t, status::Status> get_humidity();
 
+        /**
+         * @brief Conducts a single measurement and returns to sleep mode after.
+         *
+         * Note: This function should only be called when the measurement of the sensor is set to sleep or force, NOT
+         * when the sensor is set to normal measurement mode, as calling this function will disable normal measurement mode.
+         *
+         * @return status::Status The status code.
+         * @retval status::Status::OK The sensor conducts a single measurement.
+         * @retval status::Status::ERROR_INIT The firmware was not initialized. @see int
+         * @retval status::Status::ERROR_CONFIG The sensor is not configured for any measurements (temperature, humidity or pressure). @see config
+         */
+        status::Status do_forced_measurement();
+
     private:
         static constexpr std::uint8_t s_addr {std::to_underlying(address)};
         I2cControllerType m_i2c;
