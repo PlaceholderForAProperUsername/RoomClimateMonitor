@@ -167,6 +167,20 @@ namespace bme280 {
         return this->compensate_pressure(raw_pressure);
     }
 
+    template <I2cAddress address, I2cControllerTypeConcept I2cControllerType>
+    std::expected<std::uint32_t, status::Status> Bme280<address, I2cControllerType>::get_humidity() {
+        if (!this->m_flags.test(std::to_underlying(Flags::hum_meas_enabled))) {
+            return std::unexpected(status::Status::ERROR_CONFIG);
+        }
+        while (this->is_measuring()) {}
+        constexpr std::array<std::uint8_t, 1> get_raw_humidity_cmd {registers::humidity_data.first};
+        this->m_i2c.template write<s_addr>(get_raw_humidity_cmd, false);
+        std::array<std::uint8_t, registers::humidity_data.second> raw_humidity_data {};
+        this->m_i2c.template read<s_addr>(raw_humidity_data, true);
+        const std::int32_t raw_humidity {raw_humidity_data[0] << 8 | raw_humidity_data[1]};
+        return this->compensate_humidity(raw_humidity);
+    }
+
     /**
      * @internal
      * This function was adapted from the BME280 datasheet as provided by Bosch Sensortec. For bug fixing, consult datasheet
@@ -174,10 +188,10 @@ namespace bme280 {
      */
     template <I2cAddress address, I2cControllerTypeConcept I2cControllerType>
     std::int32_t Bme280<address, I2cControllerType>::compensate_temperature(const std::int32_t raw_temperature) {
-        std::int32_t tmp1 = (((raw_temperature >> 3U) - (static_cast<std::int32_t>(this->m_compensation_parameters.temperature.t1) << 1U)) *
-            static_cast<std::int32_t>(this->m_compensation_parameters.temperature.t2)) >> 11U;
-        std::int32_t tmp2 = ((((raw_temperature >> 4U) - (static_cast<std::int32_t>(this->m_compensation_parameters.temperature.t1))) *
-            ((raw_temperature >> 4U) - (static_cast<std::int32_t>(this->m_compensation_parameters.temperature.t1))) >> 12U) *
+        std::int32_t tmp1 = ((((raw_temperature >> 3U) - (static_cast<std::int32_t>(this->m_compensation_parameters.temperature.t1) << 1U))) *
+            (static_cast<std::int32_t>(this->m_compensation_parameters.temperature.t2))) >> 11U;
+        std::int32_t tmp2 = (((((raw_temperature >> 4U) - (static_cast<std::int32_t>(this->m_compensation_parameters.temperature.t1))) *
+            ((raw_temperature >> 4U) - (static_cast<std::int32_t>(this->m_compensation_parameters.temperature.t1)))) >> 12U) *
                 (static_cast<std::int32_t>(this->m_compensation_parameters.temperature.t3))) >> 14U;
         this->m_fine_resolution_temp = tmp1 + tmp2;
         const std::int32_t temperature = ((this->m_fine_resolution_temp) * 5 + 128) >> 8U;
@@ -198,15 +212,15 @@ namespace bme280 {
         tmp2 = tmp2 + ((static_cast<std::int64_t>(this->m_compensation_parameters.pressure.p4)) << 35U);
         tmp1 = ((tmp1 * tmp1 * static_cast<std::int64_t>(this->m_compensation_parameters.pressure.p3)) >> 8U) +
             ((tmp1 * static_cast<std::int64_t>(this->m_compensation_parameters.pressure.p2)) << 12U);
-        tmp1 = (((static_cast<std::int64_t>(1) << 47U) + tmp1) * static_cast<std::int64_t>(this->m_compensation_parameters.pressure.p1)) >> 33U;
+        tmp1 = ((((static_cast<std::int64_t>(1)) << 47U) + tmp1)) * (static_cast<std::int64_t>(this->m_compensation_parameters.pressure.p1)) >> 33U;
         if (tmp1 == 0) {
             return 0; // avoid exception caused by division by zero
         }
         std::int64_t pressure = 1'048'576 - raw_pressure;
         pressure = (((pressure << 31U) - tmp2) * 3'125) / tmp1;
-        tmp1 = (static_cast<std::int64_t>(this->m_compensation_parameters.pressure.p9) * (pressure >> 13U) * (pressure >> 13U)) >> 25U;
-        tmp2 = (static_cast<std::int64_t>(this->m_compensation_parameters.pressure.p8) * pressure) >> 19U;
-        pressure = ((pressure + tmp1 + tmp2) >> 8U) + (static_cast<std::int64_t>(this->m_compensation_parameters) << 4U);
+        tmp1 = ((static_cast<std::int64_t>(this->m_compensation_parameters.pressure.p9)) * (pressure >> 13U) * (pressure >> 13U)) >> 25U;
+        tmp2 = ((static_cast<std::int64_t>(this->m_compensation_parameters.pressure.p8)) * pressure) >> 19U;
+        pressure = ((pressure + tmp1 + tmp2) >> 8U) + ((static_cast<std::int64_t>(this->m_compensation_parameters.pressure.p7)) << 4U);
 
         return static_cast<std::uint32_t>(pressure);
     }
@@ -218,11 +232,12 @@ namespace bme280 {
      */
     template <I2cAddress address, I2cControllerTypeConcept I2cControllerType>
     std::uint32_t Bme280<address, I2cControllerType>::compensate_humidity(const std::int32_t raw_humidity) {
-        std::uint32_t humidity = this->m_fine_resolution_temp - 76'800;
-        humidity = (((((raw_humidity << 14U) - ((static_cast<std::int32_t>(this->m_compensation_parameters.humidity.t4)) << 20U) - ((static_cast<std::int32_t>(this->m_compensation_parameters.humidity.h5)) * humidity))
+        std::int32_t humidity = this->m_fine_resolution_temp - 76'800;
+        humidity = (((((raw_humidity << 14U) - ((static_cast<std::int32_t>(this->m_compensation_parameters.humidity.h4)) << 20U) - ((static_cast<std::int32_t>(this->m_compensation_parameters.humidity.h5)) * humidity))
             + (16'384)) >> 15U) * (((((((humidity * (static_cast<std::int32_t>(this->m_compensation_parameters.humidity.h6))) >> 10U) * (((humidity * (static_cast<std::int32_t>(this->m_compensation_parameters.humidity.h3))) >> 11U) +
                 (32'768))) >> 10U) + (2'097'152)) * (static_cast<std::int32_t>(this->m_compensation_parameters.humidity.h2)) + 8'192) >> 14U));
         humidity = (humidity - (((((humidity >> 15U) * (humidity >> 15U)) >> 7U) * (static_cast<std::int32_t>(this->m_compensation_parameters.humidity.h1))) >> 4U));
+        humidity = (humidity < 0) ? 0 : humidity;
         humidity = (humidity > 419430400 ? 419430400 : humidity);
         return static_cast<std::uint32_t>(humidity >> 12U);
     }

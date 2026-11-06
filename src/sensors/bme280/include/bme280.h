@@ -129,9 +129,21 @@ namespace bme280 {
          *
          * @return std::expected<std::uint32_t, status::Status> Either the compensated pressure data or a status code in case of error.
          * @retval std::uint32_t The compensated pressure data in Pa.
-         * @retval status::Status::ERROR_CONFIG The sensor is not configured for temperature measurement.
+         * @retval status::Status::ERROR_CONFIG The sensor is not configured for pressure measurement.
          */
         std::expected<std::uint32_t, status::Status> get_pressure();
+
+        /**
+         * @brief Gets the compensated humidity data.
+         *
+         * The humidity is in %RH in Q22.10 format, meaning 22 integer bits and 10 fractional bits. A value of 47445 represents
+         * 47445/1024 = 46.333 %RH.
+         *
+         * @return std::expected<std::uint32_t, status::Status> Either the compensated humidity data or a status code in case of error.
+         * @retval std::uint32_t The compensated humidity data in %RH.
+         * @retval status::Status::ERROR_CONFIG The sensor is not configured for humidity measurement.
+         */
+        std::expected<std::uint32_t, status::Status> get_humidity();
 
     private:
         static constexpr std::uint8_t s_addr {std::to_underlying(address)};
