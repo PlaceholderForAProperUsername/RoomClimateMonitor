@@ -25,11 +25,21 @@
 #ifndef BH1745_DEF_H
 #define BH1745_DEF_H
 
+#include <cstdint>
+
 namespace bh1745 {
     /**
      * @addtogroup bh1745
      * @{
      */
+
+    /**
+     * @brief I2C addresses of the bh1745 sensor.
+     */
+    enum class I2cAddress : std::uint8_t {
+        standard = 0x38U,
+        alternative = 0x39U,
+    };
 
     /**@}*/
 }
