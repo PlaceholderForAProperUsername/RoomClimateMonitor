@@ -26,6 +26,7 @@
 #define BH1745_DEF_H
 
 #include <cstdint>
+#include <utility>
 
 namespace bh1745 {
     /**
@@ -40,6 +41,30 @@ namespace bh1745 {
         standard = 0x38U,
         alternative = 0x39U,
     };
+
+    /**
+     * @brief Registers of the bh1745 sensor.
+     *
+     * The registers are merged to block, as there are several continuous registers belonging together (e.g. rgbc data,
+     * threshold, etc.). The format is std::pair<start_address, length> to describe register blocks.
+     */
+    namespace registers {
+        constexpr std::pair<std::uint8_t, std::size_t> system_control {0x40U, 1U}; /**< @brief System control register. */
+        constexpr std::pair<std::uint8_t, std::size_t> mode_control_1 {0x41U, 1U}; /**< @brief Functional configuration register. */
+        constexpr std::pair<std::uint8_t, std::size_t> mode_control_2 {0x42U, 1U}; /**< @brief Functional configuration register. */
+        constexpr std::pair<std::uint8_t, std::size_t> mode_control_3 {0x44U, 1U}; /**< @brief Functional configuration register. */
+        constexpr std::pair<std::uint8_t, std::size_t> rgbc_data {0x50U, 8U}; /**< @brief Red, green, blue and clear data registers. */
+        constexpr std::pair<std::uint8_t, std::size_t> red_data {0x50U, 2U}; /**< @brief Red data registers, LSB first, MSB second. */
+        constexpr std::pair<std::uint8_t, std::size_t> green_data {0x52U, 2U}; /**< @brief Green data registers, LSB first, MSB second. */
+        constexpr std::pair<std::uint8_t, std::size_t> blue_data {0x54U, 2U}; /**< @brief Blue data registers, LSB first, MSB second. */
+        constexpr std::pair<std::uint8_t, std::size_t> clear_data {0x56U, 2U}; /**< @brief Clear data registers, LSB first, MSB second. */
+        constexpr std::pair<std::uint8_t, std::size_t> dint_data {0x58U, 2U}; /**< @brief Internal data registers, LSB first, MSB second. */
+        constexpr std::pair<std::uint8_t, std::size_t> interrupt {0x60U, 1U}; /**< @brief Interrupt setting register. */
+        constexpr std::pair<std::uint8_t, std::size_t> persistence {0x61U, 1U}; /**< @brief Persistence setting register. */
+        constexpr std::pair<std::uint8_t, std::size_t> threshold_high {0x62U, 2U}; /**< @brief High threshold register, LSB first, MSB second. */
+        constexpr std::pair<std::uint8_t, std::size_t> threshold_low {0x64U, 2U}; /**< @brief Low threshold register, LSB first, MSB second. */
+        constexpr std::pair<std::uint8_t, std::size_t> manufacturer_id {0x92U, 1U}; /**< @brief Manufacturer ID register. */
+    }
 
     /**@}*/
 }
