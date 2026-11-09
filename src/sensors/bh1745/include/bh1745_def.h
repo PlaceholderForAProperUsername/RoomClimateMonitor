@@ -43,7 +43,7 @@ namespace bh1745 {
     };
 
     /**
-     * @brief The intervals at which the data is updated.
+     * @brief The intervals at which the rgbc data is updated.
      */
     enum class MeasurementTime : std::uint8_t {
         msec_160 = 0x0U,
@@ -52,6 +52,15 @@ namespace bh1745 {
         msec_1280 = 0x3U,
         msec_2560 = 0x4U,
         msec_5120 = 0x5U,
+    };
+
+    /**
+     * @brief Gain setting for the rgbc measurement.
+     */
+    enum class AdcGain : std::uint8_t {
+        gain_x1 = 0x0U,
+        gain_x2 = 0x1U,
+        gain_x16 = 0x2U,
     };
 
     /**
