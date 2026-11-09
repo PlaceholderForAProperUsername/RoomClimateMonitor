@@ -33,6 +33,22 @@ namespace bh1745 {
      * @{
      */
 
+    /**
+     * @brief The BH1745 ambient light sensor.
+     *
+     * @tparam address The I2C address of the sensor.
+     * @tparam I2cControllerType The type of the I2C controller.
+     */
+    template <I2cAddress address, I2cControllerTypeConcept I2cControllerType>
+    class Bh1745 {
+    public:
+        explicit Bh1745(I2cControllerType& i2c_controller) : m_i2c(i2c_controller) {}
+    private:
+        static constexpr std::uint8_t s_addr {std::to_underlying(address)};
+        I2cControllerType& m_i2c;
+
+    };
+
     /**@}*/
 }
 

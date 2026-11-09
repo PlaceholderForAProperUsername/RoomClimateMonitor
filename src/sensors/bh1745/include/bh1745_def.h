@@ -25,6 +25,7 @@
 #ifndef BH1745_DEF_H
 #define BH1745_DEF_H
 
+#include <array>
 #include <cstdint>
 #include <utility>
 
@@ -33,6 +34,18 @@ namespace bh1745 {
      * @addtogroup bh1745
      * @{
      */
+
+    /**
+     * @brief Checks if the I2C controller type is valid
+     */
+    template <typename I2cControllerType>
+    concept I2cControllerTypeConcept =
+        std::is_class_v<I2cControllerType> &&
+        requires(I2cControllerType controller, std::array<std::uint8_t, 2> dummy)
+    {
+        controller.template write<0x42U>(dummy, true);
+        controller.template read<0x42U>(dummy, true);
+    };
 
     /**
      * @brief I2C addresses of the bh1745 sensor.
