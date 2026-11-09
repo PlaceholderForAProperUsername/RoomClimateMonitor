@@ -43,6 +43,18 @@ namespace bh1745 {
     };
 
     /**
+     * @brief The intervals at which the data is updated.
+     */
+    enum class MeasurementTime : std::uint8_t {
+        msec_160 = 0x0U,
+        msec_320 = 0x1U,
+        msec_640 = 0x2U,
+        msec_1280 = 0x3U,
+        msec_2560 = 0x4U,
+        msec_5120 = 0x5U,
+    };
+
+    /**
      * @brief Registers of the bh1745 sensor.
      *
      * The registers are merged to block, as there are several continuous registers belonging together (e.g. rgbc data,
