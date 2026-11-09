@@ -25,6 +25,8 @@
 #ifndef BH1745_H
 #define BH1745_H
 
+#include "status.h"
+
 #include "bh1745_def.h"
 
 namespace bh1745 {
@@ -43,6 +45,15 @@ namespace bh1745 {
     class Bh1745 {
     public:
         explicit Bh1745(I2cControllerType& i2c_controller) : m_i2c(i2c_controller) {}
+
+        /**
+         * @brief Checks if a BH1745 is present and responding.
+         *
+         * @return status::Status The status code.
+         * @retval status::Status::OK The sensor is present and responding.
+         * @retval status::Status::RESOURCE The sensor is either not responding or the sensor is not a bh1745.
+         */
+        status::Status probe();
     private:
         static constexpr std::uint8_t s_addr {std::to_underlying(address)};
         I2cControllerType& m_i2c;

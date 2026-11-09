@@ -33,6 +33,29 @@ namespace bh1745 {
      * @{
      */
 
+    template <I2cAddress address, I2cControllerTypeConcept I2cControllerType>
+    status::Status Bh1745<address, I2cControllerType>::probe() {
+        constexpr std::array<std::uint8_t, 1> get_manufacturer_id_cmd {registers::manufacturer_id.first};
+        this->m_i2c.template write<s_addr>(get_manufacturer_id_cmd, false);
+        std::array<std::uint8_t, registers::manufacturer_id.second> manufacturer_id_reg {};
+        this->m_i2c.template read<s_addr>(manufacturer_id_reg, true);
+        constexpr std::uint8_t manufacturer_id {0xE0U};
+        if (manufacturer_id_reg[0] != manufacturer_id) {
+            return status::Status::ERROR_RESOURCE;
+        }
+
+        constexpr std::array<std::uint8_t, 1> get_part_id_cmd {registers::system_control.first};
+        this->m_i2c.template write<s_addr>(get_part_id_cmd, false);
+        std::array<std::uint8_t, registers::system_control.second> part_id_reg {};
+        this->m_i2c.template read<s_addr>(part_id_reg, true);
+        constexpr std::uint8_t part_id {0x0BU};
+        constexpr std::uint8_t part_id_mask {0x3F};
+        if ((part_id_reg[0] & part_id_mask) != part_id) {
+            return status::Status::ERROR_RESOURCE;
+        }
+        return status::Status::OK;
+    }
+
     /**@}*/
 }
 
