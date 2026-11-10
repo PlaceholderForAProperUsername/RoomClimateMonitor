@@ -25,6 +25,8 @@
 #ifndef BH1745_H
 #define BH1745_H
 
+#include <bitset>
+
 #include "status.h"
 
 #include "bh1745_def.h"
@@ -35,6 +37,11 @@ namespace bh1745 {
      * @{
      */
 
+    struct Config {
+        MeasurementTime time;
+        AdcGain gain;
+    };
+
     /**
      * @brief The BH1745 ambient light sensor.
      *
@@ -44,7 +51,7 @@ namespace bh1745 {
     template <I2cAddress address, I2cControllerTypeConcept I2cControllerType>
     class Bh1745 {
     public:
-        explicit Bh1745(I2cControllerType& i2c_controller) : m_i2c(i2c_controller) {}
+        explicit Bh1745(I2cControllerType& i2c_controller) : m_i2c(i2c_controller), m_flags(0) {}
 
         /**
          * @brief Checks if a BH1745 is present and responding.
@@ -54,6 +61,14 @@ namespace bh1745 {
          * @retval status::Status::RESOURCE The sensor is either not responding or the sensor is not a bh1745.
          */
         status::Status probe();
+
+        /**
+         * @brief Configures the sensor and enables measurement.
+         *
+         * @param config The configuration of the sensor.
+         */
+        void config(const Config& config);
+
     private:
         static constexpr std::uint8_t s_addr {std::to_underlying(address)};
         I2cControllerType& m_i2c;
@@ -72,6 +87,12 @@ namespace bh1745 {
             static constexpr float clear {10.0f};
         };
 
+        enum class Flags : std::uint8_t {
+            configured = 0x0U,
+            number_of_flags
+        };
+
+        std::bitset<std::to_underlying(Flags::number_of_flags)> m_flags;
     };
 
     /**@}*/

@@ -56,6 +56,23 @@ namespace bh1745 {
         return status::Status::OK;
     }
 
+    template <I2cAddress address, I2cControllerTypeConcept I2cControllerType>
+    void Bh1745<address, I2cControllerType>::config(const Config& config) {
+        std::array<std::uint8_t, 2> set_measurement_time_cmd {registers::mode_control_1.first, std::to_underlying(config.time)};
+        this->m_i2c.template write<s_addr>(set_measurement_time_cmd, true);
+
+        // the datasheet mentions writing 0x02 to mode_control_3 register without exactly specifying why
+        constexpr std::array<std::uint8_t, 2> set_mode_control_3_cmd {registers::mode_control_3.first, 0x02U};
+        this->m_i2c.template write<s_addr>(set_mode_control_3_cmd, true);
+
+        static constexpr std::uint8_t rgbc_en_bit {1U<<4};
+        std::uint8_t mode_control_2_value = std::to_underlying(config.gain) | rgbc_en_bit;
+        std::array<std::uint8_t, 2> set_adc_gain_cmd {registers::mode_control_2.first, mode_control_2_value};
+        this->m_i2c.template write<s_addr>(set_adc_gain_cmd, true);
+
+        this->m_flags.set(std::to_underlying(Flags::configured));
+    }
+
     /**@}*/
 }
 
