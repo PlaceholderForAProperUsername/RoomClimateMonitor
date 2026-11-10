@@ -58,6 +58,20 @@ namespace bh1745 {
         static constexpr std::uint8_t s_addr {std::to_underlying(address)};
         I2cControllerType& m_i2c;
 
+        /**
+         * @brief Compensation factors for the raw color readings.
+         *
+         * The sensors sensitivity differs for the colors.
+         */
+        struct ColorCompensation {
+            // compensation parameters taken from Pimoroni https://github.com/pimoroni/bh1745-python/blob/main/bh1745/__init__.py
+            // Pimoroni is the vendor from which I sourced the breakout board with the bh1745 sensor
+            static constexpr float red {2.2f};
+            static constexpr float green {1.0f};
+            static constexpr float blue {1.8f};
+            static constexpr float clear {10.0f};
+        };
+
     };
 
     /**@}*/
