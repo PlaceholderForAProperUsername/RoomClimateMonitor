@@ -87,7 +87,7 @@ namespace bh1745 {
         constexpr std::pair<std::uint8_t, std::size_t> mode_control_1 {0x41U, 1U}; /**< @brief Functional configuration register. */
         constexpr std::pair<std::uint8_t, std::size_t> mode_control_2 {0x42U, 1U}; /**< @brief Functional configuration register. */
         constexpr std::pair<std::uint8_t, std::size_t> mode_control_3 {0x44U, 1U}; /**< @brief Functional configuration register. */
-        constexpr std::pair<std::uint8_t, std::size_t> rgbc_data {0x50U, 8U}; /**< @brief Red, green, blue and clear data registers. */
+        constexpr std::pair<std::uint8_t, std::size_t> rgb_data {0x50U, 6U}; /**< @brief Red, green and blue data registers. */
         constexpr std::pair<std::uint8_t, std::size_t> red_data {0x50U, 2U}; /**< @brief Red data registers, LSB first, MSB second. */
         constexpr std::pair<std::uint8_t, std::size_t> green_data {0x52U, 2U}; /**< @brief Green data registers, LSB first, MSB second. */
         constexpr std::pair<std::uint8_t, std::size_t> blue_data {0x54U, 2U}; /**< @brief Blue data registers, LSB first, MSB second. */
