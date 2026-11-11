@@ -79,9 +79,13 @@ namespace bh1745 {
         /**
          * @brief Configures the sensor and enables measurement.
          *
-         * @param config The configuration of the sensor.
+         * @param [in] config The configuration of the sensor.
+         *
+         * @return status::Status The status code.
+         * @retval status::Status::OK The sensor is configured and the measurement are conducted in the specified intervals.
+         * @retval status::Status::ERROR_INIT The firmware is not initialized. @see init
          */
-        void config(const Config& config);
+        status::Status config(const Config& config);
 
     private:
         static constexpr std::uint8_t s_addr {std::to_underlying(address)};

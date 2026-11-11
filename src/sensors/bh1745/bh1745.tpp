@@ -79,7 +79,11 @@ namespace bh1745 {
     }
 
     template <I2cAddress address, I2cControllerTypeConcept I2cControllerType>
-    void Bh1745<address, I2cControllerType>::config(const Config& config) {
+    status::Status Bh1745<address, I2cControllerType>::config(const Config& config) {
+        if (!this->m_flags.test(std::to_underlying(Flags::initialized))) {
+            return status::Status::ERROR_INIT;
+        }
+
         std::array<std::uint8_t, 2> set_measurement_time_cmd {registers::mode_control_1.first, std::to_underlying(config.time)};
         this->m_i2c.template write<s_addr>(set_measurement_time_cmd, true);
 
@@ -93,6 +97,8 @@ namespace bh1745 {
         this->m_i2c.template write<s_addr>(set_adc_gain_cmd, true);
 
         this->m_flags.set(std::to_underlying(Flags::configured));
+
+        return status::Status::OK;
     }
 
     /**@}*/
