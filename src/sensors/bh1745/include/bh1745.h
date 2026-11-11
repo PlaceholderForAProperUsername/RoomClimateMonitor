@@ -63,6 +63,20 @@ namespace bh1745 {
         status::Status probe();
 
         /**
+         * @brief Initializes the firmware and sensor.
+         *
+         * @return status::Status The status code.
+         * @retval status::Status::OK The firmware is initialized and ready to be configured.
+         * @retval status::Status::RESOURCE The sensor is either not responding or the sensor is not a bh1745.
+         */
+        status::Status init();
+
+        /**
+         * @brief Sends the software reset command to the sensor and de-initializes the firmware.
+         */
+        void reset();
+
+        /**
          * @brief Configures the sensor and enables measurement.
          *
          * @param config The configuration of the sensor.
@@ -88,7 +102,8 @@ namespace bh1745 {
         };
 
         enum class Flags : std::uint8_t {
-            configured = 0x0U,
+            initialized = 0x00U,
+            configured = 0x1U,
             number_of_flags
         };
 

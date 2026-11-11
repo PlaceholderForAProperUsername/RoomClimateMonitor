@@ -57,6 +57,28 @@ namespace bh1745 {
     }
 
     template <I2cAddress address, I2cControllerTypeConcept I2cControllerType>
+    status::Status Bh1745<address, I2cControllerType>::init() {
+        if (this->probe() != status::Status::OK) {
+            return status::Status::ERROR_RESOURCE;
+        }
+        this->reset();
+
+        this->m_flags.reset(); // Even though the flags are reset in the reset function. In case this changes, the flags are additionally reset here
+        this->m_flags.set(std::to_underlying(Flags::initialized));
+
+        return status::Status::OK;
+    }
+
+    template <I2cAddress address, I2cControllerTypeConcept I2cControllerType>
+    void Bh1745<address, I2cControllerType>::reset() {
+        constexpr std::uint8_t reset_value = (1U << 7);
+        constexpr std::array<std::uint8_t, 2> reset_cmd {registers::system_control.first, reset_value};
+        this->m_i2c.template write<s_addr>(reset_cmd, true);
+
+        this-m_flags.reset();
+    }
+
+    template <I2cAddress address, I2cControllerTypeConcept I2cControllerType>
     void Bh1745<address, I2cControllerType>::config(const Config& config) {
         std::array<std::uint8_t, 2> set_measurement_time_cmd {registers::mode_control_1.first, std::to_underlying(config.time)};
         this->m_i2c.template write<s_addr>(set_measurement_time_cmd, true);
