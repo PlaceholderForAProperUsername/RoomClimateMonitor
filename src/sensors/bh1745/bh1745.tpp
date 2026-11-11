@@ -75,11 +75,11 @@ namespace bh1745 {
         constexpr std::array<std::uint8_t, 2> reset_cmd {registers::system_control.first, reset_value};
         this->m_i2c.template write<s_addr>(reset_cmd, true);
 
-        this-m_flags.reset();
+        this->m_flags.reset();
     }
 
     template <I2cAddress address, I2cControllerTypeConcept I2cControllerType>
-    status::Status Bh1745<address, I2cControllerType>::config(const Config& config) {
+    status::Status Bh1745<address, I2cControllerType>::configure(const Config& config) {
         if (!this->m_flags.test(std::to_underlying(Flags::initialized))) {
             return status::Status::ERROR_INIT;
         }
@@ -99,6 +99,22 @@ namespace bh1745 {
         this->m_flags.set(std::to_underlying(Flags::configured));
 
         return status::Status::OK;
+    }
+
+    template <I2cAddress address, I2cControllerTypeConcept I2cControllerType>
+    std::expected<RgbData, status::Status> Bh1745<address, I2cControllerType>::get_compensated_rgb_data() {
+        if (!this->m_flags.test(std::to_underlying(Flags::configured))) {
+            return std::unexpected(status::Status::ERROR_CONFIG);
+        }
+        constexpr std::array<std::uint8_t, 1> get_raw_rgb_data_cmd {registers::rgb_data.first};
+        this->m_i2c.template write<s_addr>(get_raw_rgb_data_cmd, false);
+        std::array<std::uint8_t, registers::rgb_data.second> raw_rgb_data {};
+        this->m_i2c.template read<s_addr>(raw_rgb_data, true);
+        RgbData data {};
+        data.red = static_cast<std::uint16_t>(((raw_rgb_data[1] << 8) | raw_rgb_data[0]) * ColorCompensation::red);
+        data.green = static_cast<std::uint16_t>(((raw_rgb_data[3] << 8) | raw_rgb_data[2]) * ColorCompensation::green);
+        data.blue = static_cast<std::uint16_t>(((raw_rgb_data[5] << 8) | raw_rgb_data[4]) * ColorCompensation::blue);
+        return data;
     }
 
     /**@}*/

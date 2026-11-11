@@ -26,6 +26,7 @@
 #define BH1745_H
 
 #include <bitset>
+#include <expected>
 
 #include "status.h"
 
@@ -37,9 +38,21 @@ namespace bh1745 {
      * @{
      */
 
+    /**
+     * @brief The configuration of the sensor.
+     */
     struct Config {
         MeasurementTime time;
         AdcGain gain;
+    };
+
+    /**
+     * @brief Red, green and blue measurement data.
+     */
+    struct RgbData {
+        std::uint16_t red;
+        std::uint16_t green;
+        std::uint16_t blue;
     };
 
     /**
@@ -85,7 +98,16 @@ namespace bh1745 {
          * @retval status::Status::OK The sensor is configured and the measurement are conducted in the specified intervals.
          * @retval status::Status::ERROR_INIT The firmware is not initialized. @see init
          */
-        status::Status config(const Config& config);
+        status::Status configure(const Config& config);
+
+        /**
+         * @brief Gets the compensated rgb measurement data.
+         *
+         * @return std::expected<RgbData, status::Status> Either the measurement data or a status code in case of an error.
+         * @retval RgbData The compensated rgb data.
+         * @retval status::Status::ERROR_CONFIG The sensor was not configured. @see config
+         */
+        std::expected<RgbData, status::Status> get_compensated_rgb_data();
 
     private:
         static constexpr std::uint8_t s_addr {std::to_underlying(address)};
@@ -107,7 +129,7 @@ namespace bh1745 {
 
         enum class Flags : std::uint8_t {
             initialized = 0x00U,
-            configured = 0x1U,
+            configured = 0x01U,
             number_of_flags
         };
 
