@@ -2,8 +2,9 @@ set(TARGET "Peripherals")
 
 add_library(${TARGET} INTERFACE)
 
-target_link_libraries(${TARGET} INTERFACE BH1745 BME280 SGP30)
+target_link_libraries(${TARGET} INTERFACE BH1745 BME280 SGP30 ST7789)
 
 add_subdirectory(bh1745)
 add_subdirectory(bme280)
 add_subdirectory(sgp30)
+add_subdirectory(st7789)
