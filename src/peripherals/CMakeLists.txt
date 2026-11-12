@@ -1,4 +1,4 @@
-set(TARGET "Sensors")
+set(TARGET "Peripherals")
 
 add_library(${TARGET} INTERFACE)
 
