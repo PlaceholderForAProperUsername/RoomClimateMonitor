@@ -24,11 +24,42 @@
 #ifndef ST7789_DEF_H
 #define ST7789_DEF_H
 
+#include <cstdint>
+#include <utility>
+
 namespace st7789 {
     /**
      * @addtogroup st7789
      * @{
      */
+
+    /**
+     * @brief List of commands of the st7789 driver.
+     *
+     * The commands are in the format std::pair<cmd, size>, where size is either the number of additional bytes to be sent or read.
+     */
+    namespace commands {
+        constexpr std::pair<std::uint8_t, std::size_t> sw_reset {0x01U, 0U}; /**< @brief Software reset. */
+        constexpr std::pair<std::uint8_t, std::size_t> read_id {0x04U, 3U}; /**< @brief Read display id. */
+        constexpr std::pair<std::uint8_t, std::size_t> sleep_in {0x10U, 0U}; /**< @brief Enable sleep mode. */
+        constexpr std::pair<std::uint8_t, std::size_t> sleep_out {0x11U, 0U}; /**< @brief Disable sleep mode. */
+        constexpr std::pair<std::uint8_t, std::size_t> partial_mode_on {0x12U, 0U}; /**< @brief Enables partial mode. */
+        constexpr std::pair<std::uint8_t, std::size_t> partial_mode_off {0x13U, 0U}; /**< @brief Disables partial mode. */
+        constexpr std::pair<std::uint8_t, std::size_t> inversion_off {0x20U, 0U}; /**< @brief Disables display inversion. */
+        constexpr std::pair<std::uint8_t, std::size_t> inversion_on {0x21U, 0U}; /**< @brief Enables display inversion. */
+        constexpr std::pair<std::uint8_t, std::size_t> gamma_set {0x26U, 1U}; /**< @brief Sets gamma values. */
+        constexpr std::pair<std::uint8_t, std::size_t> display_off {0x28U, 0U}; /**< @brief Turns the display off. */
+        constexpr std::pair<std::uint8_t, std::size_t> display_on {0x29U, 0U}; /**< @brief Turns the display on. */
+        constexpr std::pair<std::uint8_t, std::size_t> set_column_address {0x2AU, 4U}; /**< @brief Sets the column address range (start, end). */
+        constexpr std::pair<std::uint8_t, std::size_t> set_row_address {0x2BU, 4U}; /**< @brief Sets the row address range (start, end). */
+        constexpr std::pair<std::uint8_t, std::size_t> write_memory {0x2CU, 1U}; /**< @brief Writes data to the memory. The size is the minimum size. */
+        constexpr std::pair<std::uint8_t, std::size_t> tear_off {0x34U, 0U}; /**< @brief Disables tearing effect. */
+        constexpr std::pair<std::uint8_t, std::size_t> tear_on {0x35U, 1U}; /**< @brief Enables tearing effect. */
+        constexpr std::pair<std::uint8_t, std::size_t> memory_data_access_ctrl {0x36U, 1U}; /**< @brief Sets memory data access control. */
+        constexpr std::pair<std::uint8_t, std::size_t> idle_mode_off {0x38U, 0U}; /**< @brief Disables idle mode. */
+        constexpr std::pair<std::uint8_t, std::size_t> idle_mode_on {0x39U, 0U}; /**< @brief Enables idle mode. */
+        constexpr std::pair<std::uint8_t, std::size_t> interface_pixel_format {0x3AU, 1U}; /**< @brief Sets interface pixel format. */
+    }
 
     /**@}*/
 }
