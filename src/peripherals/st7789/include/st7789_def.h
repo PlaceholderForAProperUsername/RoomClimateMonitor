@@ -24,6 +24,7 @@
 #ifndef ST7789_DEF_H
 #define ST7789_DEF_H
 
+#include <array>
 #include <cstdint>
 #include <utility>
 
@@ -34,13 +35,35 @@ namespace st7789 {
      */
 
     /**
+     * @brief Checks if the spi type provides the necessary methods.
+     */
+    template <typename SpiType>
+    concept SpiTypeConcept =
+        std::is_class_v<SpiType> &&
+        requires (SpiType spi, std::array<std::uint8_t, 4U> data)
+    {
+        spi.write_blocking(data);
+    };
+
+    /**
+     * @brief Checks if the timer type provides the requirement functions.
+     */
+    template <typename TimerType>
+    concept TimerTypeConcept =
+        std::is_class_v<TimerType> &&
+        requires(TimerType timer, std::uint32_t delay)
+    {
+        timer.busy_wait_ms_32(delay);
+    };
+
+    /**
      * @brief List of commands of the st7789 driver.
      *
      * The commands are in the format std::pair<cmd, size>, where size is either the number of additional bytes to be sent or read.
      */
     namespace commands {
         constexpr std::pair<std::uint8_t, std::size_t> sw_reset {0x01U, 0U}; /**< @brief Software reset. */
-        constexpr std::pair<std::uint8_t, std::size_t> read_id {0x04U, 3U}; /**< @brief Read display id. */
+        constexpr std::pair<std::uint8_t, std::size_t> read_id {0x04U, 4U}; /**< @brief Read display id. */
         constexpr std::pair<std::uint8_t, std::size_t> sleep_in {0x10U, 0U}; /**< @brief Enable sleep mode. */
         constexpr std::pair<std::uint8_t, std::size_t> sleep_out {0x11U, 0U}; /**< @brief Disable sleep mode. */
         constexpr std::pair<std::uint8_t, std::size_t> partial_mode_on {0x12U, 0U}; /**< @brief Enables partial mode. */
