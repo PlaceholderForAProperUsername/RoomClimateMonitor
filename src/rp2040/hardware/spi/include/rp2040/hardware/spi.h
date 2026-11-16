@@ -142,6 +142,21 @@ namespace rp2040::hardware::spi {
          */
         status::Status write_blocking(std::span<std::uint16_t> data);
 
+        /**
+         * @brief Reads data over SPI.
+         *
+         * @param data The buffer to hold the read data.
+         * @return status::Status The status code.
+         * @retval OK The data has been successfully sent.
+         * @retval ERROR_INIT The SPI has not been configured. @see configure
+         * @retval ERROR_PARAM The SPI has been configured to use data sizes larger than 8 bit, but the data uses only 8 bit.
+         *
+         * @pre The SPI must be initialized and configured. @see init @see configure
+         *
+         * @post None
+         */
+        status::Status read_blocking(std::span<std::uint8_t> data);
+
     private:
         using Registers = SpiRegMap<base>;
 

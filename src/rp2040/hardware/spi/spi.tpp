@@ -119,7 +119,7 @@ namespace rp2040::hardware::spi {
             return status::Status::ERROR_PARAM;
         }
         for (size_t i {0}; i < data.size(); ++i) {
-            while (Registers::Sr::Tnf::Bits::get_value() == Registers::Sr::Tnf::Value::full) {}
+            while (Registers::Sr::Tnf::Bits::get_value() == std::to_underlying(Registers::Sr::Tnf::Value::full)) {}
             Registers::Dr::Data::Bits::set(data[i]);
         }
         // wait for transmission to end
@@ -136,11 +136,27 @@ namespace rp2040::hardware::spi {
             return status::Status::ERROR_PARAM;
         }
         for (size_t i {0}; i < data.size(); ++i) {
-            while (Registers::Sr::Tnf::Bits::get_value() == Registers::Sr::Tnf::Value::full) {}
+            while (Registers::Sr::Tnf::Bits::get_value() == std::to_underlying(Registers::Sr::Tnf::Value::full)) {}
             Registers::Dr::Data::Bits::set(data[i]);
         }
         // wait for transmission to end
         while (Registers::Sr::Bsy::Bits::get_value() == Registers::Sr::Bsy::Value::busy) {}
+        return status::Status::OK;
+    }
+
+    template <std::uintptr_t base>
+    status::Status SpiType<base>::read_blocking(std::span<std::uint8_t> data) {
+        if (!m_flags.test(std::to_underlying(Flags::configured))) {
+            return status::Status::ERROR_INIT;
+        }
+        if (m_flags.test(std::to_underlying(Flags::data_size_greater_than_8bits))) {
+            return status::Status::ERROR_PARAM;
+        }
+        for (size_t i {0}; i < data.size(); ++i) {
+            // wait for some data to be available
+            while (Registers::Sr::Rne::Bits::get_value() == std::to_underlying(Registers::Sr::Rne::Value::empty)) {}
+            data[i] = Registers::Dr::Data::Bits::get_value();
+        }
         return status::Status::OK;
     }
 
