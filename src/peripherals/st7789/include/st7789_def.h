@@ -43,6 +43,7 @@ namespace st7789 {
         requires (SpiType spi, std::array<std::uint8_t, 4U> data)
     {
         spi.write_blocking(data);
+        { SpiType::get_instance() } -> std::same_as<SpiType&>;
     };
 
     /**
@@ -54,6 +55,7 @@ namespace st7789 {
         requires(TimerType timer, std::uint32_t delay)
     {
         timer.busy_wait_ms_32(delay);
+        { TimerType::get_instance() } -> std::same_as<TimerType&>;
     };
 
     /**

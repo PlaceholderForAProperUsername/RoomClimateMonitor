@@ -22,8 +22,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef ROOMCLIMATEMONITOR_ST7789_H
-#define ROOMCLIMATEMONITOR_ST7789_H
+#ifndef ST7789_H
+#define ST7789_H
+
+#include "status.h"
 
 #include "st7789_def.h"
 
@@ -33,9 +35,34 @@ namespace st7789 {
      * @{
      */
 
+    /**
+     * @brief The display with a ST7789 driver.
+     *
+     * @tparam SpiType The type of the SPI used to communicate with the display.
+     * @tparam TimerType The type of the timer providing necessary wait functions.
+     * @tparam GpioType The type of the gpio providing functions to control chip select and data_command pins.
+     * @tparam GpioPinType The type of the gpio pins.
+     */
+    template <SpiTypeConcept SpiType, TimerTypeConcept TimerType, typename GpioType, typename GpioPinType>
+    requires std::is_enum_v<GpioPinType> && std::is_class_v<GpioType> && requires (GpioType gpio)
+    {
+        // GpioType and GpioPinType must be checked together for working properly, therefore no concept for those types
+        { gpio.template set_output<GpioPinType::gpio0, true>() } -> std::same_as<status::Status>;
+        { GpioType::get_instance() } -> std::same_as<GpioType&>;
+    }
+    class St7789 {
+    public:
+        St7789() = default;
+
+    private:
+        static constexpr SpiType& m_spi {SpiType::get_instance()};
+        static constexpr TimerType& m_timer {TimerType::get_instance()};
+        static constexpr GpioType& m_gpio {GpioType::get_instance()};
+    };
+
     /**@}*/
 }
 
 #include "../st7789.tpp"
 
-#endif //ROOMCLIMATEMONITOR_ST7789_H
+#endif //ST7789_H
