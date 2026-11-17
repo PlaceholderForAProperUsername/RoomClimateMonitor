@@ -111,7 +111,7 @@ namespace rp2040::hardware::spi {
     }
 
     template <std::uintptr_t base>
-    status::Status SpiType<base>::write_blocking(const std::span<std::uint8_t> data) {
+    status::Status SpiType<base>::write_blocking(const std::span<const std::uint8_t> data) {
         if (!m_flags.test(std::to_underlying(Flags::configured))) {
             return status::Status::ERROR_INIT;
         }
@@ -123,12 +123,12 @@ namespace rp2040::hardware::spi {
             Registers::Dr::Data::Bits::set(data[i]);
         }
         // wait for transmission to end
-        while (Registers::Sr::Bsy::Bits::get_value() == Registers::Sr::Bsy::Value::busy) {}
+        while (Registers::Sr::Bsy::Bits::get_value() == std::to_underlying(Registers::Sr::Bsy::Value::busy)) {}
         return status::Status::OK;
     }
 
     template <std::uintptr_t base>
-    status::Status SpiType<base>::write_blocking(const std::span<std::uint16_t> data) {
+    status::Status SpiType<base>::write_blocking(const std::span<const std::uint16_t> data) {
         if (!m_flags.test(std::to_underlying(Flags::configured))) {
             return status::Status::ERROR_INIT;
         }

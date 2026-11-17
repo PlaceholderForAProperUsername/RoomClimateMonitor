@@ -121,7 +121,7 @@ namespace rp2040::hardware::spi {
          *
          * @post None
          */
-        status::Status write_blocking(std::span<std::uint8_t> data);
+        status::Status write_blocking(std::span<const std::uint8_t> data);
 
         /**
          * @brief Sends data over SPI.
@@ -140,7 +140,7 @@ namespace rp2040::hardware::spi {
          *
          * @post None
          */
-        status::Status write_blocking(std::span<std::uint16_t> data);
+        status::Status write_blocking(std::span<const std::uint16_t> data);
 
         /**
          * @brief Reads data over SPI.

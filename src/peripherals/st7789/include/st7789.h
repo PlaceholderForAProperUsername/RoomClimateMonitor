@@ -25,6 +25,8 @@
 #ifndef ST7789_H
 #define ST7789_H
 
+#include <bitset>
+
 #include "status.h"
 
 #include "st7789_def.h"
@@ -44,20 +46,30 @@ namespace st7789 {
      * @tparam GpioPinType The type of the gpio pins.
      */
     template <SpiTypeConcept SpiType, TimerTypeConcept TimerType, typename GpioType, typename GpioPinType>
-    requires std::is_enum_v<GpioPinType> && std::is_class_v<GpioType> && requires (GpioType gpio)
-    {
-        // GpioType and GpioPinType must be checked together for working properly, therefore no concept for those types
-        { gpio.template set_output<GpioPinType::gpio0, true>() } -> std::same_as<status::Status>;
-        { GpioType::get_instance() } -> std::same_as<GpioType&>;
-    }
+    requires GpioTypeConcept<GpioType, GpioPinType>
     class St7789 {
     public:
-        St7789() = default;
+        St7789() : m_flags(0) {}
+
+        /**
+         * @brief Initializes the firmware and sensor.
+         *
+         * The sensor is put in an initialized state by sending a software reset command. This command may require up to
+         * 120ms before a sleep out command can be sent. To be on the safe side, the init function waits the 120ms.
+         */
+        void init();
 
     private:
-        static constexpr SpiType& m_spi {SpiType::get_instance()};
-        static constexpr TimerType& m_timer {TimerType::get_instance()};
-        static constexpr GpioType& m_gpio {GpioType::get_instance()};
+        SpiType& m_spi {SpiType::get_instance()};
+        TimerType& m_timer {TimerType::get_instance()};
+        GpioType& m_gpio {GpioType::get_instance()};
+
+        enum class Flags : std::uint32_t {
+            initialized = 0x00U,
+            number_of_flags
+        };
+
+        std::bitset<std::to_underlying(Flags::number_of_flags)> m_flags;
     };
 
     /**@}*/

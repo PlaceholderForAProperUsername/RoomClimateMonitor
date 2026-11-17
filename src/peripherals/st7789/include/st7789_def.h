@@ -47,7 +47,7 @@ namespace st7789 {
     };
 
     /**
-     * @brief Checks if the timer type provides the requirement functions.
+     * @brief Checks if the timer type provides the required functions.
      */
     template <typename TimerType>
     concept TimerTypeConcept =
@@ -56,6 +56,17 @@ namespace st7789 {
     {
         timer.busy_wait_ms_32(delay);
         { TimerType::get_instance() } -> std::same_as<TimerType&>;
+    };
+
+    /**
+     * @brief Checks if the gpio and gpio pin type provides the required functions.
+     */
+    template <typename GpioType, typename GpioPinType>
+    concept GpioTypeConcept =
+        std::is_enum_v<GpioPinType> && std::is_class_v<GpioType> && requires (GpioType gpio)
+    {
+        { gpio.template set_output<static_cast<GpioPinType>(0), true>() } -> std::same_as<status::Status>;
+        { GpioType::get_instance() } -> std::same_as<GpioType&>;
     };
 
     /**

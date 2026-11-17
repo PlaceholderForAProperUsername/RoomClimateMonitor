@@ -34,6 +34,18 @@ namespace st7789 {
      * @{
      */
 
+    template <SpiTypeConcept SpiType, TimerTypeConcept TimerType, typename GpioType, typename GpioPinType>
+    requires GpioTypeConcept<GpioType, GpioPinType>
+    void St7789<SpiType, TimerType, GpioType, GpioPinType>::init() {
+        constexpr std::array<std::uint8_t, 1> sw_reset_cmd {commands::sw_reset.first};
+        this->m_spi.write_blocking(sw_reset_cmd);
+        constexpr std::uint32_t wait_after_reset_ms {120};
+        this->m_timer.busy_wait_ms_32(wait_after_reset_ms);
+
+        this->m_flags.reset();
+        this->m_flags.set(std::to_underlying(Flags::initialized));
+    }
+
     /**@}*/
 }
 
