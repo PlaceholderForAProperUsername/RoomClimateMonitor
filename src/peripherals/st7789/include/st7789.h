@@ -49,7 +49,7 @@ namespace st7789 {
     requires GpioTypeConcept<GpioType, GpioPinType>
     class St7789 {
     public:
-        St7789() : m_flags(0) {}
+        St7789(const GpioPinType dc, const GpioPinType cs) : m_dc(dc), m_cs(cs), m_flags(0) {}
 
         /**
          * @brief Initializes the firmware and sensor.
@@ -63,6 +63,9 @@ namespace st7789 {
         SpiType& m_spi {SpiType::get_instance()};
         TimerType& m_timer {TimerType::get_instance()};
         GpioType& m_gpio {GpioType::get_instance()};
+
+        GpioPinType m_dc;
+        GpioPinType m_cs;
 
         enum class Flags : std::uint32_t {
             initialized = 0x00U,

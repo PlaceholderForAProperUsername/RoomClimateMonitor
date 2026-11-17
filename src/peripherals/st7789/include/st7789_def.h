@@ -35,6 +35,23 @@ namespace st7789 {
      */
 
     /**
+     * @brief Options for the rgb interface color format.
+     */
+    enum class RgbInterfaceColorFormat : std::uint8_t {
+        rgb_65K = 0b101U,
+        rgb_262K = 0b110U,
+    };
+
+    /**
+     * @brief Options for the control interface color format.
+     */
+    enum class ControlInterfaceColorFormat : std::uint8_t {
+        bits_per_pixel_12 = 0b011U,
+        bits_per_pixel_16 = 0b101U,
+        bits_per_pixel_18 = 0b110U,
+    };
+
+    /**
      * @brief Checks if the spi type provides the necessary methods.
      */
     template <typename SpiType>
