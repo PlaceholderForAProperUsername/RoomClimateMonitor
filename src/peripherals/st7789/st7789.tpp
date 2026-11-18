@@ -34,16 +34,44 @@ namespace st7789 {
      * @{
      */
 
-    template <SpiTypeConcept SpiType, TimerTypeConcept TimerType, typename GpioType, typename GpioPinType>
+    template <SpiTypeConcept SpiType, TimerTypeConcept TimerType, typename GpioType, typename GpioPinType, GpioPinType data_cmd, GpioPinType chip_select>
     requires GpioTypeConcept<GpioType, GpioPinType>
-    void St7789<SpiType, TimerType, GpioType, GpioPinType>::init() {
-        constexpr std::array<std::uint8_t, 1> sw_reset_cmd {commands::sw_reset.first};
-        this->m_spi.write_blocking(sw_reset_cmd);
+    status::Status St7789<SpiType, TimerType, GpioType, GpioPinType, data_cmd, chip_select>::init() {
+        // data_cmd and chip_select are active low
+        if (this->m_gpio.template set_output<s_data_cmd, true>() != status::Status::OK) {
+            return status::Status::ERROR_CONFIG;
+        }
+        if (this->m_gpio.template set_output<s_chip_select, true>() != status::Status::OK) {
+            return status::Status::ERROR_CONFIG;
+        }
+        this->send_cmd(commands::sw_reset);
         constexpr std::uint32_t wait_after_reset_ms {120};
         this->m_timer.busy_wait_ms_32(wait_after_reset_ms);
 
         this->m_flags.reset();
         this->m_flags.set(std::to_underlying(Flags::initialized));
+
+        return status::Status::OK;
+    }
+
+    template <SpiTypeConcept SpiType, TimerTypeConcept TimerType, typename GpioType, typename GpioPinType, GpioPinType data_cmd, GpioPinType chip_select>
+    requires GpioTypeConcept<GpioType, GpioPinType>
+    status::Status St7789<SpiType, TimerType, GpioType, GpioPinType, data_cmd, chip_select>::send_cmd(std::pair<std::array<std::uint8_t, 1>, std::size_t> cmd, std::span<std::uint8_t> data) {
+        // write memory command has a variable amount of data that can be sent, therefore it is checked extra.
+        // the other commands have fixed size of parameters to be sent.
+        if (((cmd == commands::write_memory) && data.empty()) || ((cmd != commands::write_memory) && cmd.second != data.size()))  {
+            return status::Status::ERROR_PARAM;
+        }
+        this->m_gpio.template set_output<s_data_cmd, false>();
+        this->m_gpio.template set_output<s_chip_select, false>();
+        this->m_spi.write_blocking(cmd.first);
+        this->m_gpio.template set_output<s_data_cmd, true>();
+        if (cmd.second > 0) {
+            this->m_spi.write_blocking(data);
+        }
+        this->m_gpio.template set_output<s_chip_select, true>();
+
+        return status::Status::OK;
     }
 
     /**@}*/

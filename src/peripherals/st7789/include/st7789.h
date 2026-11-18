@@ -45,32 +45,38 @@ namespace st7789 {
      * @tparam GpioType The type of the gpio providing functions to control chip select and data_command pins.
      * @tparam GpioPinType The type of the gpio pins.
      */
-    template <SpiTypeConcept SpiType, TimerTypeConcept TimerType, typename GpioType, typename GpioPinType>
+    template <SpiTypeConcept SpiType, TimerTypeConcept TimerType, typename GpioType, typename GpioPinType, GpioPinType data_cmd, GpioPinType chip_select>
     requires GpioTypeConcept<GpioType, GpioPinType>
     class St7789 {
     public:
-        St7789(const GpioPinType dc, const GpioPinType cs) : m_dc(dc), m_cs(cs), m_flags(0) {}
+        St7789() : m_flags(0) {}
 
         /**
          * @brief Initializes the firmware and sensor.
          *
          * The sensor is put in an initialized state by sending a software reset command. This command may require up to
          * 120ms before a sleep out command can be sent. To be on the safe side, the init function waits the 120ms.
+         *
+         * @return status::Status The status code.
+         * @retval OK The firmware and sensor are initialized.
+         * @retval ERROR_CONFIG Either the data_cmd or chip_select gpio pin is not configured as output.
          */
-        void init();
+        status::Status init();
 
     private:
         SpiType& m_spi {SpiType::get_instance()};
         TimerType& m_timer {TimerType::get_instance()};
         GpioType& m_gpio {GpioType::get_instance()};
 
-        GpioPinType m_dc;
-        GpioPinType m_cs;
+        static constexpr GpioPinType s_data_cmd {data_cmd};
+        static constexpr GpioPinType s_chip_select {chip_select};
 
         enum class Flags : std::uint32_t {
             initialized = 0x00U,
             number_of_flags
         };
+
+        status::Status send_cmd(std::pair<std::array<std::uint8_t, 1>, std::size_t> cmd, std::span<std::uint8_t> data = std::span<std::uint8_t>());
 
         std::bitset<std::to_underlying(Flags::number_of_flags)> m_flags;
     };
