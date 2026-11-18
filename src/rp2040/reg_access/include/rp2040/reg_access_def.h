@@ -51,11 +51,6 @@ namespace rp2040::reg_access {
      *  - position: position of the first bit in the register
      *  - mask: Bitmask of the bits contained in the BitType
      *
-     *  For write access, an enum must be provided @see HasEnumConcept, except for atomic set operation, where the
-     *  bit mask is the value.
-     *
-     * For generic examples, @see BitTypeEnableDisable and @see BitTypeValues
-     *
      * @tparam BitType The BitType instance to check.
      * @tparam Reg The register to which the BitType belongs.
      * @tparam T The base data type of the register.
@@ -66,10 +61,29 @@ namespace rp2040::reg_access {
             std::is_same_v<decltype(BitType::position), const T> &&
             std::is_same_v<decltype(BitType::mask), const T>;
 
+    /**
+     * @brief Checks if a BitType has an enum called value.
+     *
+     * For a specific set of known values or values known at compile time set via template parameter, an enum is used.
+     * This concepts checks for the existence of such enum.
+     *
+     * @tparam BitType The BitType to be checked.
+     * @tparam T The base data type of the register.
+     */
     template <typename BitType, typename T>
     concept HasValueConcept =
         std::is_enum_v<typename BitType::value> &&
         std::is_same_v<std::underlying_type_t<typename BitType::value>, T>;
+
+    /**
+     * @brief Check if a BitType has limits for the minimum and maximum allowed value for the bits.
+     *
+     * @tparam BitType The BitType to be checked.
+     */
+    template <typename BitType>
+    concept HasValueLimitConcept =
+        std::is_integral_v<decltype(BitType::min_value)> &&
+        std::is_integral_v<decltype(BitType::max_value)>;
 
 }// rp2040::reg_access
 

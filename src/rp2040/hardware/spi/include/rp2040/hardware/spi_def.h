@@ -303,6 +303,9 @@ namespace rp2040::hardware::spi {
 
                     static constexpr T position = 0U; /**< @brief The position of the bit in the register. */
                     static constexpr T mask = (0xFFFFU << position); /**< @brief The mask of the bit used in bit operations. */
+
+                    static constexpr T min_value {0U}; /**< @brief The minimum allowed value for the data bits. */
+                    static constexpr T max_value {0xFFFFU}; /**< @brief The maximum allowed value for the data bits. */
                 };
                 using Bits = data_reg::template Bits<BitType>; /**< @brief Object to handle the data bits. */
             };

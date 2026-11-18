@@ -91,10 +91,14 @@ namespace rp2040::reg_access {
              * @return None
              */
             template <typename BitsAccess = BitsAccess_, typename BitType_ = BitType>
-            requires (!HasValueConcept<BitType_, RegType>)
+            requires HasValueLimitConcept<BitType_>
             static std::enable_if_t<std::is_base_of_v<access_tag::read_write, BitsAccess>, void>
             set(std::uint32_t bits_value)
             {
+                // TODO: add status code support
+                if (bits_value < BitType::min_value || bits_value > BitType::max_value) {
+                    return;
+                }
                 auto reg_value = read();
                 reg_value &= ~BitType::mask;
                 reg_value |= ((static_cast<T>(bits_value) << BitType::position) & BitType::mask);
@@ -353,6 +357,9 @@ namespace rp2040::reg_access {
 
         static constexpr T position = Pos; /**< @brief The position of the BitType in the register. */
         static constexpr T mask = (Mask << position); /**< @brief The mask of the BitType used in bit operations. */
+
+        static constexpr T min_value {0U};
+        static constexpr T max_value {Mask};
 
         static_assert(Value <= Mask);
 
