@@ -25,8 +25,6 @@
 #ifndef ST7789_H
 #define ST7789_H
 
-#include <bitset>
-
 #include "status.h"
 
 #include "st7789_def.h"
@@ -49,7 +47,7 @@ namespace st7789 {
     requires GpioTypeConcept<GpioType, GpioPinType>
     class St7789 {
     public:
-        St7789(const std::uint16_t height, const std::uint16_t width) : m_height(height), m_width(width), m_flags(0) {}
+        St7789(const std::uint16_t height, const std::uint16_t width) : m_height(height), m_width(width) {}
 
         /**
          * @brief Initializes the firmware and sensor.
@@ -58,10 +56,24 @@ namespace st7789 {
          * 120ms before a sleep out command can be sent. To be on the safe side, the init function waits the 120ms.
          *
          * @return status::Status The status code.
-         * @retval OK The firmware and sensor are initialized.
-         * @retval ERROR_CONFIG Either the data_cmd or chip_select gpio pin is not configured as output.
+         * @retval status::Status::OK The firmware and sensor are initialized.
+         * @retval status::Status::ERROR_CONFIG Either the data_cmd or chip_select gpio pin is not configured as output.
          */
-        status::Status init();
+        status::Status init(RgbInterfaceColorFormat rgb_format, ControlInterfaceColorFormat control_format);
+
+        /**
+         * @brief Sets the column address.
+         *
+         * @param start Address of the start column.
+         * @param end Address of the end column.
+         * @return status::Status The status code.
+         * @retval status::Status::OK The column address was set successfully.
+         * @retval status::Status::ERROR_PARAM Either start > end or start > display width or end > display width
+         *
+         * Note: This function returns error codes from @see send_cmd directly. If another error code than listed here is
+         * returned, see description of @see send_cmd
+         */
+        status::Status set_column_address(std::uint16_t start, std::uint16_t end);
 
         /**
          * @brief Send a command to the display.
@@ -71,6 +83,7 @@ namespace st7789 {
          * @return status::Status The status code.
          * @retval status::Status::OK The command was successfully sent.
          * @retval status::Status::ERROR_PARAM Invalid data length.
+         * @retval status::Status::ERROR_CONFIG Either the data_cmd or chip_select gpio pin is not configured as output.
          */
         status::Status send_cmd(std::pair<std::array<std::uint8_t, 1>, std::size_t> cmd, std::span<std::uint8_t> data = std::span<std::uint8_t>());
 
@@ -84,13 +97,6 @@ namespace st7789 {
 
         static constexpr GpioPinType s_data_cmd {data_cmd};
         static constexpr GpioPinType s_chip_select {chip_select};
-
-        enum class Flags : std::uint32_t {
-            initialized = 0x00U,
-            number_of_flags
-        };
-
-        std::bitset<std::to_underlying(Flags::number_of_flags)> m_flags;
     };
 
     /**@}*/

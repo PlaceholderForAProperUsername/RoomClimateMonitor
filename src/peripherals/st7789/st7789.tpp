@@ -36,7 +36,7 @@ namespace st7789 {
 
     template <SpiTypeConcept SpiType, TimerTypeConcept TimerType, typename GpioType, typename GpioPinType, GpioPinType data_cmd, GpioPinType chip_select>
     requires GpioTypeConcept<GpioType, GpioPinType>
-    status::Status St7789<SpiType, TimerType, GpioType, GpioPinType, data_cmd, chip_select>::init() {
+    status::Status St7789<SpiType, TimerType, GpioType, GpioPinType, data_cmd, chip_select>::init(const RgbInterfaceColorFormat rgb_format, const ControlInterfaceColorFormat control_format) {
         // data_cmd and chip_select are active low
         if (this->m_gpio.template set_output<s_data_cmd, true>() != status::Status::OK) {
             return status::Status::ERROR_CONFIG;
@@ -48,10 +48,30 @@ namespace st7789 {
         constexpr std::uint32_t wait_after_reset_ms {120};
         this->m_timer.busy_wait_ms_32(wait_after_reset_ms);
 
-        this->m_flags.reset();
-        this->m_flags.set(std::to_underlying(Flags::initialized));
+        this->send_cmd(commands::sleep_out);
+        constexpr std::uint32_t wait_after_sleep_out_ms {5};
+        this->m_timer.busy_wait_ms_32(wait_after_sleep_out_ms);
+
+        std::array<std::uint8_t, 1> interface_pixel_format_data {static_cast<std::uint8_t>(std::to_underlying(control_format) | (std::to_underlying(rgb_format) << 4U))};
+        this->send_cmd(commands::interface_pixel_format, interface_pixel_format_data);
+
+        this->send_cmd(commands::display_on);
 
         return status::Status::OK;
+    }
+
+
+    template <SpiTypeConcept SpiType, TimerTypeConcept TimerType, typename GpioType, typename GpioPinType, GpioPinType data_cmd, GpioPinType chip_select>
+    requires GpioTypeConcept<GpioType, GpioPinType>
+    status::Status St7789<SpiType, TimerType, GpioType, GpioPinType, data_cmd, chip_select>::set_column_address(const std::uint16_t start, const std::uint16_t end) {
+        if ((start > end) || (start > this->m_width) || (end > this->m_width)) {
+            return status::Status::ERROR_PARAM;
+        }
+        std::array<std::uint8_t, commands::set_column_address.second> data {
+            static_cast<std::uint8_t>(start >> 8U), static_cast<std::uint8_t>(start & 0xFFU),
+            static_cast<std::uint8_t>(end >> 8U), static_cast<std::uint8_t>(end & 0xFFU)
+        };
+        return this->send_cmd(commands::set_column_address, data);
     }
 
     template <SpiTypeConcept SpiType, TimerTypeConcept TimerType, typename GpioType, typename GpioPinType, GpioPinType data_cmd, GpioPinType chip_select>
@@ -62,13 +82,21 @@ namespace st7789 {
         if (((cmd == commands::write_memory) && data.empty()) || ((cmd != commands::write_memory) && cmd.second != data.size()))  {
             return status::Status::ERROR_PARAM;
         }
-        this->m_gpio.template set_output<s_data_cmd, false>();
-        this->m_gpio.template set_output<s_chip_select, false>();
+        if (this->m_gpio.template set_output<s_data_cmd, false>() != status::Status::OK) {
+            return status::Status::ERROR_CONFIG;
+        }
+        if (this->m_gpio.template set_output<s_chip_select, false>() != status::Status::OK) {
+            // resetting data_cmd pin
+            this->m_gpio.template set_output<s_data_cmd, true>();
+            return status::Status::ERROR_CONFIG;
+        }
         this->m_spi.write_blocking(cmd.first);
+        // no need to check if the output can be set for the data_cmd pin again
         this->m_gpio.template set_output<s_data_cmd, true>();
         if (cmd.second > 0) {
             this->m_spi.write_blocking(data);
         }
+        // no need to check if the output can be set for the chip_select pin again
         this->m_gpio.template set_output<s_chip_select, true>();
 
         return status::Status::OK;
