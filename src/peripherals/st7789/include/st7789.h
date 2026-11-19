@@ -63,6 +63,17 @@ namespace st7789 {
          */
         status::Status init();
 
+        /**
+         * @brief Send a command to the display.
+         *
+         * @param cmd The command. @see commands
+         * @param data The data for commands that requires it.
+         * @return status::Status The status code.
+         * @retval status::Status::OK The command was successfully sent.
+         * @retval status::Status::ERROR_PARAM Invalid data length.
+         */
+        status::Status send_cmd(std::pair<std::array<std::uint8_t, 1>, std::size_t> cmd, std::span<std::uint8_t> data = std::span<std::uint8_t>());
+
     private:
         SpiType& m_spi {SpiType::get_instance()};
         TimerType& m_timer {TimerType::get_instance()};
@@ -75,8 +86,6 @@ namespace st7789 {
             initialized = 0x00U,
             number_of_flags
         };
-
-        status::Status send_cmd(std::pair<std::array<std::uint8_t, 1>, std::size_t> cmd, std::span<std::uint8_t> data = std::span<std::uint8_t>());
 
         std::bitset<std::to_underlying(Flags::number_of_flags)> m_flags;
     };
