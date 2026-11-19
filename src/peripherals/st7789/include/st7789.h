@@ -49,7 +49,7 @@ namespace st7789 {
     requires GpioTypeConcept<GpioType, GpioPinType>
     class St7789 {
     public:
-        St7789() : m_flags(0) {}
+        St7789(const std::uint16_t height, const std::uint16_t width) : m_height(height), m_width(width), m_flags(0) {}
 
         /**
          * @brief Initializes the firmware and sensor.
@@ -78,6 +78,9 @@ namespace st7789 {
         SpiType& m_spi {SpiType::get_instance()};
         TimerType& m_timer {TimerType::get_instance()};
         GpioType& m_gpio {GpioType::get_instance()};
+
+        std::uint16_t m_height;
+        std::uint16_t m_width;
 
         static constexpr GpioPinType s_data_cmd {data_cmd};
         static constexpr GpioPinType s_chip_select {chip_select};
