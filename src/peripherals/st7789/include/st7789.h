@@ -76,6 +76,20 @@ namespace st7789 {
         status::Status set_column_address(std::uint16_t start, std::uint16_t end);
 
         /**
+         * @brief Sets the row address.
+         *
+         * @param start Address of the start row.
+         * @param end Address of the end row.
+         * @return status::Status The status code.
+         * @retval status::Status::OK The row address was set successfully.
+         * @retval status::Status::ERROR_PARAM Either start > end or start > display height or end > display height
+         *
+         * Note: This function returns error codes from @see send_cmd directly. If another error code than listed here is
+         * returned, see description of @see send_cmd
+         */
+        status::Status set_row_address(std::uint16_t start, std::uint16_t end);
+
+        /**
          * @brief Send a command to the display.
          *
          * @param cmd The command. @see commands

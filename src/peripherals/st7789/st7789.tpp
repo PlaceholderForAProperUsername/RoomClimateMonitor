@@ -60,7 +60,6 @@ namespace st7789 {
         return status::Status::OK;
     }
 
-
     template <SpiTypeConcept SpiType, TimerTypeConcept TimerType, typename GpioType, typename GpioPinType, GpioPinType data_cmd, GpioPinType chip_select>
     requires GpioTypeConcept<GpioType, GpioPinType>
     status::Status St7789<SpiType, TimerType, GpioType, GpioPinType, data_cmd, chip_select>::set_column_address(const std::uint16_t start, const std::uint16_t end) {
@@ -72,6 +71,19 @@ namespace st7789 {
             static_cast<std::uint8_t>(end >> 8U), static_cast<std::uint8_t>(end & 0xFFU)
         };
         return this->send_cmd(commands::set_column_address, data);
+    }
+
+    template <SpiTypeConcept SpiType, TimerTypeConcept TimerType, typename GpioType, typename GpioPinType, GpioPinType data_cmd, GpioPinType chip_select>
+    requires GpioTypeConcept<GpioType, GpioPinType>
+    status::Status St7789<SpiType, TimerType, GpioType, GpioPinType, data_cmd, chip_select>::set_row_address(const std::uint16_t start, const std::uint16_t end) {
+        if ((start > end) || (start > this->m_height) || (end > this->m_height)) {
+            return status::Status::ERROR_PARAM;
+        }
+        std::array<std::uint8_t, commands::set_row_address.second> data {
+            static_cast<std::uint8_t>(start >> 8U), static_cast<std::uint8_t>(start & 0xFFU),
+            static_cast<std::uint8_t>(end >> 8U), static_cast<std::uint8_t>(end & 0xFFU)
+        };
+        return this->send_cmd(commands::set_row_address, data);
     }
 
     template <SpiTypeConcept SpiType, TimerTypeConcept TimerType, typename GpioType, typename GpioPinType, GpioPinType data_cmd, GpioPinType chip_select>
