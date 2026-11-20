@@ -90,6 +90,17 @@ namespace st7789 {
         status::Status set_row_address(std::uint16_t start, std::uint16_t end);
 
         /**
+         * @brief Draws a colored pixel.
+         *
+         * @param x The x coordinate of the pixel.
+         * @param y The y coordinate of the pixel.
+         * @param color The color of the pixel in 16bit.
+         * @return status::Status The status code.
+         * @retval The status code is propagated from @see set_row_address @see set_column_address and @see send_cmd
+         */
+        status::Status draw_pixel_16bit(std::uint16_t x, std::uint16_t y, std::uint16_t color);
+
+        /**
          * @brief Send a command to the display.
          *
          * @param cmd The command. @see commands

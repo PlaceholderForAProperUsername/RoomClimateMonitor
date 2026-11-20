@@ -88,6 +88,19 @@ namespace st7789 {
 
     template <SpiTypeConcept SpiType, TimerTypeConcept TimerType, typename GpioType, typename GpioPinType, GpioPinType data_cmd, GpioPinType chip_select>
     requires GpioTypeConcept<GpioType, GpioPinType>
+    status::Status St7789<SpiType, TimerType, GpioType, GpioPinType, data_cmd, chip_select>::draw_pixel_16bit(std::uint16_t x, std::uint16_t y, std::uint16_t color) {
+        if (auto status_code = this->set_column_address(x, x); status_code != status::Status::OK) {
+            return status_code;
+        }
+        if (auto status_code = this->set_row_address(y, y); status_code != status::Status::OK) {
+            return status_code;
+        }
+        std::array<std::uint8_t, 2> data {static_cast<std::uint8_t>(color & 0xFFU), static_cast<std::uint8_t>((color >> 8U) & 0xFFU)};
+        return this->send_cmd(commands::write_memory, data);
+    }
+
+    template <SpiTypeConcept SpiType, TimerTypeConcept TimerType, typename GpioType, typename GpioPinType, GpioPinType data_cmd, GpioPinType chip_select>
+    requires GpioTypeConcept<GpioType, GpioPinType>
     status::Status St7789<SpiType, TimerType, GpioType, GpioPinType, data_cmd, chip_select>::send_cmd(std::pair<std::array<std::uint8_t, 1>, std::size_t> cmd, std::span<std::uint8_t> data) {
         // write memory command has a variable amount of data that can be sent, therefore it is checked extra.
         // the other commands have fixed size of parameters to be sent.
