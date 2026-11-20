@@ -55,6 +55,8 @@ namespace st7789 {
         std::array<std::uint8_t, 1> interface_pixel_format_data {static_cast<std::uint8_t>(std::to_underlying(control_format) | (std::to_underlying(rgb_format) << 4U))};
         this->send_cmd(commands::interface_pixel_format, interface_pixel_format_data);
 
+        this->fill_screen_16bit(0xFFFFU);
+
         this->send_cmd(commands::display_on);
 
         return status::Status::OK;
@@ -63,7 +65,7 @@ namespace st7789 {
     template <SpiTypeConcept SpiType, TimerTypeConcept TimerType, typename GpioType, typename GpioPinType, GpioPinType data_cmd, GpioPinType chip_select>
     requires GpioTypeConcept<GpioType, GpioPinType>
     status::Status St7789<SpiType, TimerType, GpioType, GpioPinType, data_cmd, chip_select>::set_column_address(const std::uint16_t start, const std::uint16_t end) {
-        if ((start > end) || (start > this->m_width) || (end > this->m_width)) {
+        if ((start > end) || (start >= this->m_width) || (end >= this->m_width)) {
             return status::Status::ERROR_PARAM;
         }
         std::array<std::uint8_t, commands::set_column_address.second> data {
@@ -76,7 +78,7 @@ namespace st7789 {
     template <SpiTypeConcept SpiType, TimerTypeConcept TimerType, typename GpioType, typename GpioPinType, GpioPinType data_cmd, GpioPinType chip_select>
     requires GpioTypeConcept<GpioType, GpioPinType>
     status::Status St7789<SpiType, TimerType, GpioType, GpioPinType, data_cmd, chip_select>::set_row_address(const std::uint16_t start, const std::uint16_t end) {
-        if ((start > end) || (start > this->m_height) || (end > this->m_height)) {
+        if ((start > end) || (start >= this->m_height) || (end >= this->m_height)) {
             return status::Status::ERROR_PARAM;
         }
         std::array<std::uint8_t, commands::set_row_address.second> data {
@@ -88,7 +90,7 @@ namespace st7789 {
 
     template <SpiTypeConcept SpiType, TimerTypeConcept TimerType, typename GpioType, typename GpioPinType, GpioPinType data_cmd, GpioPinType chip_select>
     requires GpioTypeConcept<GpioType, GpioPinType>
-    status::Status St7789<SpiType, TimerType, GpioType, GpioPinType, data_cmd, chip_select>::draw_pixel_16bit(std::uint16_t x, std::uint16_t y, std::uint16_t color) {
+    status::Status St7789<SpiType, TimerType, GpioType, GpioPinType, data_cmd, chip_select>::draw_pixel_16bit(const std::uint16_t x, const std::uint16_t y, const std::uint16_t color) {
         if (auto status_code = this->set_column_address(x, x); status_code != status::Status::OK) {
             return status_code;
         }
@@ -101,10 +103,30 @@ namespace st7789 {
 
     template <SpiTypeConcept SpiType, TimerTypeConcept TimerType, typename GpioType, typename GpioPinType, GpioPinType data_cmd, GpioPinType chip_select>
     requires GpioTypeConcept<GpioType, GpioPinType>
+    status::Status St7789<SpiType, TimerType, GpioType, GpioPinType, data_cmd, chip_select>::fill_screen_16bit(const std::uint16_t color) {
+        if (auto status_code = this->set_column_address(0, this->m_width - 1); status_code != status::Status::OK) {
+            return status_code;
+        }
+        if (auto status_code = this->set_row_address(0, this->m_height - 1); status_code != status::Status::OK) {
+            return status_code;
+        }
+        std::array<std::uint8_t, 2> data {static_cast<std::uint8_t>(color & 0xFFU), static_cast<std::uint8_t>((color >> 8U) & 0xFFU)};
+        for (auto column {0U}; column < this->m_width; column++) {
+            for (auto row {0U}; row < this->m_height; row++) {
+                if (auto status_code = this->send_cmd(commands::write_memory_continue, data); status_code != status::Status::OK) {
+                    return status_code;
+                }
+            }
+        }
+        return status::Status::OK;
+    }
+
+    template <SpiTypeConcept SpiType, TimerTypeConcept TimerType, typename GpioType, typename GpioPinType, GpioPinType data_cmd, GpioPinType chip_select>
+    requires GpioTypeConcept<GpioType, GpioPinType>
     status::Status St7789<SpiType, TimerType, GpioType, GpioPinType, data_cmd, chip_select>::send_cmd(std::pair<std::array<std::uint8_t, 1>, std::size_t> cmd, std::span<std::uint8_t> data) {
         // write memory command has a variable amount of data that can be sent, therefore it is checked extra.
         // the other commands have fixed size of parameters to be sent.
-        if (((cmd == commands::write_memory) && data.empty()) || ((cmd != commands::write_memory) && cmd.second != data.size()))  {
+        if (((cmd == commands::write_memory || cmd == commands::write_memory_continue) && data.empty()) || ((cmd != commands::write_memory && cmd != commands::write_memory_continue) && cmd.second != data.size()))  {
             return status::Status::ERROR_PARAM;
         }
         if (this->m_gpio.template set_output<s_data_cmd, false>() != status::Status::OK) {

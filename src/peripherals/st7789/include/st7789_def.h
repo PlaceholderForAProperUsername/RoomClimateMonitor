@@ -112,6 +112,7 @@ namespace st7789 {
         constexpr std::pair<std::array<std::uint8_t, 1>, std::size_t> idle_mode_off {{0x38U}, 0U}; /**< @brief Disables idle mode. */
         constexpr std::pair<std::array<std::uint8_t, 1>, std::size_t> idle_mode_on {{0x39U}, 0U}; /**< @brief Enables idle mode. */
         constexpr std::pair<std::array<std::uint8_t, 1>, std::size_t> interface_pixel_format {{0x3AU}, 1U}; /**< @brief Sets interface pixel format. */
+        constexpr std::pair<std::array<std::uint8_t, 1>, std::size_t> write_memory_continue {{0x3CU}, 1U}; /**< @brief Writes to memory from last position. */
     }
 
     /**@}*/
