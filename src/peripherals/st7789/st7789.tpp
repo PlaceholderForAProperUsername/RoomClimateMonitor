@@ -102,6 +102,36 @@ namespace st7789 {
         std::array<std::uint8_t, 2> data {static_cast<std::uint8_t>(color & 0xFFU), static_cast<std::uint8_t>((color >> 8U) & 0xFFU)};
         return this->send_cmd(commands::write_memory, data);
     }
+
+    template <SpiTypeConcept SpiType, TimerTypeConcept TimerType, typename GpioType, typename GpioPinType, GpioPinType data_cmd, GpioPinType chip_select>
+    requires GpioTypeConcept<GpioType, GpioPinType>
+    status::Status St7789<SpiType, TimerType, GpioType, GpioPinType, data_cmd, chip_select>::
+    draw_rectangle_16bit(const std::uint16_t x, const std::uint16_t y, const std::uint16_t width, const std::uint16_t height, const std::uint16_t color) {
+        if (((x + width) >= this->m_width) || (y + height >= this->m_height)) {
+            return status::Status::ERROR_PARAM;
+        }
+        if (auto status_code = this->set_column_address(x, x + width - 1); status_code != status::Status::OK) {
+            return status_code;
+        }
+        if (auto status_code = this->set_row_address(y, y + height - 1); status_code != status::Status::OK) {
+            return status_code;
+        }
+        std::array<std::uint8_t, 2> color_data {
+            static_cast<std::uint8_t>(color >> 8U),
+            static_cast<std::uint8_t>(color & 0xFFU)
+        };
+        // a write memory command must be sent before a write memory continue command can be sent to ensure writing at the correct position
+        if (auto status_code = this->send_cmd(commands::write_memory, color_data); status_code != status::Status::OK) {
+            return status_code;
+        }
+        for (auto i {0U}; i < static_cast<size_t>(width * height - 1); i++) {
+            if (auto status_code = this->send_cmd(commands::write_memory_continue, color_data); status_code != status::Status::OK) {
+                return status_code;
+            }
+        }
+        return status::Status::OK;
+    }
+
     template <SpiTypeConcept SpiType, TimerTypeConcept TimerType, typename GpioType, typename GpioPinType, GpioPinType data_cmd, GpioPinType chip_select>
     requires GpioTypeConcept<GpioType, GpioPinType>
     status::Status St7789<SpiType, TimerType, GpioType, GpioPinType, data_cmd, chip_select>::

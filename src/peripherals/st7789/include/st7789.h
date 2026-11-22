@@ -102,6 +102,21 @@ namespace st7789 {
         status::Status draw_pixel_16bit(std::uint16_t x, std::uint16_t y, std::uint16_t color);
 
         /**
+         * @brief Draws a rectangle.
+         *
+         * @param x Starting column of the rectangle.
+         * @param y Starting row of the rectangle.
+         * @param width Width of the rectangle in pixels.
+         * @param height Height of the rectangle in pixel.
+         * @param color The color of the rectangle.
+         * @return status::Status The status code.
+         * @retval status::Status::OK The pattern was drawn successfully.
+         * @retval status::Status::ERROR_PARAM The provided are out of bounds (x + width larger than display width, y + height greater than display height).
+         * Furthermore, this function propagates the error codes of @see set_column_address @see set_row_address and @see send_cmd
+         */
+        status::Status draw_rectangle_16bit(std::uint16_t x, std::uint16_t y, std::uint16_t width, std::uint16_t height, std::uint16_t color);
+
+        /**
          * @brief Draws a monocolor pattern on the display.
          *
          * The data is left-justified bit patterns, where a '1' will be drawn and a '0' will be skipped.
