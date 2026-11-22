@@ -102,6 +102,35 @@ namespace st7789 {
         status::Status draw_pixel_16bit(std::uint16_t x, std::uint16_t y, std::uint16_t color);
 
         /**
+         * @brief Draws a bicolor pattern on the display.
+         *
+         * The data is left-justified bit patterns, where a '1' represents the foreground and a '0' represents the background.
+         * An example pattern at position x = 50 and y = 100 with following colors foreground = 0x0000U and background = 0xFFFFU:
+         * 101010101010
+         * 101010101010
+         * will be represented by the following data array:
+         * std::array<std::uint8_t, 2*2> data {
+         *  0b10101010, 0b10100000,
+         *  0b10101010, 0b10100000,
+         * };
+         * The function call will be:
+         * draw_bicolor_16bit(50, 100, 12, 2, data, 0x0000U, 0xFFFFU);
+         *
+         * @param x Starting column of the pattern.
+         * @param y Starting row of the pattern.
+         * @param width Width in pixel of the pattern.
+         * @param height Height in pixel of the pattern.
+         * @param data A flat array containing the left-justified data.
+         * @param fg_color Foreground color corresponding to '1' in data.
+         * @param bg_color Background color corresponding to '0' in data.
+         * @return status::Status The status code.
+         * @retval status::Status::OK The pattern was drawn successfully.
+         * @retval status::Status::ERROR_PARAM The provided are out of bounds (x + width larger than display width, y + height greater than display height, data is of wrong dimension).
+         * Furthermore, this function propagates the status codes from @see send_cmd @see set_column_address and @see set_row_address
+         */
+        status::Status draw_bicolor_16bit(std::uint16_t x, std::uint16_t y, std::uint16_t width, std::uint16_t height, std::span<std::uint8_t> data, std::uint16_t fg_color, std::uint16_t bg_color);
+
+        /**
          * @brief Fills the whole screen in the color.
          *
          * @param color The color to fill the screen with.
