@@ -102,6 +102,33 @@ namespace st7789 {
         std::array<std::uint8_t, 2> data {static_cast<std::uint8_t>(color & 0xFFU), static_cast<std::uint8_t>((color >> 8U) & 0xFFU)};
         return this->send_cmd(commands::write_memory, data);
     }
+    template <SpiTypeConcept SpiType, TimerTypeConcept TimerType, typename GpioType, typename GpioPinType, GpioPinType data_cmd, GpioPinType chip_select>
+    requires GpioTypeConcept<GpioType, GpioPinType>
+    status::Status St7789<SpiType, TimerType, GpioType, GpioPinType, data_cmd, chip_select>::
+    draw_monocolor_16bit(const std::uint16_t x, const std::uint16_t y, const std::uint16_t width, const std::uint16_t height, const std::span<std::uint8_t> data, const std::uint16_t color) {
+        constexpr auto bits_per_byte {8U};
+        const auto bytes_per_row {(width / bits_per_byte) + (width % bits_per_byte > 0 ? 1 : 0) };
+        // if x is greater or equal the display width, then x + data width is definitely greater than the display width, therefore no need to check if x is greater or equal the display width
+        if (((x + width) >= this->m_width) || (y + height >= this->m_height) || ((height * bytes_per_row) != data.size())) {
+            return status::Status::ERROR_PARAM;
+        }
+        for (auto row {0U}; row < height; row++) {
+            for (auto column {0U}; column < width; column++) {
+                const auto byte_idx {row * bytes_per_row + (column / bits_per_byte)};
+                // the byte gets iterated from msb to lsb, the column goes from lsb to msb
+                constexpr auto max_bit_idx_per_byte {7U};
+                const auto bit_idx {max_bit_idx_per_byte - (column % bits_per_byte)};
+                if (data[byte_idx] & (1U << bit_idx)) {
+                    const auto target_x {x + column};
+                    const auto target_y {y + row};
+                    if (auto status_code = this->draw_pixel_16bit(target_x, target_y, color); status_code != status::Status::OK) {
+                        return status_code;
+                    }
+                }
+            }
+        }
+        return status::Status::OK;
+    }
 
     template <SpiTypeConcept SpiType, TimerTypeConcept TimerType, typename GpioType, typename GpioPinType, GpioPinType data_cmd, GpioPinType chip_select>
     requires GpioTypeConcept<GpioType, GpioPinType>
@@ -110,7 +137,7 @@ namespace st7789 {
         constexpr auto bits_per_byte {8U};
         const auto bytes_per_row {(width / bits_per_byte) + (width % bits_per_byte > 0 ? 1 : 0) };
         // if x is greater or equal the display width, then x + data width is definitely greater than the display width, therefore no need to check if x is greater or equal the display width
-        if (((x + width) >= this->m_width) || (y + data.size() >= this->m_height) || ((height * bytes_per_row) != data.size())) {
+        if (((x + width) >= this->m_width) || (y + height >= this->m_height) || ((height * bytes_per_row) != data.size())) {
             return status::Status::ERROR_PARAM;
         }
         if (auto status_code = this->set_column_address(x, x + width - 1); status_code != status::Status::OK) {
