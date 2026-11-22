@@ -161,8 +161,14 @@ namespace st7789 {
         std::array<std::uint8_t, 2> data {static_cast<std::uint8_t>(color & 0xFFU), static_cast<std::uint8_t>((color >> 8U) & 0xFFU)};
         for (auto column {0U}; column < this->m_width; column++) {
             for (auto row {0U}; row < this->m_height; row++) {
-                if (auto status_code = this->send_cmd(commands::write_memory_continue, data); status_code != status::Status::OK) {
-                    return status_code;
+                if (row == 0 && column == 0) {
+                    if (auto status_code = this->send_cmd(commands::write_memory, data); status_code != status::Status::OK) {
+                        return status_code;
+                    }
+                } else {
+                    if (auto status_code = this->send_cmd(commands::write_memory_continue, data); status_code != status::Status::OK) {
+                        return status_code;
+                    }
                 }
             }
         }
