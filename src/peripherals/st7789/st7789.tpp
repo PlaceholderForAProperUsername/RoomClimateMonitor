@@ -117,8 +117,8 @@ namespace st7789 {
             return status_code;
         }
         std::array<std::uint8_t, 2> color_data {
-            static_cast<std::uint8_t>(color >> 8U),
-            static_cast<std::uint8_t>(color & 0xFFU)
+            static_cast<std::uint8_t>(color & 0xFFU),
+            static_cast<std::uint8_t>((color >> 8U) & 0xFFU),
         };
         // a write memory command must be sent before a write memory continue command can be sent to ensure writing at the correct position
         if (auto status_code = this->send_cmd(commands::write_memory, color_data); status_code != status::Status::OK) {
