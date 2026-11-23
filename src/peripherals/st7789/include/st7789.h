@@ -42,6 +42,8 @@ namespace st7789 {
      * @tparam TimerType The type of the timer providing necessary wait functions.
      * @tparam GpioType The type of the gpio providing functions to control chip select and data_command pins.
      * @tparam GpioPinType The type of the gpio pins.
+     * @tparam data_cmd The data_command gpio pin to select whether data or a command is sent.
+     * @tparam chip_select The chip select gpio pin to select the display.
      */
     template <SpiTypeConcept SpiType, TimerTypeConcept TimerType, typename GpioType, typename GpioPinType, GpioPinType data_cmd, GpioPinType chip_select>
     requires GpioTypeConcept<GpioType, GpioPinType>
@@ -50,13 +52,14 @@ namespace st7789 {
         St7789(const std::uint16_t height, const std::uint16_t width) : m_height(height), m_width(width) {}
 
         /**
-         * @brief Initializes the firmware and sensor.
+         * @brief Initializes the display.
          *
-         * The sensor is put in an initialized state by sending a software reset command. This command may require up to
-         * 120ms before a sleep out command can be sent. To be on the safe side, the init function waits the 120ms.
+         * Note: The init function enables display inversion, as inverting the colors of the display makes the colors
+         * behave normally, e.g. setting a pixel color to 0x0000U is black and 0xFFFFU is white. While disabling the display
+         * inversion sets 0x0000U to white and 0xFFFFU to black.
          *
          * @return status::Status The status code.
-         * @retval status::Status::OK The firmware and sensor are initialized.
+         * @retval status::Status::OK The display is initialized.
          * @retval status::Status::ERROR_CONFIG Either the data_cmd or chip_select gpio pin is not configured as output.
          */
         status::Status init(RgbInterfaceColorFormat rgb_format, ControlInterfaceColorFormat control_format);
@@ -69,9 +72,7 @@ namespace st7789 {
          * @return status::Status The status code.
          * @retval status::Status::OK The column address was set successfully.
          * @retval status::Status::ERROR_PARAM Either start > end or start > display width or end > display width
-         *
-         * Note: This function returns error codes from @see send_cmd directly. If another error code than listed here is
-         * returned, see description of @see send_cmd
+         * Furthermore, this function propagates the error codes from @see send_cmd directly.
          */
         status::Status set_column_address(std::uint16_t start, std::uint16_t end);
 
@@ -83,9 +84,7 @@ namespace st7789 {
          * @return status::Status The status code.
          * @retval status::Status::OK The row address was set successfully.
          * @retval status::Status::ERROR_PARAM Either start > end or start > display height or end > display height
-         *
-         * Note: This function returns error codes from @see send_cmd directly. If another error code than listed here is
-         * returned, see description of @see send_cmd
+         * Furthermore, this function propagates the error codes from @see send_cmd directly.
          */
         status::Status set_row_address(std::uint16_t start, std::uint16_t end);
 
@@ -96,8 +95,7 @@ namespace st7789 {
          * @param y The y coordinate of the pixel.
          * @param color The color of the pixel in 16bit.
          * @return status::Status The status code.
-         *
-         * The status code is propagated from @see set_row_address @see set_column_address and @see send_cmd
+         * Furthermore, this function propagates the error codes from @see set_row_address @see set_column_address and @see send_cmd directly.
          */
         status::Status draw_pixel_16bit(std::uint16_t x, std::uint16_t y, std::uint16_t color);
 
