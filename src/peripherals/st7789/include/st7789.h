@@ -65,6 +65,20 @@ namespace st7789 {
         status::Status init(RgbInterfaceColorFormat rgb_format, ControlInterfaceColorFormat control_format);
 
         /**
+         * @brief Converts rgb data to 16bit rgb565 format used by the display.
+         *
+         * To get the correct color, display inversion must be considered. To get the red color with display inversion on,
+         * the function needs to be called a follows: convert_rgb_to_rgb565(255, 0, 0);
+         * To get the red color with display inversion off: convert_rgb_to_rgb565(0, 255, 255);
+         *
+         * @param red The red component of the color.
+         * @param green The green component of the color.
+         * @param blue The blue component of the color.
+         * @return std::uint16_t The color in rgb565 format.
+         */
+        std::uint16_t convert_rgb_to_rgb565(std::uint8_t red, std::uint8_t green, std::uint8_t blue);
+
+        /**
          * @brief Sets the column address.
          *
          * @param start Address of the start column.

@@ -66,6 +66,13 @@ namespace st7789 {
 
     template <SpiTypeConcept SpiType, TimerTypeConcept TimerType, typename GpioType, typename GpioPinType, GpioPinType data_cmd, GpioPinType chip_select>
     requires GpioTypeConcept<GpioType, GpioPinType>
+    std::uint16_t St7789<SpiType, TimerType, GpioType, GpioPinType, data_cmd, chip_select>::convert_rgb_to_rgb565(const std::uint8_t red, const std::uint8_t green, const std::uint8_t blue) {
+        const std::uint16_t color {static_cast<std::uint16_t>((green & 0xE0U) >> 5U | (red & 0xF8U) | (blue & 0xF8U) << 5U | (static_cast<std::uint16_t>(green & 0x1CU) << 11U))};
+        return color;
+    }
+
+    template <SpiTypeConcept SpiType, TimerTypeConcept TimerType, typename GpioType, typename GpioPinType, GpioPinType data_cmd, GpioPinType chip_select>
+    requires GpioTypeConcept<GpioType, GpioPinType>
     status::Status St7789<SpiType, TimerType, GpioType, GpioPinType, data_cmd, chip_select>::set_column_address(const std::uint16_t start, const std::uint16_t end) {
         if ((start > end) || (start >= this->m_width) || (end >= this->m_width)) {
             return status::Status::ERROR_PARAM;
